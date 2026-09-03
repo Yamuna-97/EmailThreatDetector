@@ -1,5 +1,6 @@
 import React from 'react'
 import Card from './Card'
+import ScrollReveal from './ScrollReveal'
 import {
   Mail,
   Brain,
@@ -26,37 +27,40 @@ export const TechStack: React.FC = () => {
   return (
     <section id="tech" className="py-24 px-5 sm:px-8 bg-[#FAF9F6] border-b border-[#192837]/6">
       <div className="max-w-[1280px] mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
-            Enterprise-Grade Foundation
-          </span>
-          <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
-            Built with Trusted AI & Security Technologies
-          </h2>
-          <p className="font-body text-base text-[#192837]/75 leading-relaxed">
-            VaultShield integrates industry-standard APIs, advanced LLM reasoning, and low-latency microservices
-            engineered for SIH 2026.
-          </p>
-        </div>
+        <ScrollReveal delay={0.05}>
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
+              Enterprise-Grade Foundation
+            </span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
+              Built with Trusted AI & Security Technologies
+            </h2>
+            <p className="font-body text-base text-[#192837]/75 leading-relaxed">
+              VaultShield integrates industry-standard APIs, advanced LLM reasoning, and low-latency microservices
+              engineered for SIH 2026.
+            </p>
+          </div>
+        </ScrollReveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {techs.map((t) => {
+          {techs.map((t, idx) => {
             const Icon = t.icon
             return (
-              <Card
-                key={t.name}
-                badge={t.badge}
-                title={t.name}
-                description={t.desc}
-                className="p-6 text-left"
-              >
-                <div className="pt-3 border-t border-[#192837]/8 flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-[#7342E2]">{t.role}</span>
-                  <div className="p-2 rounded-xl bg-[#FAF9F6] text-[#7342E2]">
-                    <Icon size={16} />
+              <ScrollReveal key={t.name} delay={0.06 * idx} yOffset={25} scaleStart={0.94}>
+                <Card
+                  badge={t.badge}
+                  title={t.name}
+                  description={t.desc}
+                  className="p-6 text-left"
+                >
+                  <div className="pt-3 border-t border-[#192837]/8 flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#7342E2]">{t.role}</span>
+                    <div className="p-2 rounded-xl bg-[#FAF9F6] text-[#7342E2]">
+                      <Icon size={16} />
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </ScrollReveal>
             )
           })}
         </div>

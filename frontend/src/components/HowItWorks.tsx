@@ -1,5 +1,6 @@
 import React from 'react'
 import Card from './Card'
+import ScrollReveal from './ScrollReveal'
 import {
   KeyRound,
   CloudLightning,
@@ -30,37 +31,40 @@ export const HowItWorks: React.FC = () => {
   return (
     <section id="how-it-works" className="py-24 px-5 sm:px-8 bg-[#FAF9F6] border-b border-[#192837]/6">
       <div className="max-w-[1280px] mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
-            Execution Flow Pipeline
-          </span>
-          <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
-            How VaultShield Operates End-to-End
-          </h2>
-          <p className="font-body text-base text-[#192837]/75 leading-relaxed">
-            From initial OAuth inbox connection to forensic timeline generation, discover the 10-stage automated workflow
-            that powers our SIH 2026 platform.
-          </p>
-        </div>
+        <ScrollReveal delay={0.05}>
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
+              Execution Flow Pipeline
+            </span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
+              How VaultShield Operates End-to-End
+            </h2>
+            <p className="font-body text-base text-[#192837]/75 leading-relaxed">
+              From initial OAuth inbox connection to forensic timeline generation, discover the 10-stage automated workflow
+              that powers our SIH 2026 platform.
+            </p>
+          </div>
+        </ScrollReveal>
 
         {/* 10-Step Workflow Grid using unified Card */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {steps.map((s) => {
+          {steps.map((s, idx) => {
             const Icon = s.icon
             return (
-              <Card
-                key={s.step}
-                badge={`STEP ${s.step}`}
-                title={s.title}
-                description={s.desc}
-                className="p-5 text-left flex flex-col justify-between"
-              >
-                <div className="pt-3 border-t border-[#192837]/6 flex justify-end">
-                  <div className="p-2 rounded-xl bg-[#FAF9F6] text-[#7342E2]">
-                    <Icon size={18} />
+              <ScrollReveal key={s.step} delay={0.06 * idx} yOffset={30} scaleStart={0.94}>
+                <Card
+                  badge={`STEP ${s.step}`}
+                  title={s.title}
+                  description={s.desc}
+                  className="p-5 text-left flex flex-col justify-between"
+                >
+                  <div className="pt-3 border-t border-[#192837]/6 flex justify-end">
+                    <div className="p-2 rounded-xl bg-[#FAF9F6] text-[#7342E2]">
+                      <Icon size={18} />
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </ScrollReveal>
             )
           })}
         </div>

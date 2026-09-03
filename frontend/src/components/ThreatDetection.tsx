@@ -1,5 +1,6 @@
 import React from 'react'
 import Card from './Card'
+import ScrollReveal from './ScrollReveal'
 import {
   Fish,
   UserX,
@@ -66,48 +67,51 @@ export const ThreatDetection: React.FC = () => {
     <section id="detection" className="py-24 px-5 sm:px-8 bg-[#FAF9F6] border-b border-[#192837]/6">
       <div className="max-w-[1280px] mx-auto">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
-            Core Threat Vector Coverage
-          </span>
-          <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
-            Comprehensive Email Threat Detection
-          </h2>
-          <p className="font-body text-base text-[#192837]/75 leading-relaxed">
-            VaultShield intercepts advanced cyberattacks targeting corporate inboxes using multi-layer heuristic
-            scoring, NLP intent extraction, and real-time threat intelligence.
-          </p>
-        </div>
+        <ScrollReveal delay={0.05}>
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
+              Core Threat Vector Coverage
+            </span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
+              Comprehensive Email Threat Detection
+            </h2>
+            <p className="font-body text-base text-[#192837]/75 leading-relaxed">
+              VaultShield intercepts advanced cyberattacks targeting corporate inboxes using multi-layer heuristic
+              scoring, NLP intent extraction, and real-time threat intelligence.
+            </p>
+          </div>
+        </ScrollReveal>
 
         {/* 6 Threat Cards using unified Card component */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {threats.map((t) => {
+          {threats.map((t, idx) => {
             const Icon = t.icon
             return (
-              <Card
-                key={t.title}
-                badge={t.badge}
-                title={t.title}
-                description={t.desc}
-                className="p-7 text-left"
-              >
-                <div className="pt-4 border-t border-[#192837]/8 space-y-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[#192837]/50">
-                      Key Indicators
-                    </span>
-                    <div className={`p-1.5 rounded-lg bg-[#FAF9F6] ${t.color}`}>
-                      <Icon size={16} />
+              <ScrollReveal key={t.title} delay={0.08 * idx} yOffset={36} scaleStart={0.94}>
+                <Card
+                  badge={t.badge}
+                  title={t.title}
+                  description={t.desc}
+                  className="p-7 text-left"
+                >
+                  <div className="pt-4 border-t border-[#192837]/8 space-y-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[#192837]/50">
+                        Key Indicators
+                      </span>
+                      <div className={`p-1.5 rounded-lg bg-[#FAF9F6] ${t.color}`}>
+                        <Icon size={16} />
+                      </div>
                     </div>
+                    {t.indicators.map((ind) => (
+                      <div key={ind} className="flex items-center gap-2 text-xs text-[#192837]/85 font-medium">
+                        <CheckCircle size={13} className="text-[#7342E2] shrink-0" />
+                        <span>{ind}</span>
+                      </div>
+                    ))}
                   </div>
-                  {t.indicators.map((ind) => (
-                    <div key={ind} className="flex items-center gap-2 text-xs text-[#192837]/85 font-medium">
-                      <CheckCircle size={13} className="text-[#7342E2] shrink-0" />
-                      <span>{ind}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+                </Card>
+              </ScrollReveal>
             )
           })}
         </div>

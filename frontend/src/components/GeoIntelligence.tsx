@@ -1,5 +1,6 @@
 import React from 'react'
 import Card from './Card'
+import ScrollReveal from './ScrollReveal'
 import {
   Server,
   MapPin,
@@ -59,40 +60,43 @@ export const GeoIntelligence: React.FC = () => {
     <section id="intelligence" className="py-24 px-5 sm:px-8 bg-[#FAF9F6] border-b border-[#192837]/6">
       <div className="max-w-[1280px] mx-auto">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
-            Global Infrastructure Telemetry
-          </span>
-          <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
-            Geolocation & Threat Intelligence Engine
-          </h2>
-          <p className="font-body text-base text-[#192837]/75 leading-relaxed">
-            Every email header contains digital breadcrumbs. VaultShield maps sender IP origins, flags Tor/VPN proxies,
-            and checks global threat feeds in milliseconds.
-          </p>
-        </div>
+        <ScrollReveal delay={0.05}>
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
+              Global Infrastructure Telemetry
+            </span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
+              Geolocation & Threat Intelligence Engine
+            </h2>
+            <p className="font-body text-base text-[#192837]/75 leading-relaxed">
+              Every email header contains digital breadcrumbs. VaultShield maps sender IP origins, flags Tor/VPN proxies,
+              and checks global threat feeds in milliseconds.
+            </p>
+          </div>
+        </ScrollReveal>
 
         {/* 6 Intel Grid Cards using unified Card component */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {intelMetrics.map((item) => {
+          {intelMetrics.map((item, idx) => {
             const Icon = item.icon
             return (
-              <Card
-                key={item.title}
-                badge={item.badge}
-                title={item.title}
-                description={item.details}
-                className="p-7 text-left"
-              >
-                <div className="pt-4 border-t border-[#192837]/8 flex items-center justify-between">
-                  <div className="font-mono text-sm font-bold text-[#192837] truncate">
-                    {item.value}
+              <ScrollReveal key={item.title} delay={0.08 * idx} yOffset={35} scaleStart={0.94}>
+                <Card
+                  badge={item.badge}
+                  title={item.title}
+                  description={item.details}
+                  className="p-7 text-left"
+                >
+                  <div className="pt-4 border-t border-[#192837]/8 flex items-center justify-between">
+                    <div className="font-mono text-sm font-bold text-[#192837] truncate">
+                      {item.value}
+                    </div>
+                    <div className="p-2 rounded-xl bg-[#FAF9F6] text-[#7342E2] shrink-0">
+                      <Icon size={18} />
+                    </div>
                   </div>
-                  <div className="p-2 rounded-xl bg-[#FAF9F6] text-[#7342E2] shrink-0">
-                    <Icon size={18} />
-                  </div>
-                </div>
-              </Card>
+                </Card>
+              </ScrollReveal>
             )
           })}
         </div>

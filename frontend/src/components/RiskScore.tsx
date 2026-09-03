@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Card from './Card'
+import ScrollReveal from './ScrollReveal'
 import {
   CheckCircle,
   Info,
@@ -96,101 +97,107 @@ export const RiskScore: React.FC = () => {
   return (
     <section id="risk-score" className="py-24 px-5 sm:px-8 bg-[#FAF9F6] border-b border-[#192837]/6">
       <div className="max-w-[1280px] mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
-            Multi-Variable Threat Assessment
-          </span>
-          <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
-            Dynamic Risk Scoring Engine
-          </h2>
-          <p className="font-body text-base text-[#192837]/75 leading-relaxed">
-            VaultShield assigns a precise 0–100 risk score based on header authenticity, domain reputation, NLP intent
-            analysis, and geolocation telemetry.
-          </p>
-        </div>
-
-        {/* Level Switcher Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
-          {riskLevels.map((lvl) => {
-            const isActive = lvl.key === selectedKey
-            return (
-              <button
-                key={lvl.key}
-                type="button"
-                onClick={() => setSelectedKey(lvl.key)}
-                className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer shadow-xs ${
-                  isActive
-                    ? 'bg-[#192837] text-white shadow-md scale-105'
-                    : 'bg-white text-[#192837] border border-[#192837]/10 hover:bg-[#FAF9F6]'
-                }`}
-              >
-                {lvl.level} ({lvl.score}/100)
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Live Threat Assessment Display Card using unified Card */}
-        <Card
-          badge={`${current.level.toUpperCase()} SEVERITY`}
-          title={`Overall Risk Score: ${current.score}/100`}
-          description={`Threat Class: ${current.category} • Model Confidence: ${current.confidence}`}
-          className="max-w-4xl mx-auto p-7 sm:p-10 text-left"
-        >
-          {/* Progress Bar */}
-          <div className="w-full bg-[#FAF9F6] h-3 rounded-full overflow-hidden border border-[#192837]/8 mb-8 mt-4">
-            <div
-              className={`h-full ${current.barColor} transition-all duration-500 rounded-full`}
-              style={{ width: `${current.score}%` }}
-            />
-          </div>
-
-          {/* Email Subject & Sender Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8">
-              <span className="text-[11px] font-bold text-[#192837]/50 uppercase tracking-wide block mb-1">
-                Analyzed Subject Line
-              </span>
-              <p className="text-xs sm:text-sm font-bold text-[#192837]">{current.subject}</p>
-            </div>
-            <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8">
-              <span className="text-[11px] font-bold text-[#192837]/50 uppercase tracking-wide block mb-1">
-                Sender & Infrastructure
-              </span>
-              <p className="text-xs font-mono font-semibold text-[#192837] truncate">{current.sender}</p>
-              <p className="text-[11px] text-[#192837]/70 font-mono mt-0.5">{current.ip}</p>
-            </div>
-          </div>
-
-          {/* Reason for Classification */}
-          <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8 mb-6">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#192837] mb-2 uppercase tracking-wide">
-              <Info size={15} className="text-[#7342E2]" />
-              Reason for Classification
-            </div>
-            <p className="text-xs sm:text-sm text-[#192837]/80 leading-relaxed font-body">
-              {current.reason}
+        <ScrollReveal delay={0.05}>
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
+              Multi-Variable Threat Assessment
+            </span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
+              Dynamic Risk Scoring Engine
+            </h2>
+            <p className="font-body text-base text-[#192837]/75 leading-relaxed">
+              VaultShield assigns a precise 0–100 risk score based on header authenticity, domain reputation, NLP intent
+              analysis, and geolocation telemetry.
             </p>
           </div>
+        </ScrollReveal>
 
-          {/* Detected Indicators Grid */}
-          <div className="pt-4 border-t border-[#192837]/10">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#192837]/60 mb-3">
-              <Layers size={14} /> Detected Forensic Indicators
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {current.indicators.map((ind) => (
-                <div
-                  key={ind}
-                  className="flex items-center gap-2 text-xs font-medium text-[#192837] bg-[#FAF9F6] p-2.5 rounded-xl border border-[#192837]/6"
+        {/* Level Switcher Buttons */}
+        <ScrollReveal delay={0.12}>
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+            {riskLevels.map((lvl) => {
+              const isActive = lvl.key === selectedKey
+              return (
+                <button
+                  key={lvl.key}
+                  type="button"
+                  onClick={() => setSelectedKey(lvl.key)}
+                  className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer shadow-xs ${
+                    isActive
+                      ? 'bg-[#192837] text-white shadow-md scale-105'
+                      : 'bg-white text-[#192837] border border-[#192837]/10 hover:bg-[#FAF9F6]'
+                  }`}
                 >
-                  <CheckCircle size={14} className="text-[#7342E2] shrink-0" />
-                  <span>{ind}</span>
-                </div>
-              ))}
-            </div>
+                  {lvl.level} ({lvl.score}/100)
+                </button>
+              )
+            })}
           </div>
-        </Card>
+        </ScrollReveal>
+
+        {/* Live Threat Assessment Display Card using unified Card */}
+        <ScrollReveal delay={0.18} yOffset={45} scaleStart={0.93}>
+          <Card
+            badge={`${current.level.toUpperCase()} SEVERITY`}
+            title={`Overall Risk Score: ${current.score}/100`}
+            description={`Threat Class: ${current.category} • Model Confidence: ${current.confidence}`}
+            className="max-w-4xl mx-auto p-7 sm:p-10 text-left shadow-2xl"
+          >
+            {/* Progress Bar */}
+            <div className="w-full bg-[#FAF9F6] h-3 rounded-full overflow-hidden border border-[#192837]/8 mb-8 mt-4">
+              <div
+                className={`h-full ${current.barColor} transition-all duration-500 rounded-full`}
+                style={{ width: `${current.score}%` }}
+              />
+            </div>
+
+            {/* Email Subject & Sender Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8">
+                <span className="text-[11px] font-bold text-[#192837]/50 uppercase tracking-wide block mb-1">
+                  Analyzed Subject Line
+                </span>
+                <p className="text-xs sm:text-sm font-bold text-[#192837]">{current.subject}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8">
+                <span className="text-[11px] font-bold text-[#192837]/50 uppercase tracking-wide block mb-1">
+                  Sender & Infrastructure
+                </span>
+                <p className="text-xs font-mono font-semibold text-[#192837] truncate">{current.sender}</p>
+                <p className="text-[11px] text-[#192837]/70 font-mono mt-0.5">{current.ip}</p>
+              </div>
+            </div>
+
+            {/* Reason for Classification */}
+            <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8 mb-6">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#192837] mb-2 uppercase tracking-wide">
+                <Info size={15} className="text-[#7342E2]" />
+                Reason for Classification
+              </div>
+              <p className="text-xs sm:text-sm text-[#192837]/80 leading-relaxed font-body">
+                {current.reason}
+              </p>
+            </div>
+
+            {/* Detected Indicators Grid */}
+            <div className="pt-4 border-t border-[#192837]/10">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#192837]/60 mb-3">
+                <Layers size={14} /> Detected Forensic Indicators
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {current.indicators.map((ind) => (
+                  <div
+                    key={ind}
+                    className="flex items-center gap-2 text-xs font-medium text-[#192837] bg-[#FAF9F6] p-2.5 rounded-xl border border-[#192837]/6"
+                  >
+                    <CheckCircle size={14} className="text-[#7342E2] shrink-0" />
+                    <span>{ind}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </ScrollReveal>
       </div>
     </section>
   )
