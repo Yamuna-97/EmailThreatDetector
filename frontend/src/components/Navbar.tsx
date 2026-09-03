@@ -18,7 +18,11 @@ const socialLinks = [
   { label: 'Threat Feeds', link: '#intelligence' },
 ]
 
-export const Navbar: React.FC = () => {
+export interface NavbarProps {
+  onOpenAuth?: (mode: 'signin' | 'signup') => void
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-[#192837]/8 transition-all">
       <nav
@@ -53,20 +57,22 @@ export const Navbar: React.FC = () => {
 
         {/* Right: Actions & Staggered Menu */}
         <div className="flex items-center gap-3">
-          <a
-            href="#dashboard"
-            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-[#192837] bg-[#F2F2EE] hover:bg-[#e7e7e2] active:scale-95 transition-all shadow-sm"
+          <button
+            type="button"
+            onClick={() => onOpenAuth ? onOpenAuth('signin') : null}
+            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-[#192837] bg-[#F2F2EE] hover:bg-[#e7e7e2] active:scale-95 transition-all shadow-sm cursor-pointer"
           >
             <ShieldCheck size={14} className="text-[#7342E2]" />
             <span>Sign In</span>
-          </a>
+          </button>
 
-          <a
-            href="#cta"
-            className="hidden sm:inline-flex px-5 py-2 rounded-full text-xs font-semibold text-white bg-[#7342E2] hover:brightness-110 active:scale-95 transition-all shadow-sm shadow-[#7342E2]/20"
+          <button
+            type="button"
+            onClick={() => onOpenAuth ? onOpenAuth('signup') : null}
+            className="hidden sm:inline-flex px-5 py-2 rounded-full text-xs font-semibold text-white bg-[#7342E2] hover:brightness-110 active:scale-95 transition-all shadow-sm shadow-[#7342E2]/20 cursor-pointer"
           >
             Get Started
-          </a>
+          </button>
 
           {/* Staggered Menu from React Bits */}
           <div className="ml-1">

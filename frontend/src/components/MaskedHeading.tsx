@@ -16,6 +16,7 @@ export interface MaskedHeadingProps extends React.HTMLAttributes<HTMLElement> {
   brightness?: number
   saturation?: number
   grayscale?: boolean
+  colorful?: boolean
   reveal?: 'rise' | 'wipe' | 'fade' | 'none'
   duration?: number
   stagger?: number
@@ -38,9 +39,10 @@ export const MaskedHeading: React.FC<MaskedHeadingProps> = ({
   fillScale = 1.25,
   parallax = 26,
   drift = 18,
-  brightness = 1,
-  saturation = 1,
+  brightness = 1.15,
+  saturation = 1.6,
   grayscale = false,
+  colorful = true,
   reveal = 'rise',
   duration = 1.1,
   stagger = 0.09,
@@ -273,7 +275,7 @@ export const MaskedHeading: React.FC<MaskedHeadingProps> = ({
   return (
     <Tag
       ref={rootRef}
-      className={`masked-heading ${className}`.trim()}
+      className={`masked-heading ${colorful ? 'masked-heading--colorful' : ''} ${className}`.trim()}
       style={{
         textAlign: align,
         fontWeight: weight,

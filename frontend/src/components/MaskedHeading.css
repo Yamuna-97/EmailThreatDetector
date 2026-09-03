@@ -51,6 +51,54 @@
   inset: 0;
   display: block;
   will-change: transform, filter;
+  overflow: hidden;
+}
+
+/* Colorful gradient overlay for vibrant masked text */
+.masked-heading--colorful .masked-heading__media::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(
+    120deg,
+    #7342E2 0%,
+    #F43F5E 20%,
+    #06B6D4 40%,
+    #8B5CF6 60%,
+    #10B981 80%,
+    #EC4899 100%
+  );
+  background-size: 250% 250%;
+  animation: colorfulFlow 6s ease-in-out infinite alternate;
+  mix-blend-mode: color-dodge;
+  opacity: 0.92;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.masked-heading--colorful .masked-heading__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 50%, rgba(115, 66, 226, 0.6) 0%, rgba(6, 182, 212, 0.4) 50%, transparent 80%);
+  mix-blend-mode: overlay;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes colorfulFlow {
+  0% {
+    background-position: 0% 30%;
+    filter: hue-rotate(0deg) saturate(1.8);
+  }
+  50% {
+    background-position: 100% 70%;
+    filter: hue-rotate(90deg) saturate(2.2);
+  }
+  100% {
+    background-position: 0% 30%;
+    filter: hue-rotate(180deg) saturate(1.8);
+  }
 }
 
 .masked-heading__source {
