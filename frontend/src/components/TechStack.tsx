@@ -1,5 +1,5 @@
 import React from 'react'
-import SpotlightCard from './SpotlightCard'
+import Card from './Card'
 import {
   Mail,
   Brain,
@@ -8,16 +8,18 @@ import {
   Zap,
   Lock,
   Radar,
+  Server,
 } from 'lucide-react'
 
 const techs = [
-  { name: 'Gmail API', role: 'Real-time Message Ingestion', desc: 'Secure Google Workspace pub/sub hooks for continuous inbox telemetry.', icon: Mail, color: 'text-red-600 bg-red-50' },
-  { name: 'Gemini AI', role: 'Advanced Semantic Reasoning', desc: 'Transformer LLMs for context-aware NLP threat intent extraction and classification.', icon: Brain, color: 'text-purple-600 bg-purple-50' },
-  { name: 'IPQualityScore', role: 'Reputation & Fraud Scoring', desc: 'Global blacklist verification and honeypot correlation for high-accuracy scoring.', icon: ShieldCheck, color: 'text-emerald-600 bg-emerald-50' },
-  { name: 'IP Geolocation', role: 'MaxMind GeoIP2 Telemetry', desc: 'Physical city, country, and ASN traceroute resolution for forensic clues.', icon: Globe, color: 'text-blue-600 bg-blue-50' },
-  { name: 'FastAPI Backend', role: 'High-Throughput Microservice', desc: 'Asynchronous Python architecture handling thousands of email requests per second.', icon: Zap, color: 'text-teal-600 bg-teal-50' },
-  { name: 'Secure OAuth 2.0', role: 'Zero Trust Authorization', desc: 'Minimal-privilege token access adhering to Google Cloud security standards.', icon: Lock, color: 'text-indigo-600 bg-indigo-50' },
-  { name: 'Threat Intelligence', role: 'Multi-Feed IOC Clustering', desc: 'Aggregates Spamhaus, AbuseIPDB, and Tor directory node lists continuously.', icon: Radar, color: 'text-amber-600 bg-amber-50' },
+  { name: 'Gmail API', badge: 'INGESTION', role: 'Real-time Message Ingestion', desc: 'Secure Google Workspace pub/sub hooks for continuous inbox telemetry.', icon: Mail },
+  { name: 'Gemini AI', badge: 'INTELLIGENCE', role: 'Advanced Semantic Reasoning', desc: 'Transformer LLMs for context-aware NLP threat intent extraction and classification.', icon: Brain },
+  { name: 'IPQualityScore', badge: 'FRAUD SCORES', role: 'Reputation & Scoring', desc: 'Global blacklist verification and honeypot correlation for high-accuracy scoring.', icon: ShieldCheck },
+  { name: 'IP Geolocation', badge: 'TELEMETRY', role: 'MaxMind GeoIP2', desc: 'Physical city, country, and ASN traceroute resolution for forensic clues.', icon: Globe },
+  { name: 'FastAPI Backend', badge: 'MICROSERVICES', role: 'High-Throughput Core', desc: 'Asynchronous Python architecture handling thousands of email requests per second.', icon: Zap },
+  { name: 'Secure OAuth 2.0', badge: 'ZERO TRUST', role: 'Zero Trust Authorization', desc: 'Minimal-privilege token access adhering to Google Cloud security standards.', icon: Lock },
+  { name: 'Threat Intelligence', badge: 'IOC FEEDS', role: 'Multi-Feed Clustering', desc: 'Aggregates Spamhaus, AbuseIPDB, and Tor directory node lists continuously.', icon: Radar },
+  { name: 'Forensic Storage', badge: 'AUDIT TRAILS', role: 'Verifiable Evidence Vault', desc: 'Immutable JSON and PDF export dossiers with RFC-compliant cryptographic hashes.', icon: Server },
 ]
 
 export const TechStack: React.FC = () => {
@@ -41,22 +43,20 @@ export const TechStack: React.FC = () => {
           {techs.map((t) => {
             const Icon = t.icon
             return (
-              <SpotlightCard
+              <Card
                 key={t.name}
-                spotlightColor="rgba(115, 66, 226, 0.14)"
-                className="p-6 rounded-3xl bg-white border border-[#192837]/8 shadow-sm hover:shadow-md transition-all text-left flex flex-col justify-between"
+                badge={t.badge}
+                title={t.name}
+                description={t.desc}
+                className="p-6 text-left"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`p-2.5 rounded-2xl ${t.color}`}>
-                      <Icon size={20} />
-                    </div>
+                <div className="pt-3 border-t border-[#192837]/8 flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-[#7342E2]">{t.role}</span>
+                  <div className="p-2 rounded-xl bg-[#FAF9F6] text-[#7342E2]">
+                    <Icon size={16} />
                   </div>
-                  <h3 className="font-heading text-base font-bold text-[#192837] mb-1">{t.name}</h3>
-                  <div className="text-xs font-semibold text-[#7342E2] mb-2">{t.role}</div>
-                  <p className="font-body text-xs text-[#192837]/70 leading-relaxed">{t.desc}</p>
                 </div>
-              </SpotlightCard>
+              </Card>
             )
           })}
         </div>

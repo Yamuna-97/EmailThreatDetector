@@ -12,7 +12,6 @@ import EarlyWarning from './components/EarlyWarning'
 import HowItWorks from './components/HowItWorks'
 import DashboardPreview from './components/DashboardPreview'
 import TechStack from './components/TechStack'
-import FinalCTA from './components/FinalCTA'
 import Footer from './components/Footer'
 
 export const App: React.FC = () => {
@@ -36,41 +35,38 @@ export const App: React.FC = () => {
         {/* 1. NAVBAR */}
         <Navbar />
 
-        {/* 2. HERO SECTION (With Big Full-Screen ScrollExpand Video Stage & Left MaskedHeading) */}
+        {/* 2. HERO (Fullscreen Background Video with Left MaskedHeading) */}
         <Hero />
 
-        {/* INTERACTIVE MAGIC BENTO SECTION (White & Purple Light Grid) */}
+        {/* 3. INTERACTIVE INTELLIGENCE MATRIX (MagicBento) */}
         <IntelligenceMatrix />
 
-        {/* 3. THREAT DETECTION SECTION */}
+        {/* 4. THREAT DETECTION */}
         <ThreatDetection />
 
-        {/* 4. AI ANALYSIS SECTION */}
+        {/* 5. AI ANALYSIS */}
         <AiAnalysis />
 
-        {/* 5. GEOLOCATION & THREAT INTELLIGENCE SECTION */}
+        {/* 6. GEOLOCATION & THREAT INTELLIGENCE */}
         <GeoIntelligence />
 
-        {/* 6. FORENSIC INTELLIGENCE SECTION */}
+        {/* 7. FORENSIC INTELLIGENCE */}
         <Forensics />
 
-        {/* 7. RISK SCORE SECTION */}
+        {/* 8. RISK SCORE ASSESSMENT */}
         <RiskScore />
 
-        {/* 8. EARLY WARNING SECTION */}
+        {/* 9. EARLY WARNING & INBOX TRIAGE */}
         <EarlyWarning />
 
-        {/* 9. HOW IT WORKS SECTION */}
+        {/* 10. HOW IT WORKS */}
         <HowItWorks />
 
-        {/* 10. DASHBOARD PREVIEW SECTION */}
+        {/* 11. DASHBOARD PREVIEW */}
         <DashboardPreview />
 
-        {/* 11. TRUST / TECHNOLOGY SECTION */}
+        {/* 12. TECH STACK */}
         <TechStack />
-
-        {/* 12. FINAL CTA SECTION */}
-        <FinalCTA />
 
         {/* 13. FOOTER */}
         <Footer />

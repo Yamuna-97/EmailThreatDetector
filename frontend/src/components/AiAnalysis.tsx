@@ -1,5 +1,5 @@
 import React from 'react'
-import SpotlightCard from './SpotlightCard'
+import Card from './Card'
 import {
   Brain,
   Sparkles,
@@ -14,31 +14,37 @@ import {
 const aiFeatures = [
   {
     title: 'Email Content Analysis',
+    badge: 'CONTENT NLP',
     icon: FileSearch,
     desc: 'Deep inspection of message body tokens, embedded markup, hidden HTML attributes, and obfuscated text scripts.',
   },
   {
     title: 'Sender Identity Analysis',
+    badge: 'IDENTITY TRACE',
     icon: Fingerprint,
     desc: 'Cross-verifies historical communication frequency, DKIM cryptographic seals, and domain age to spot impersonators.',
   },
   {
     title: 'NLP-Based Threat Detection',
+    badge: 'TRANSFORMERS',
     icon: Brain,
     desc: 'Transformer-based neural models parse semantic intent to isolate zero-day lures that bypass signature-based filters.',
   },
   {
     title: 'Suspicious Language & Urgency',
+    badge: 'URGENCY METRICS',
     icon: MessageSquareWarning,
     desc: 'Evaluates psychological coercion, artificial deadlines ("Act within 1 hour"), and emotional manipulation phrases.',
   },
   {
     title: 'Intent & Action Extraction',
+    badge: 'INTENT CLASSIFIER',
     icon: Flame,
     desc: 'Discovers whether the email is attempting to elicit credentials, trigger banking transactions, or install binaries.',
   },
   {
     title: 'AI-Generated Explanations',
+    badge: 'EXPLAINABLE AI',
     icon: Sparkles,
     desc: 'Generates plain-English threat summaries explaining exactly why an email was classified as dangerous for SOC teams.',
   },
@@ -63,57 +69,39 @@ export const AiAnalysis: React.FC = () => {
               and contextual anomalies in real time.
             </p>
 
-            {/* Feature Checklist */}
+            {/* Feature Checklist using unified Card */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-              {aiFeatures.map((item) => {
-                const Icon = item.icon
-                return (
-                  <div
-                    key={item.title}
-                    className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8 flex flex-col justify-start"
-                  >
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="p-1.5 rounded-lg bg-[#7342E2]/10 text-[#7342E2]">
-                        <Icon size={16} />
-                      </div>
-                      <h4 className="font-heading font-bold text-xs sm:text-sm text-[#192837]">{item.title}</h4>
-                    </div>
-                    <p className="font-body text-xs text-[#192837]/70 leading-relaxed">{item.desc}</p>
-                  </div>
-                )
-              })}
+              {aiFeatures.map((item) => (
+                <Card
+                  key={item.title}
+                  badge={item.badge}
+                  title={item.title}
+                  description={item.desc}
+                  className="p-4 rounded-2xl"
+                />
+              ))}
             </div>
           </div>
 
           {/* Right Column: Interactive AI Output Card */}
           <div className="lg:col-span-6">
-            <SpotlightCard
-              spotlightColor="rgba(115, 66, 226, 0.16)"
-              className="bg-[#FAF9F6] border border-[#192837]/10 p-7 sm:p-9 rounded-3xl shadow-xl text-left"
+            <Card
+              badge="GEMINI AI VERDICT"
+              title="AI Threat Classification"
+              description="NLP Intent Analysis Engine • 96.8% Model Confidence"
+              className="p-7 sm:p-9 text-left"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-[#192837]/10 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-[#7342E2] text-white shadow-sm shadow-[#7342E2]/30">
-                    <Brain size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-heading font-bold text-base text-[#192837]">Gemini AI Threat Verdict</h3>
-                    <p className="text-xs text-[#192837]/60">NLP Intent Classification Engine</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200">
-                  <Gauge size={14} />
-                  <span>96.8% Confidence</span>
-                </div>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 w-fit mb-5">
+                <Gauge size={14} />
+                <span>96.8% Threat Confidence</span>
               </div>
 
               {/* Threat Explanation Box */}
-              <div className="p-4 rounded-2xl bg-white border border-[#192837]/8 mb-5 shadow-xs">
+              <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8 mb-5">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#7342E2] mb-1.5">
                   <Sparkles size={14} /> AI-Generated Threat Explanation
                 </div>
-                <p className="text-xs text-[#192837]/85 leading-relaxed font-mono bg-[#FAF9F6] p-3 rounded-xl border border-[#192837]/6">
+                <p className="text-xs text-[#192837]/85 leading-relaxed font-mono bg-white p-3 rounded-xl border border-[#192837]/6">
                   "This email exhibits high-severity coercion patterns. The sender domain <code>support-microsoff.com</code> is a newly registered typosquat mimicking Microsoft Cloud Operations. Language constructs demand immediate credential renewal within 15 minutes to prevent simulated service termination."
                 </p>
               </div>
@@ -143,7 +131,7 @@ export const AiAnalysis: React.FC = () => {
                 </span>
                 <span className="text-[#7342E2]">FastAPI Telemetry Stream</span>
               </div>
-            </SpotlightCard>
+            </Card>
           </div>
         </div>
       </div>

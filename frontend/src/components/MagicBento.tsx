@@ -3,7 +3,6 @@ import { gsap } from 'gsap'
 import './MagicBento.css'
 
 const DEFAULT_PARTICLE_COUNT = 12
-const DEFAULT_SPOTLIGHT_RADIUS = 300
 const DEFAULT_GLOW_COLOR = '115, 66, 226' // Purple theme light
 const MOBILE_BREAKPOINT = 768
 
@@ -72,22 +71,6 @@ const createParticleElement = (x: number, y: number, color = DEFAULT_GLOW_COLOR)
   return el
 }
 
-const calculateSpotlightValues = (radius: number) => ({
-  proximity: radius * 0.5,
-  fadeDistance: radius * 0.75,
-})
-
-const updateCardGlowProperties = (card: HTMLElement, mouseX: number, mouseY: number, glow: number, radius: number) => {
-  const rect = card.getBoundingClientRect()
-  const relativeX = ((mouseX - rect.left) / rect.width) * 100
-  const relativeY = ((mouseY - rect.top) / rect.height) * 100
-
-  card.style.setProperty('--glow-x', `${relativeX}%`)
-  card.style.setProperty('--glow-y', `${relativeY}%`)
-  card.style.setProperty('--glow-intensity', glow.toString())
-  card.style.setProperty('--glow-radius', `${radius}px`)
-}
-
 interface ParticleCardProps {
   children?: React.ReactNode
   className?: string
@@ -131,7 +114,7 @@ const ParticleCard: React.FC<ParticleCardProps> = ({
 
   const clearAllParticles = useCallback(() => {
     timeoutsRef.current.forEach(clearTimeout)
-    timeoutsRef.current = [];
+    timeoutsRef.current = []
     magnetismAnimationRef.current?.kill()
 
     particlesRef.current.forEach((particle) => {
@@ -381,9 +364,8 @@ export const MagicBento: React.FC<MagicBentoProps> = ({
   return (
     <div className="card-grid bento-section" ref={gridRef}>
       {cards.map((card, index) => {
-        const baseClassName = `magic-bento-card ${textAutoHide ? 'magic-bento-card--text-autohide' : ''} ${
-          enableBorderGlow ? 'magic-bento-card--border-glow' : ''
-        }`
+        const baseClassName = `magic-bento-card ${textAutoHide ? 'magic-bento-card--text-autohide' : ''} ${enableBorderGlow ? 'magic-bento-card--border-glow' : ''
+          }`
         const cardProps = {
           className: baseClassName,
           style: {

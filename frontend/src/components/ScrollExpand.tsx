@@ -37,16 +37,16 @@ export const ScrollExpand: React.FC<ScrollExpandProps> = ({
   poster = '',
   alt = '',
   title = '',
-  scrollHint = 'Scroll to expand security pipeline',
-  startWidth = 75,
-  startHeight = 70,
-  startRadius = 28,
+  scrollHint = '',
+  startWidth = 52,
+  startHeight = 64,
+  startRadius = 24,
   endRadius = 0,
   mediaZoom = 1.25,
-  scrollDistance = 1.0,
-  holdDistance = 0.25,
-  smoothing = 0.1,
-  overlayScrim = 0.35,
+  scrollDistance = 0.55,
+  holdDistance = 0.1,
+  smoothing = 0.08,
+  overlayScrim = 0.45,
   useWindowScroll = true,
   enabled = true,
   children,
@@ -111,21 +111,21 @@ export const ScrollExpand: React.FC<ScrollExpandProps> = ({
     if (scrimRef.current) scrimRef.current.style.opacity = `${c.overlayScrim * e}`
 
     if (titleRef.current) {
-      const out = smoothstep(0.4, 0.88, p)
+      const out = smoothstep(0.35, 0.85, p)
       titleRef.current.style.opacity = `${1 - out}`
-      titleRef.current.style.transform = `translate3d(0, ${-28 * out}px, 0) scale(${1 + 0.06 * out})`
+      titleRef.current.style.transform = `translate3d(0, ${-24 * out}px, 0) scale(${1 + 0.05 * out})`
     }
 
     if (hintRef.current) {
-      const gone = smoothstep(0, 0.12, p)
+      const gone = smoothstep(0, 0.15, p)
       hintRef.current.style.opacity = `${1 - gone}`
       hintRef.current.style.transform = `translate3d(0, ${8 * gone}px, 0)`
     }
 
     if (overlayRef.current) {
-      const inn = smoothstep(0.68, 1, p)
+      const inn = smoothstep(0.65, 1, p)
       overlayRef.current.style.opacity = `${inn}`
-      overlayRef.current.style.transform = `translate3d(0, ${18 * (1 - inn)}px, 0)`
+      overlayRef.current.style.transform = `translate3d(0, ${16 * (1 - inn)}px, 0)`
     }
   }, [])
 
@@ -145,13 +145,13 @@ export const ScrollExpand: React.FC<ScrollExpandProps> = ({
 
     const measure = () => {
       const c = propsRef.current
-      stageH = c.useWindowScroll ? window.innerHeight : root.clientHeight
+      stageH = c.useWindowScroll ? Math.max(500, window.innerHeight - 68) : root.clientHeight
       if (stageH <= 0) return
       stage.style.height = `${stageH}px`
       track.style.height = `${stageH * (1 + Math.max(0, c.scrollDistance) + Math.max(0, c.holdDistance))}px`
 
       const w = root.clientWidth || stageH
-      stage.style.setProperty('--se-title-size', `${clamp(w * 0.06, 20, 72)}px`)
+      stage.style.setProperty('--se-title-size', `${clamp(w * 0.07, 24, 76)}px`)
     }
 
     const readProgress = () => {
@@ -159,7 +159,7 @@ export const ScrollExpand: React.FC<ScrollExpandProps> = ({
       if (!c.enabled) return 1
       const span = stageH * Math.max(0.01, c.scrollDistance)
       if (c.useWindowScroll) {
-        const top = track.getBoundingClientRect().top
+        const top = track.getBoundingClientRect().top - 68
         return clamp(-top / span, 0, 1)
       }
       return clamp(root.scrollTop / span, 0, 1)
@@ -219,6 +219,28 @@ export const ScrollExpand: React.FC<ScrollExpandProps> = ({
     }
   }, [applyProgress, useWindowScroll])
 
+  const media =
+    mediaType === 'video' ? (
+      <video
+        ref={mediaRef as React.RefObject<HTMLVideoElement>}
+        className="scroll-expand__media"
+        src={src}
+        poster={poster}
+        autoPlay
+        muted
+        loop
+        playsInline
+      />
+    ) : (
+      <img
+        ref={mediaRef as React.RefObject<HTMLImageElement>}
+        className="scroll-expand__media"
+        src={src}
+        alt={alt}
+        draggable={false}
+      />
+    )
+
   return (
     <div
       ref={rootRef}
@@ -229,26 +251,7 @@ export const ScrollExpand: React.FC<ScrollExpandProps> = ({
       <div ref={trackRef} className="scroll-expand__track">
         <div ref={stageRef} className="scroll-expand__stage">
           <div ref={frameRef} className="scroll-expand__frame">
-            {mediaType === 'video' ? (
-              <video
-                ref={mediaRef as React.RefObject<HTMLVideoElement>}
-                className="scroll-expand__media"
-                src={src}
-                poster={poster}
-                autoPlay
-                muted
-                loop
-                playsInline
-              />
-            ) : (
-              <img
-                ref={mediaRef as React.RefObject<HTMLImageElement>}
-                className="scroll-expand__media"
-                src={src}
-                alt={alt}
-                draggable={false}
-              />
-            )}
+            {media}
             <div ref={scrimRef} className="scroll-expand__scrim" />
             {children ? (
               <div ref={overlayRef} className="scroll-expand__overlay">

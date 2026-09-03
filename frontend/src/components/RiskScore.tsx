@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import SpotlightCard from './SpotlightCard'
+import Card from './Card'
 import {
   CheckCircle,
   Info,
@@ -130,45 +130,15 @@ export const RiskScore: React.FC = () => {
           })}
         </div>
 
-        {/* Live Threat Assessment Display Card using SpotlightCard */}
-        <SpotlightCard
-          spotlightColor="rgba(115, 66, 226, 0.16)"
-          className="max-w-4xl mx-auto bg-white border border-[#192837]/10 p-7 sm:p-10 rounded-3xl shadow-xl text-left"
+        {/* Live Threat Assessment Display Card using unified Card */}
+        <Card
+          badge={`${current.level.toUpperCase()} SEVERITY`}
+          title={`Overall Risk Score: ${current.score}/100`}
+          description={`Threat Class: ${current.category} • Model Confidence: ${current.confidence}`}
+          className="max-w-4xl mx-auto p-7 sm:p-10 text-left"
         >
-          {/* Top Bar with Score Meter */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-[#192837]/10 mb-8">
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-[#192837]/60 uppercase tracking-wide">
-                  Overall Risk Score
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span className={`font-heading text-4xl sm:text-5xl font-extrabold ${current.color}`}>
-                    {current.score}
-                  </span>
-                  <span className="text-sm font-semibold text-[#192837]/50">/ 100</span>
-                </div>
-              </div>
-              <span className={`px-4 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${current.bgBadge}`}>
-                {current.level} Severity
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4 text-xs font-medium text-[#192837]/70">
-              <div>
-                <span className="text-[#192837]/50 block text-[10px] uppercase font-bold">Model Confidence</span>
-                <span className="text-sm font-bold text-[#192837]">{current.confidence}</span>
-              </div>
-              <div className="h-8 w-px bg-[#192837]/10" />
-              <div>
-                <span className="text-[#192837]/50 block text-[10px] uppercase font-bold">Threat Class</span>
-                <span className="text-sm font-bold text-[#7342E2]">{current.category}</span>
-              </div>
-            </div>
-          </div>
-
           {/* Progress Bar */}
-          <div className="w-full bg-[#FAF9F6] h-3 rounded-full overflow-hidden border border-[#192837]/8 mb-8">
+          <div className="w-full bg-[#FAF9F6] h-3 rounded-full overflow-hidden border border-[#192837]/8 mb-8 mt-4">
             <div
               className={`h-full ${current.barColor} transition-all duration-500 rounded-full`}
               style={{ width: `${current.score}%` }}
@@ -220,7 +190,7 @@ export const RiskScore: React.FC = () => {
               ))}
             </div>
           </div>
-        </SpotlightCard>
+        </Card>
       </div>
     </section>
   )

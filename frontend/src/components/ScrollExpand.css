@@ -23,8 +23,9 @@
 
 .scroll-expand__stage {
   position: sticky;
-  top: 0;
+  top: 64px;
   width: 100%;
+  height: calc(100vh - 64px);
   overflow: hidden;
   --se-title-size: 3.5rem;
 }
@@ -32,7 +33,7 @@
 .scroll-expand__frame {
   position: absolute;
   inset: 0;
-  clip-path: inset(12% 16% 12% 16% round 24px);
+  clip-path: inset(18% 24% 18% 24% round 24px);
   will-change: clip-path;
 }
 
@@ -52,7 +53,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(to top, rgba(25, 40, 55, 0.75), rgba(25, 40, 55, 0.1) 45%, rgba(25, 40, 55, 0.35));
+  background: linear-gradient(to top, rgba(25, 40, 55, 0.8), rgba(25, 40, 55, 0.15) 45%, rgba(25, 40, 55, 0.4));
   opacity: 0;
 }
 
@@ -64,7 +65,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 6%;
+  padding: 5%;
   opacity: 0;
   will-change: opacity, transform;
 }
@@ -81,9 +82,9 @@
   font-size: var(--se-title-size);
   font-weight: 800;
   letter-spacing: -0.03em;
-  line-height: 1.05;
-  color: #192837;
-  text-shadow: 0 2px 20px rgba(255, 255, 255, 0.8);
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
   pointer-events: none;
   will-change: opacity, transform;
 }
@@ -92,13 +93,14 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 1.5rem;
+  bottom: 2rem;
   text-align: center;
   font-size: 0.85rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   font-weight: 700;
-  color: #7342E2;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
   pointer-events: none;
   will-change: opacity, transform;
 }

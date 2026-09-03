@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import SpotlightCard from './SpotlightCard'
+import Card from './Card'
 import {
   BellRing,
-  ShieldAlert,
   ShieldBan,
   Flag,
   AlertTriangle,
@@ -31,61 +30,41 @@ export const EarlyWarning: React.FC = () => {
             </p>
 
             <div className="space-y-4 mb-8">
-              <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8">
-                <div className="p-2 rounded-xl bg-[#7342E2]/10 text-[#7342E2] shrink-0 mt-0.5">
-                  <BellRing size={18} />
+              <Card
+                badge="HEADER INJECTION"
+                title="Real-Time Header Injections"
+                description="Clear visual indicators warn users with color-coded severity badges without disrupting normal email workflows."
+                className="p-4"
+              >
+                <div className="flex items-center gap-2 text-xs font-semibold text-[#7342E2] mt-1">
+                  <BellRing size={15} /> Active Gmail / Outlook add-in hook
                 </div>
-                <div>
-                  <h4 className="font-heading font-bold text-sm text-[#192837]">Real-Time Header Injections</h4>
-                  <p className="text-xs text-[#192837]/70 mt-0.5">
-                    Clear visual indicators warn users with color-coded severity badges without disrupting normal email workflows.
-                  </p>
-                </div>
-              </div>
+              </Card>
 
-              <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8">
-                <div className="p-2 rounded-xl bg-[#7342E2]/10 text-[#7342E2] shrink-0 mt-0.5">
-                  <Lock size={18} />
+              <Card
+                badge="CLICK SANDBOXING"
+                title="Automated Click Interception"
+                description="Dangerous links are neutralized and wrapped in sandboxed URL inspection gateways to prevent drive-by downloads."
+                className="p-4"
+              >
+                <div className="flex items-center gap-2 text-xs font-semibold text-[#7342E2] mt-1">
+                  <Lock size={15} /> Zero-day link shielding active
                 </div>
-                <div>
-                  <h4 className="font-heading font-bold text-sm text-[#192837]">Automated Click Interception</h4>
-                  <p className="text-xs text-[#192837]/70 mt-0.5">
-                    Dangerous links are neutralized and wrapped in sandboxed URL inspection gateways to prevent drive-by downloads.
-                  </p>
-                </div>
-              </div>
+              </Card>
             </div>
           </div>
 
-          {/* Right Column: Live Early Warning Banner Simulator using SpotlightCard */}
+          {/* Right Column: Live Early Warning Banner Simulator using Card */}
           <div className="lg:col-span-6">
-            <SpotlightCard
-              spotlightColor="rgba(225, 29, 72, 0.12)"
-              className="bg-[#FAF9F6] border-2 border-rose-500/30 p-7 sm:p-9 rounded-3xl shadow-xl text-left"
+            <Card
+              badge="VAULTSHIELD EARLY WARNING"
+              title="High-Risk Threat Intercepted"
+              description="Risk Level: Critical • Finance Payroll Impersonation"
+              className="p-7 sm:p-9 text-left"
             >
-              {/* Alert Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-rose-200 mb-5">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-rose-600 text-white animate-pulse">
-                    <ShieldAlert size={20} />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">
-                      VAULTSHIELD EARLY WARNING
-                    </span>
-                    <h3 className="font-heading font-bold text-base text-[#192837]">
-                      High-Risk Threat Intercepted
-                    </h3>
-                  </div>
-                </div>
-                <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-rose-100 text-rose-700 border border-rose-300">
-                  Risk Level: Critical
-                </span>
-              </div>
-
               {/* Threat Details */}
-              <div className="space-y-3 mb-6">
-                <div className="p-3.5 rounded-2xl bg-white border border-[#192837]/8">
+              <div className="space-y-3 mb-6 mt-3">
+                <div className="p-3.5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8">
                   <div className="text-[11px] font-bold text-[#192837]/50 uppercase tracking-wide mb-1">
                     Reason for Detection
                   </div>
@@ -94,7 +73,7 @@ export const EarlyWarning: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200">
+                <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-rose-800 mb-1">
                     <AlertTriangle size={14} /> Recommended Action
                   </div>
@@ -147,7 +126,7 @@ export const EarlyWarning: React.FC = () => {
                   </div>
                 )}
               </div>
-            </SpotlightCard>
+            </Card>
           </div>
         </div>
       </div>

@@ -1,20 +1,19 @@
 import React from 'react'
-import SpotlightCard from './SpotlightCard'
+import Card from './Card'
 import {
   Mail,
   ShieldAlert,
   AlertTriangle,
   Globe2,
-  Activity,
   ArrowUpRight,
   TrendingUp,
 } from 'lucide-react'
 
 const stats = [
-  { label: 'Total Emails Analyzed', value: '18,492', change: '+12.4% today', icon: Mail, color: 'text-blue-600 bg-blue-50' },
-  { label: 'Threats Intercepted', value: '418', change: '100% neutralized', icon: ShieldAlert, color: 'text-rose-600 bg-rose-50' },
-  { label: 'High-Risk BEC Emails', value: '62', change: 'Quarantined', icon: AlertTriangle, color: 'text-amber-600 bg-amber-50' },
-  { label: 'Suspicious IPs Blocked', value: '194', change: 'Tor / Proxy flagged', icon: Globe2, color: 'text-purple-600 bg-purple-50' },
+  { label: 'Total Emails Analyzed', badge: 'INGESTION', value: '18,492', change: '+12.4% today', icon: Mail },
+  { label: 'Threats Intercepted', badge: 'NEUTRALIZED', value: '418', change: '100% neutralized', icon: ShieldAlert },
+  { label: 'High-Risk BEC Emails', badge: 'QUARANTINED', value: '62', change: 'Zero breaches', icon: AlertTriangle },
+  { label: 'Suspicious IPs Blocked', badge: 'TOR / PROXIES', value: '194', change: 'Global feed blacklist', icon: Globe2 },
 ]
 
 const recentAlerts = [
@@ -41,57 +40,41 @@ export const DashboardPreview: React.FC = () => {
           </p>
         </div>
 
-        {/* 4 Quick Stat Metric Cards using SpotlightCard */}
+        {/* 4 Quick Stat Metric Cards using unified Card */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
           {stats.map((st) => {
             const Icon = st.icon
             return (
-              <SpotlightCard
+              <Card
                 key={st.label}
-                spotlightColor="rgba(115, 66, 226, 0.12)"
-                className="p-6 rounded-3xl bg-[#FAF9F6] border border-[#192837]/8 text-left"
+                badge={st.badge}
+                title={st.value}
+                description={st.label}
+                className="p-6 text-left"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-semibold text-[#192837]/60">{st.label}</span>
-                  <div className={`p-2 rounded-xl ${st.color}`}>
-                    <Icon size={18} />
+                <div className="pt-3 border-t border-[#192837]/8 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+                    <TrendingUp size={13} />
+                    <span>{st.change}</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-[#FAF9F6] text-[#7342E2]">
+                    <Icon size={16} />
                   </div>
                 </div>
-                <div className="font-heading text-3xl font-extrabold text-[#192837] mb-1.5">
-                  {st.value}
-                </div>
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
-                  <TrendingUp size={13} />
-                  <span>{st.change}</span>
-                </div>
-              </SpotlightCard>
+              </Card>
             )
           })}
         </div>
 
         {/* Complex Dashboard Interface Mockup */}
-        <div className="rounded-3xl border border-[#192837]/10 bg-[#FAF9F6] p-6 sm:p-8 shadow-xl text-left">
-          {/* Top Bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#192837]/10 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-[#7342E2] text-white">
-                <Activity size={20} />
-              </div>
-              <div>
-                <h3 className="font-heading font-bold text-base text-[#192837]">Active Threat Feed Stream</h3>
-                <p className="text-xs text-[#192837]/60">FastAPI Async Webhook Listener • Connected to Gmail API</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                Live Ingestion
-              </span>
-            </div>
-          </div>
-
+        <Card
+          badge="SOC LIVE STREAM"
+          title="Active Threat Feed Stream"
+          description="FastAPI Async Webhook Listener • Connected to Gmail API • Sub-50ms Response"
+          className="p-6 sm:p-8 text-left"
+        >
           {/* Grid Layout for Live Table & Risk Distribution */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-4">
             {/* Live Alerts Stream Table */}
             <div className="lg:col-span-8">
               <div className="flex items-center justify-between mb-3">
@@ -115,7 +98,7 @@ export const DashboardPreview: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-[#192837]/6">
                     {recentAlerts.map((alt) => (
-                      <tr key={alt.id} className="hover:bg-white/80 transition-colors">
+                      <tr key={alt.id} className="hover:bg-[#FAF9F6] transition-colors">
                         <td className="py-3 px-3 font-mono font-bold text-[#7342E2]">{alt.id}</td>
                         <td className="py-3 px-3 font-mono font-medium text-[#192837] truncate max-w-[200px]">{alt.sender}</td>
                         <td className="py-3 px-3">
@@ -132,7 +115,7 @@ export const DashboardPreview: React.FC = () => {
             </div>
 
             {/* Risk Distribution & Threat Breakdown */}
-            <div className="lg:col-span-4 p-5 rounded-2xl bg-white border border-[#192837]/8 flex flex-col justify-between">
+            <div className="lg:col-span-4 p-5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8 flex flex-col justify-between">
               <div>
                 <div className="text-xs font-bold uppercase tracking-wider text-[#192837]/70 mb-4">
                   Threat Category Distribution
@@ -144,7 +127,7 @@ export const DashboardPreview: React.FC = () => {
                       <span>Phishing & Credential Harvest</span>
                       <span>42%</span>
                     </div>
-                    <div className="h-2 w-full bg-[#FAF9F6] rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-white rounded-full overflow-hidden">
                       <div className="h-full bg-rose-500 rounded-full w-[42%]" />
                     </div>
                   </div>
@@ -154,7 +137,7 @@ export const DashboardPreview: React.FC = () => {
                       <span>BEC & Wire Transfer Fraud</span>
                       <span>28%</span>
                     </div>
-                    <div className="h-2 w-full bg-[#FAF9F6] rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-white rounded-full overflow-hidden">
                       <div className="h-full bg-amber-500 rounded-full w-[28%]" />
                     </div>
                   </div>
@@ -164,7 +147,7 @@ export const DashboardPreview: React.FC = () => {
                       <span>Spoofing & Impersonation</span>
                       <span>18%</span>
                     </div>
-                    <div className="h-2 w-full bg-[#FAF9F6] rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-white rounded-full overflow-hidden">
                       <div className="h-full bg-purple-500 rounded-full w-[18%]" />
                     </div>
                   </div>
@@ -174,7 +157,7 @@ export const DashboardPreview: React.FC = () => {
                       <span>Malicious Attachments / ISOs</span>
                       <span>12%</span>
                     </div>
-                    <div className="h-2 w-full bg-[#FAF9F6] rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-white rounded-full overflow-hidden">
                       <div className="h-full bg-blue-500 rounded-full w-[12%]" />
                     </div>
                   </div>
@@ -186,7 +169,7 @@ export const DashboardPreview: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </section>
   )
