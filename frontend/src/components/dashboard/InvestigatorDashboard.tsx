@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import {
   ShieldAlert, Globe, Users, BarChart3, FileText,
-  Sparkles, Download, Eye, RefreshCw,
-  Search, Terminal, LogOut, Play, ArrowUpDown, ChevronLeft, ChevronRight,
+  Download, Eye, RefreshCw,
+  Search, Terminal, LogOut, ArrowUpDown, ChevronLeft, ChevronRight,
   AlertTriangle, CheckCircle, Activity, MapPin
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { threatService, type ThreatItem } from '../../services/threats'
 import ForensicsModal from './ForensicsModal'
 import ThreatMapView from './ThreatMapView'
-import ManualScanModal from './ManualScanModal'
 
 export const InvestigatorDashboard: React.FC = () => {
   const { logout } = useAuth()
@@ -20,8 +19,6 @@ export const InvestigatorDashboard: React.FC = () => {
   const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [selectedThreatId, setSelectedThreatId] = useState<string | null>(null)
-  const [scanModalOpen, setScanModalOpen] = useState<boolean>(false)
-  const [seedingDemo, setSeedingDemo] = useState<boolean>(false)
   
   // Table filters & controls
   const [severityFilter, setSeverityFilter] = useState<string>('')
@@ -55,18 +52,6 @@ export const InvestigatorDashboard: React.FC = () => {
   useEffect(() => {
     loadInvestigatorData()
   }, [])
-
-  const handleSeedDemoScenarios = async () => {
-    setSeedingDemo(true)
-    try {
-      await threatService.seedDemoData()
-      await loadInvestigatorData()
-    } catch (err) {
-      alert('Failed to seed demo scenarios.')
-    } finally {
-      setSeedingDemo(false)
-    }
-  }
 
   const handleDownloadPdfReport = async (tId: string) => {
     try {
@@ -116,26 +101,23 @@ export const InvestigatorDashboard: React.FC = () => {
   }, [filteredAndSortedThreats, currentPage])
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-[#192837] flex flex-col font-body">
-      {/* Top Security Operations Center Header */}
-      <header className="sticky top-0 z-40 w-full bg-[#12101F]/95 backdrop-blur-xl border-b border-[#7342E2]/25 text-white shadow-xl shadow-[#7342E2]/10">
+    <div className="min-h-screen bg-[#FFFFFF] text-[#1F1F29] flex flex-col font-body">
+      {/* Top Navigation Header */}
+      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-[#D8C8FF] text-[#1F1F29] shadow-sm">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#A78BFA] via-[#8B5CF6] to-[#7342E2] flex items-center justify-center text-white shadow-lg shadow-[#7342E2]/35 border border-white/20">
+            <div className="w-9 h-9 rounded-xl bg-[#F5F3FF] border border-[#D8C8FF] flex items-center justify-center text-[#7342E2] shadow-sm">
               <ShieldAlert size={20} />
             </div>
             <div>
-              <span className="font-heading text-lg font-bold tracking-tight flex items-center gap-2 text-white">
+              <span className="font-heading text-lg font-bold tracking-tight text-[#1F1F29]">
                 VaultShield
-                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#7342E2] to-[#8B5CF6] text-white tracking-wider uppercase shadow-sm border border-white/15">
-                  SOC Tier 2 Investigator
-                </span>
               </span>
             </div>
           </div>
 
-          {/* Investigator Navigation */}
-          <nav className="hidden lg:flex items-center gap-1 bg-[#1E1938]/80 p-1.5 rounded-2xl border border-[#7342E2]/30 shadow-inner">
+          {/* Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-1 bg-[#F9FAFB] p-1 rounded-2xl border border-[#D8C8FF]">
             {[
               { id: 'dashboard', label: 'Overview', icon: BarChart3 },
               { id: 'threats', label: 'Threat Monitoring', icon: ShieldAlert, count: threats.length },
@@ -152,14 +134,16 @@ export const InvestigatorDashboard: React.FC = () => {
                   onClick={() => { setActiveTab(tab.id as any); setCurrentPage(1); }}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                     active
-                      ? 'bg-gradient-to-r from-[#7342E2] to-[#8B5CF6] text-white shadow-md shadow-[#7342E2]/30 border border-white/10'
-                      : 'text-purple-200/70 hover:text-white hover:bg-[#7342E2]/15'
+                      ? 'bg-[#7342E2] text-white shadow-sm'
+                      : 'text-[#6B7280] hover:text-[#1F1F29] hover:bg-white'
                   }`}
                 >
                   <Icon size={14} />
                   <span>{tab.label}</span>
                   {tab.count !== undefined && tab.count > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-extrabold shadow-sm">
+                    <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-extrabold ${
+                      active ? 'bg-white/20 text-white' : 'bg-[#7342E2]/10 text-[#7342E2]'
+                    }`}>
                       {tab.count}
                     </span>
                   )}
@@ -168,44 +152,25 @@ export const InvestigatorDashboard: React.FC = () => {
             })}
           </nav>
 
-          {/* Quick Tools */}
-          <div className="flex items-center gap-3">
+          {/* Quick Actions */}
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={loadInvestigatorData}
               disabled={loading}
-              title="Refresh SOC Data"
-              className="w-8 h-8 rounded-full flex items-center justify-center text-purple-200/70 hover:text-white hover:bg-[#7342E2]/20 transition-all cursor-pointer border border-transparent hover:border-[#7342E2]/30"
+              title="Refresh Data"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-[#6B7280] hover:text-[#7342E2] hover:bg-[#F5F3FF] border border-[#D8C8FF] transition-all cursor-pointer shadow-sm"
             >
               <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             </button>
 
-            <button
-              type="button"
-              onClick={handleSeedDemoScenarios}
-              disabled={seedingDemo}
-              className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#7342E2]/20 text-purple-200 border border-[#7342E2]/40 hover:bg-[#7342E2]/35 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
-            >
-              <Play size={12} className={seedingDemo ? 'animate-spin' : ''} />
-              <span>{seedingDemo ? 'Seeding...' : 'Load Demo Scenarios'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setScanModalOpen(true)}
-              className="hidden sm:inline-flex px-3.5 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-[#7342E2] to-[#8B5CF6] hover:brightness-110 active:scale-95 transition-all items-center gap-1.5 shadow-md shadow-[#7342E2]/25 cursor-pointer border border-white/10"
-            >
-              <Sparkles size={13} />
-              <span>Manual Scan</span>
-            </button>
-
-            <div className="h-5 w-[1px] bg-[#7342E2]/30" />
+            <div className="h-5 w-[1px] bg-[#D8C8FF]" />
 
             <button
               type="button"
               onClick={logout}
               title="Sign Out"
-              className="w-8 h-8 rounded-full flex items-center justify-center text-purple-200/60 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-[#6B7280] hover:text-red-600 hover:bg-red-50 border border-[#D8C8FF] hover:border-red-200 transition-all cursor-pointer shadow-sm"
             >
               <LogOut size={16} />
             </button>
@@ -215,45 +180,45 @@ export const InvestigatorDashboard: React.FC = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl w-full mx-auto px-5 sm:px-8 py-8 flex-1 space-y-8">
-        {/* TAB 1: SOC OVERVIEW DASHBOARD */}
+        {/* TAB 1: OVERVIEW DASHBOARD */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
-            {/* Primary SOC Metric Cards */}
+            {/* Primary Metric Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-              <div className="p-4 sm:p-5 rounded-3xl bg-white border border-[#192837]/10 shadow-sm flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-[#192837]/60 uppercase tracking-wider">Total Emails Analyzed</span>
+              <div className="p-5 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Total Emails Analyzed</span>
                 <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold font-heading text-[#192837]">{stats?.total_emails_scanned ?? threats.length}</span>
+                  <span className="text-2xl sm:text-3xl font-extrabold font-heading text-[#1F1F29]">{stats?.total_emails_scanned ?? threats.length}</span>
                 </div>
                 <span className="text-[10px] text-emerald-600 font-semibold mt-1">Ingestion Pipeline Active</span>
               </div>
 
-              <div className="p-4 sm:p-5 rounded-3xl bg-white border border-[#192837]/10 shadow-sm flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-[#192837]/60 uppercase tracking-wider">Total Threats</span>
+              <div className="p-5 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Total Threats</span>
                 <div className="flex items-baseline gap-2 mt-2">
                   <span className="text-2xl sm:text-3xl font-extrabold font-heading text-orange-600">{stats?.total_threats ?? threats.length}</span>
                 </div>
                 <span className="text-[10px] text-orange-600 font-semibold mt-1">Classified via Gemini AI</span>
               </div>
 
-              <div className="p-4 sm:p-5 rounded-3xl bg-white border border-[#192837]/10 shadow-sm flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-[#192837]/60 uppercase tracking-wider">Critical Threats</span>
+              <div className="p-5 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Critical Threats</span>
                 <div className="flex items-baseline gap-2 mt-2">
                   <span className="text-2xl sm:text-3xl font-extrabold font-heading text-red-600">{stats?.critical_threats ?? threats.filter(t => t.severity === 'critical').length}</span>
                 </div>
-                <span className="text-[10px] text-red-600 font-semibold mt-1">Immediate SOC Alert</span>
+                <span className="text-[10px] text-red-600 font-semibold mt-1">Immediate Alert</span>
               </div>
 
-              <div className="p-4 sm:p-5 rounded-3xl bg-white border border-[#192837]/10 shadow-sm flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-[#192837]/60 uppercase tracking-wider">Active Investigations</span>
+              <div className="p-5 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Active Investigations</span>
                 <div className="flex items-baseline gap-2 mt-2">
                   <span className="text-2xl sm:text-3xl font-extrabold font-heading text-[#7342E2]">{stats?.active_investigations ?? threats.filter(t => t.status !== 'resolved').length}</span>
                 </div>
                 <span className="text-[10px] text-[#7342E2] font-semibold mt-1">Open / Under Review</span>
               </div>
 
-              <div className="p-4 sm:p-5 rounded-3xl bg-white border border-[#192837]/10 shadow-sm flex flex-col justify-between col-span-2 sm:col-span-1">
-                <span className="text-[11px] font-bold text-[#192837]/60 uppercase tracking-wider">Suspicious IPs</span>
+              <div className="p-5 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm flex flex-col justify-between col-span-2 sm:col-span-1">
+                <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Suspicious IPs</span>
                 <div className="flex items-baseline gap-2 mt-2">
                   <span className="text-2xl sm:text-3xl font-extrabold font-heading text-amber-600">{stats?.suspicious_ip_count ?? 4}</span>
                 </div>
@@ -263,7 +228,7 @@ export const InvestigatorDashboard: React.FC = () => {
 
             {/* Severity Cards Row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3.5 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-red-50/70 border border-red-200 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider block">Critical (75-100)</span>
                   <span className="text-xl font-extrabold text-red-700">{stats?.critical_threats ?? 0}</span>
@@ -271,7 +236,7 @@ export const InvestigatorDashboard: React.FC = () => {
                 <AlertTriangle size={20} className="text-red-500" />
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-200 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold text-orange-700 uppercase tracking-wider block">High (50-74)</span>
                   <span className="text-xl font-extrabold text-orange-700">{stats?.high_threats ?? stats?.high_risk_threats ?? 0}</span>
@@ -279,7 +244,7 @@ export const InvestigatorDashboard: React.FC = () => {
                 <ShieldAlert size={20} className="text-orange-500" />
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">Medium (25-49)</span>
                   <span className="text-xl font-extrabold text-amber-700">{stats?.medium_threats ?? 0}</span>
@@ -287,7 +252,7 @@ export const InvestigatorDashboard: React.FC = () => {
                 <Activity size={20} className="text-amber-500" />
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Low (0-24)</span>
                   <span className="text-xl font-extrabold text-emerald-700">{stats?.low_threats ?? 0}</span>
@@ -299,8 +264,8 @@ export const InvestigatorDashboard: React.FC = () => {
             {/* Threat Categories & Recent Incident Stream */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Category Breakdown */}
-              <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-sm space-y-4">
-                <h3 className="font-heading text-base font-bold text-[#192837]">
+              <div className="p-6 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm space-y-4">
+                <h3 className="font-heading text-base font-bold text-[#1F1F29]">
                   Threat Type Distribution
                 </h3>
                 <div className="space-y-3">
@@ -310,12 +275,12 @@ export const InvestigatorDashboard: React.FC = () => {
                     { label: 'Credential Theft / Fraud', count: stats?.fraud_count || 0, color: 'bg-purple-500' },
                     { label: 'Malware Vectors', count: stats?.malware_count || 0, color: 'bg-amber-500' },
                   ].map((cat, idx) => (
-                    <div key={idx} className="p-3 rounded-2xl bg-[#FAF9F6] border border-[#192837]/5 flex items-center justify-between">
+                    <div key={idx} className="p-3 rounded-2xl bg-[#F9FAFB] border border-[#D8C8FF]/50 flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
                         <span className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
-                        <span className="text-xs font-bold text-[#192837]">{cat.label}</span>
+                        <span className="text-xs font-bold text-[#1F1F29]">{cat.label}</span>
                       </div>
-                      <span className="text-xs font-mono font-extrabold text-[#192837]">{cat.count}</span>
+                      <span className="text-xs font-mono font-extrabold text-[#1F1F29]">{cat.count}</span>
                     </div>
                   ))}
                 </div>
@@ -324,25 +289,25 @@ export const InvestigatorDashboard: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('map')}
-                    className="w-full py-2.5 rounded-2xl bg-[#7342E2]/10 hover:bg-[#7342E2]/20 text-xs font-bold text-[#7342E2] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 rounded-2xl bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#D8C8FF] text-xs font-bold text-[#7342E2] transition-all cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <Globe size={14} />
                     <span>View Geographic Distribution Map</span>
                   </button>
-                  <p className="text-[10px] text-[#192837]/40 text-center mt-2">
+                  <p className="text-[10px] text-[#6B7280] text-center mt-2">
                     Approximate IP-based location — not exact physical location.
                   </p>
                 </div>
               </div>
 
-              {/* Master Incident Log */}
-              <div className="lg:col-span-2 p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-sm space-y-4">
+              {/* Recent Incidents */}
+              <div className="lg:col-span-2 p-6 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-heading text-base font-bold text-[#192837]">
+                    <h3 className="font-heading text-base font-bold text-[#1F1F29]">
                       Recent Security Incidents
                     </h3>
-                    <p className="text-xs text-[#192837]/60">Verified threat telemetry from Supabase</p>
+                    <p className="text-xs text-[#6B7280]">Verified threat telemetry from Supabase</p>
                   </div>
                   <button
                     type="button"
@@ -354,39 +319,39 @@ export const InvestigatorDashboard: React.FC = () => {
                 </div>
 
                 {threats.length === 0 ? (
-                  <div className="py-12 text-center text-xs text-[#192837]/60">
-                    No threats detected yet. Use "Load Demo Scenarios" or run a manual email scan.
+                  <div className="py-12 text-center text-xs text-[#6B7280]">
+                    No threats detected yet.
                   </div>
                 ) : (
                   <div className="space-y-2.5">
                     {threats.slice(0, 5).map(t => {
                       const sevColor =
-                        t.severity === 'critical' ? 'bg-red-500/10 text-red-600 border-red-500/30' :
-                        t.severity === 'high' ? 'bg-orange-500/10 text-orange-600 border-orange-500/30' :
-                        t.severity === 'medium' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' :
-                        'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+                        t.severity === 'critical' ? 'bg-red-50 text-red-700 border-red-200' :
+                        t.severity === 'high' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                        t.severity === 'medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                        'bg-emerald-50 text-emerald-700 border-emerald-200'
 
                       return (
                         <div
                           key={t.id}
-                          className="p-4 rounded-2xl bg-[#FAF9F6] hover:bg-white border border-[#192837]/5 hover:border-[#7342E2]/30 hover:shadow-md transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                          className="p-4 rounded-2xl bg-[#FAFAFC] hover:bg-white border border-[#D8C8FF]/60 hover:border-[#7342E2] hover:shadow-sm transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
                         >
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${sevColor}`}>
                                 {t.severity}
                               </span>
-                              <span className="font-heading text-sm font-bold text-[#192837]">
+                              <span className="font-heading text-sm font-bold text-[#1F1F29]">
                                 {t.threat_type}
                               </span>
-                              <span className="text-[10px] font-mono text-[#192837]/40">
+                              <span className="text-[10px] font-mono text-[#6B7280]">
                                 #{t.id.slice(0, 8).toUpperCase()}
                               </span>
-                              <span className="text-[10px] font-mono font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                              <span className="text-[10px] font-mono font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">
                                 Risk {t.risk_score}/100
                               </span>
                             </div>
-                            <p className="text-xs text-[#192837]/70 line-clamp-1 font-body">
+                            <p className="text-xs text-[#6B7280] line-clamp-1 font-body">
                               {t.summary}
                             </p>
                           </div>
@@ -395,7 +360,7 @@ export const InvestigatorDashboard: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => setSelectedThreatId(t.id)}
-                              className="px-3 py-1.5 rounded-xl bg-white border border-[#192837]/15 text-xs font-bold text-[#192837] hover:border-[#7342E2] hover:text-[#7342E2] transition-all flex items-center gap-1 cursor-pointer"
+                              className="px-3 py-1.5 rounded-xl bg-white border border-[#D8C8FF] text-xs font-bold text-[#1F1F29] hover:border-[#7342E2] hover:text-[#7342E2] transition-all flex items-center gap-1 cursor-pointer"
                             >
                               <Eye size={13} />
                               <span>Forensics</span>
@@ -404,7 +369,7 @@ export const InvestigatorDashboard: React.FC = () => {
                               type="button"
                               onClick={() => handleDownloadPdfReport(t.id)}
                               title="Download PDF Dossier"
-                              className="w-8 h-8 rounded-xl bg-[#7342E2]/10 hover:bg-[#7342E2] hover:text-white text-[#7342E2] transition-all flex items-center justify-center cursor-pointer"
+                              className="w-8 h-8 rounded-xl bg-[#F5F3FF] hover:bg-[#7342E2] hover:text-white text-[#7342E2] border border-[#D8C8FF] transition-all flex items-center justify-center cursor-pointer"
                             >
                               <Download size={14} />
                             </button>
@@ -419,15 +384,15 @@ export const InvestigatorDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 2: THREAT MONITORING TABLE WITH FULL SOC CONTROLS */}
+        {/* TAB 2: THREAT MONITORING TABLE */}
         {activeTab === 'threats' && (
-          <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-sm space-y-6">
+          <div className="p-6 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h2 className="font-heading text-xl font-bold text-[#192837]">
+                <h2 className="font-heading text-xl font-bold text-[#1F1F29]">
                   Investigator Threat Monitoring
                 </h2>
-                <p className="text-xs text-[#192837]/60">
+                <p className="text-xs text-[#6B7280]">
                   Full organizational security incidents with forensic lookup and risk metrics
                 </p>
               </div>
@@ -441,16 +406,16 @@ export const InvestigatorDashboard: React.FC = () => {
                     value={searchQuery}
                     onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                     placeholder="Search threats, type, ID..."
-                    className="w-full text-xs px-3.5 py-2 pl-9 rounded-xl bg-[#FAF9F6] border border-[#192837]/15 focus:outline-none focus:bg-white focus:border-[#7342E2]"
+                    className="w-full text-xs px-3.5 py-2 pl-9 rounded-xl bg-white border border-[#D8C8FF] text-[#1F1F29] focus:outline-none focus:border-[#7342E2]"
                   />
-                  <Search size={14} className="absolute left-3 top-2.5 text-[#192837]/40" />
+                  <Search size={14} className="absolute left-3 top-2.5 text-[#6B7280]" />
                 </div>
 
                 {/* Threat Type Filter */}
                 <select
                   value={typeFilter}
                   onChange={(e) => { setTypeFilter(e.target.value); setCurrentPage(1); }}
-                  className="text-xs font-bold px-3 py-2 rounded-xl bg-[#FAF9F6] border border-[#192837]/15 focus:outline-none focus:border-[#7342E2]"
+                  className="text-xs font-bold px-3 py-2 rounded-xl bg-white border border-[#D8C8FF] text-[#1F1F29] focus:outline-none focus:border-[#7342E2]"
                 >
                   <option value="">All Threat Types</option>
                   <option value="phish">Phishing</option>
@@ -463,7 +428,7 @@ export const InvestigatorDashboard: React.FC = () => {
                 <select
                   value={severityFilter}
                   onChange={(e) => { setSeverityFilter(e.target.value); setCurrentPage(1); }}
-                  className="text-xs font-bold px-3 py-2 rounded-xl bg-[#FAF9F6] border border-[#192837]/15 focus:outline-none focus:border-[#7342E2]"
+                  className="text-xs font-bold px-3 py-2 rounded-xl bg-white border border-[#D8C8FF] text-[#1F1F29] focus:outline-none focus:border-[#7342E2]"
                 >
                   <option value="">All Severities</option>
                   <option value="critical">Critical</option>
@@ -476,7 +441,7 @@ export const InvestigatorDashboard: React.FC = () => {
                 <select
                   value={statusFilter}
                   onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                  className="text-xs font-bold px-3 py-2 rounded-xl bg-[#FAF9F6] border border-[#192837]/15 focus:outline-none focus:border-[#7342E2]"
+                  className="text-xs font-bold px-3 py-2 rounded-xl bg-white border border-[#D8C8FF] text-[#1F1F29] focus:outline-none focus:border-[#7342E2]"
                 >
                   <option value="">All Statuses</option>
                   <option value="new">New</option>
@@ -490,18 +455,18 @@ export const InvestigatorDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSortBy(sortBy === 'newest' ? 'risk_score' : 'newest')}
-                  className="px-3 py-2 rounded-xl bg-[#FAF9F6] border border-[#192837]/15 text-xs font-bold flex items-center gap-1 hover:border-[#7342E2] cursor-pointer"
+                  className="px-3 py-2 rounded-xl bg-white border border-[#D8C8FF] text-xs font-bold text-[#1F1F29] flex items-center gap-1 hover:border-[#7342E2] cursor-pointer"
                 >
-                  <ArrowUpDown size={12} />
+                  <ArrowUpDown size={12} className="text-[#7342E2]" />
                   <span>{sortBy === 'newest' ? 'Sort: Newest' : 'Sort: Risk Score'}</span>
                 </button>
               </div>
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto rounded-2xl border border-[#192837]/10">
+            <div className="overflow-x-auto rounded-2xl border border-[#D8C8FF] bg-white">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#FAF9F6] text-[#192837]/70 font-bold uppercase tracking-wider border-b border-[#192837]/10">
+                <thead className="bg-[#FAF8FF] text-[#6B7280] font-bold uppercase tracking-wider border-b border-[#D8C8FF]">
                   <tr>
                     <th className="py-3.5 px-4">Threat ID</th>
                     <th className="py-3.5 px-4">Threat Type</th>
@@ -513,47 +478,47 @@ export const InvestigatorDashboard: React.FC = () => {
                     <th className="py-3.5 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#192837]/5 bg-white">
+                <tbody className="divide-y divide-[#D8C8FF]/40 bg-white">
                   {paginatedThreats.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-12 text-center text-[#192837]/50 font-medium">
+                      <td colSpan={8} className="py-12 text-center text-[#6B7280] font-medium">
                         No threat incidents matching your current filters.
                       </td>
                     </tr>
                   ) : (
                     paginatedThreats.map(t => {
                       const sevColor =
-                        t.severity === 'critical' ? 'bg-red-100 text-red-700' :
-                        t.severity === 'high' ? 'bg-orange-100 text-orange-700' :
-                        t.severity === 'medium' ? 'bg-amber-100 text-amber-700' :
-                        'bg-emerald-100 text-emerald-700'
+                        t.severity === 'critical' ? 'bg-red-50 text-red-700 border-red-200' :
+                        t.severity === 'high' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                        t.severity === 'medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                        'bg-emerald-50 text-emerald-700 border-emerald-200'
 
                       return (
-                        <tr key={t.id} className="hover:bg-[#FAF9F6]/80 transition-all">
+                        <tr key={t.id} className="hover:bg-[#FAF8FF] transition-all">
                           <td className="py-3.5 px-4 font-mono font-bold text-[#7342E2]">
                             #{t.id.slice(0, 8).toUpperCase()}
                           </td>
                           <td className="py-3.5 px-4">
-                            <span className="font-bold text-[#192837] block">{t.threat_type}</span>
-                            <span className="text-[11px] text-[#192837]/60 line-clamp-1 max-w-xs">{t.summary}</span>
+                            <span className="font-bold text-[#1F1F29] block">{t.threat_type}</span>
+                            <span className="text-[11px] text-[#6B7280] line-clamp-1 max-w-xs">{t.summary}</span>
                           </td>
                           <td className="py-3.5 px-4">
-                            <span className={`px-2 py-0.5 rounded-md font-extrabold uppercase text-[10px] ${sevColor}`}>
+                            <span className={`px-2 py-0.5 rounded-md font-extrabold uppercase text-[10px] border ${sevColor}`}>
                               {t.severity}
                             </span>
                           </td>
                           <td className="py-3.5 px-4 font-mono font-bold text-red-600">
                             {t.risk_score} / 100
                           </td>
-                          <td className="py-3.5 px-4 font-semibold text-[#192837]/70">
+                          <td className="py-3.5 px-4 font-semibold text-[#1F1F29]">
                             {Math.round((t.confidence || 0.95) * 100)}%
                           </td>
                           <td className="py-3.5 px-4">
-                            <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+                            <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-[#F3F4F6] text-[#4B5563] border border-gray-200">
                               {t.status}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4 text-[#192837]/60 whitespace-nowrap">
+                          <td className="py-3.5 px-4 text-[#6B7280] whitespace-nowrap">
                             {new Date(t.created_at).toLocaleDateString()}
                           </td>
                           <td className="py-3.5 px-4 text-right">
@@ -561,7 +526,7 @@ export const InvestigatorDashboard: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => setSelectedThreatId(t.id)}
-                                className="px-3 py-1.5 rounded-xl bg-white border border-[#192837]/15 font-bold text-xs text-[#192837] hover:border-[#7342E2] hover:text-[#7342E2] transition-all flex items-center gap-1 cursor-pointer"
+                                className="px-3 py-1.5 rounded-xl bg-white border border-[#D8C8FF] font-bold text-xs text-[#1F1F29] hover:border-[#7342E2] hover:text-[#7342E2] transition-all flex items-center gap-1 cursor-pointer"
                               >
                                 <Eye size={12} />
                                 <span>Forensics</span>
@@ -570,7 +535,7 @@ export const InvestigatorDashboard: React.FC = () => {
                                 type="button"
                                 onClick={() => handleDownloadPdfReport(t.id)}
                                 title="Download PDF Report"
-                                className="w-7 h-7 rounded-xl bg-[#7342E2]/10 hover:bg-[#7342E2] hover:text-white text-[#7342E2] transition-all flex items-center justify-center cursor-pointer"
+                                className="w-7 h-7 rounded-xl bg-[#F5F3FF] hover:bg-[#7342E2] hover:text-white text-[#7342E2] border border-[#D8C8FF] transition-all flex items-center justify-center cursor-pointer"
                               >
                                 <Download size={13} />
                               </button>
@@ -587,7 +552,7 @@ export const InvestigatorDashboard: React.FC = () => {
             {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between pt-2">
-                <span className="text-xs text-[#192837]/60">
+                <span className="text-xs text-[#6B7280]">
                   Showing Page {currentPage} of {totalPages} ({filteredAndSortedThreats.length} incidents)
                 </span>
                 <div className="flex items-center gap-2">
@@ -595,7 +560,7 @@ export const InvestigatorDashboard: React.FC = () => {
                     type="button"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    className="p-2 rounded-xl bg-[#FAF9F6] border border-[#192837]/10 disabled:opacity-40 hover:bg-white cursor-pointer"
+                    className="p-2 rounded-xl bg-white border border-[#D8C8FF] text-[#1F1F29] disabled:opacity-40 hover:bg-[#FAF8FF] cursor-pointer"
                   >
                     <ChevronLeft size={14} />
                   </button>
@@ -603,7 +568,7 @@ export const InvestigatorDashboard: React.FC = () => {
                     type="button"
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    className="p-2 rounded-xl bg-[#FAF9F6] border border-[#192837]/10 disabled:opacity-40 hover:bg-white cursor-pointer"
+                    className="p-2 rounded-xl bg-white border border-[#D8C8FF] text-[#1F1F29] disabled:opacity-40 hover:bg-[#FAF8FF] cursor-pointer"
                   >
                     <ChevronRight size={14} />
                   </button>
@@ -618,38 +583,38 @@ export const InvestigatorDashboard: React.FC = () => {
 
         {/* TAB 4: USER MONITORING */}
         {activeTab === 'users' && (
-          <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-sm space-y-4">
+          <div className="p-6 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm space-y-4">
             <div>
-              <h2 className="font-heading text-lg font-bold text-[#192837]">
+              <h2 className="font-heading text-lg font-bold text-[#1F1F29]">
                 Monitored Enterprise Accounts ({usersList.length})
               </h2>
-              <p className="text-xs text-[#192837]/60">
+              <p className="text-xs text-[#6B7280]">
                 RBAC monitored user telemetry and threat incident volume
               </p>
             </div>
 
-            <div className="divide-y divide-[#192837]/5">
+            <div className="divide-y divide-[#D8C8FF]/40">
               {usersList.map((u, i) => (
                 <div key={i} className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-[#7342E2]/10 text-[#7342E2] font-bold flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-2xl bg-[#F5F3FF] border border-[#D8C8FF] text-[#7342E2] font-bold flex items-center justify-center">
                       {u.name ? u.name[0].toUpperCase() : 'U'}
                     </div>
                     <div>
-                      <span className="font-bold text-xs text-[#192837] block">{u.name || 'Enterprise User'}</span>
-                      <span className="text-[11px] text-[#192837]/60 font-mono">{u.email}</span>
+                      <span className="font-bold text-xs text-[#1F1F29] block">{u.name || 'Enterprise User'}</span>
+                      <span className="text-[11px] text-[#6B7280] font-mono">{u.email}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4 text-xs">
-                    <span className="px-2.5 py-1 rounded-full bg-[#FAF9F6] border border-[#192837]/10 font-bold uppercase text-[10px]">
+                    <span className="px-2.5 py-1 rounded-full bg-[#F9FAFB] border border-[#D8C8FF] font-bold uppercase text-[10px] text-[#6B7280]">
                       Role: {u.role}
                     </span>
-                    <span className="font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md">
+                    <span className="font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-md">
                       {u.threats_count} Threats Logged
                     </span>
                     {u.critical_count > 0 && (
-                      <span className="font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md">
+                      <span className="font-bold text-red-600 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-md">
                         {u.critical_count} Critical
                       </span>
                     )}
@@ -665,16 +630,16 @@ export const InvestigatorDashboard: React.FC = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Distribution */}
-              <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-sm space-y-4">
-                <h3 className="font-heading text-base font-bold text-[#192837]">Threat Vector Distribution</h3>
+              <div className="p-6 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm space-y-4">
+                <h3 className="font-heading text-base font-bold text-[#1F1F29]">Threat Vector Distribution</h3>
                 <div className="space-y-3">
                   {(analytics?.threat_distribution || []).map((item: any, i: number) => (
                     <div key={i} className="space-y-1">
                       <div className="flex justify-between text-xs font-bold">
-                        <span>{item.name}</span>
-                        <span>{item.percentage}% ({item.count || 0})</span>
+                        <span className="text-[#1F1F29]">{item.name}</span>
+                        <span className="text-[#7342E2]">{item.percentage}% ({item.count || 0})</span>
                       </div>
-                      <div className="w-full h-2 rounded-full bg-[#FAF9F6] overflow-hidden">
+                      <div className="w-full h-2 rounded-full bg-[#F3F4F6] overflow-hidden">
                         <div className="h-full bg-[#7342E2]" style={{ width: `${item.percentage}%` }} />
                       </div>
                     </div>
@@ -683,19 +648,19 @@ export const InvestigatorDashboard: React.FC = () => {
               </div>
 
               {/* Geo Sources */}
-              <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-sm space-y-4">
-                <h3 className="font-heading text-base font-bold text-[#192837]">Origin Geographic Sources</h3>
-                <p className="text-[11px] text-[#192837]/50">
+              <div className="p-6 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm space-y-4">
+                <h3 className="font-heading text-base font-bold text-[#1F1F29]">Origin Geographic Sources</h3>
+                <p className="text-[11px] text-[#6B7280]">
                   Approximate IP-based location — not exact physical location.
                 </p>
                 <div className="space-y-3">
                   {(analytics?.geographic_distribution || []).map((geo: any, i: number) => (
-                    <div key={i} className="p-3 rounded-2xl bg-[#FAF9F6] border border-[#192837]/5 flex justify-between items-center text-xs">
+                    <div key={i} className="p-3 rounded-2xl bg-[#FAFAFC] border border-[#D8C8FF]/60 flex justify-between items-center text-xs">
                       <div className="flex items-center gap-2">
                         <MapPin size={14} className="text-[#7342E2]" />
-                        <span className="font-bold">{geo.country} ({geo.code})</span>
+                        <span className="font-bold text-[#1F1F29]">{geo.country} ({geo.code})</span>
                       </div>
-                      <span className="font-mono font-bold text-red-600">{geo.threats} Detected</span>
+                      <span className="font-mono font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded">{geo.threats} Detected</span>
                     </div>
                   ))}
                 </div>
@@ -706,24 +671,26 @@ export const InvestigatorDashboard: React.FC = () => {
 
         {/* TAB 6: REPORTS */}
         {activeTab === 'reports' && (
-          <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-sm space-y-4">
-            <h2 className="font-heading text-lg font-bold text-[#192837]">
+          <div className="p-6 rounded-3xl bg-white border border-[#D8C8FF] shadow-sm space-y-4">
+            <h2 className="font-heading text-lg font-bold text-[#1F1F29]">
               Generated Forensic Incident Dossiers ({threats.length})
             </h2>
-            <p className="text-xs text-[#192837]/60">
+            <p className="text-xs text-[#6B7280]">
               Download court-admissible and SOC compliance level 2 PDF forensic dossiers
             </p>
             <div className="space-y-3 pt-2">
               {threats.map(t => (
-                <div key={t.id} className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/10 flex items-center justify-between gap-4">
+                <div key={t.id} className="p-4 rounded-2xl bg-[#FAFAFC] border border-[#D8C8FF]/60 hover:border-[#7342E2] flex items-center justify-between gap-4 transition-all">
                   <div className="flex items-center gap-3">
-                    <FileText size={20} className="text-[#7342E2]" />
+                    <div className="w-9 h-9 rounded-xl bg-[#F5F3FF] border border-[#D8C8FF] text-[#7342E2] flex items-center justify-center shrink-0">
+                      <FileText size={18} />
+                    </div>
                     <div>
-                      <span className="font-bold text-xs text-[#192837] block">
+                      <span className="font-bold text-xs text-[#1F1F29] block">
                         Forensic Dossier: {t.threat_type} (Incident #{t.id.slice(0, 8).toUpperCase()})
                       </span>
-                      <span className="text-[11px] text-[#192837]/50">
-                        Generated by VaultShield SOC Engine • Risk Score: {t.risk_score}/100 • Status: {t.status.toUpperCase()}
+                      <span className="text-[11px] text-[#6B7280]">
+                        Risk Score: {t.risk_score}/100 • Status: {t.status.toUpperCase()}
                       </span>
                     </div>
                   </div>
@@ -742,13 +709,6 @@ export const InvestigatorDashboard: React.FC = () => {
         )}
       </main>
 
-      {/* Manual Scan Modal */}
-      <ManualScanModal
-        isOpen={scanModalOpen}
-        onClose={() => setScanModalOpen(false)}
-        onScanCompleted={loadInvestigatorData}
-      />
-
       {/* Forensic Deep Dive Modal */}
       <ForensicsModal
         threatId={selectedThreatId}
@@ -760,4 +720,3 @@ export const InvestigatorDashboard: React.FC = () => {
 }
 
 export default InvestigatorDashboard
-
