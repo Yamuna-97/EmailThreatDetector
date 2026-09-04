@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   X, ShieldAlert, CheckCircle2, AlertTriangle, Globe,
-  Download, Clock, Lock, Activity, ShieldCheck, Cpu
+  Download, Lock, Activity, ShieldCheck
 } from 'lucide-react'
 import { threatService } from '../../services/threats'
 
@@ -17,7 +17,7 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
   const [loading, setLoading] = useState<boolean>(true)
   const [downloading, setDownloading] = useState<boolean>(false)
   const [updatingStatus, setUpdatingStatus] = useState<boolean>(false)
-  const [activeTab, setActiveTab] = useState<'overview' | 'headers' | 'intel' | 'evidence' | 'timeline'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'headers' | 'intel'>('overview')
 
   useEffect(() => {
     if (!threatId) return
@@ -137,8 +137,6 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
             { id: 'overview', label: 'Threat Overview', icon: Activity },
             { id: 'headers', label: 'Headers & Auth (SPF/DKIM)', icon: Lock },
             { id: 'intel', label: 'IP & GeoLocation', icon: Globe },
-            { id: 'evidence', label: 'Evidence vs Inference', icon: Cpu },
-            { id: 'timeline', label: 'Investigation Timeline', icon: Clock },
           ].map(tab => {
             const Icon = tab.icon
             const active = activeTab === tab.id
@@ -394,101 +392,6 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 4: EVIDENCE VS INFERENCE */}
-              {activeTab === 'evidence' && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Observed Technical Evidence */}
-                    <div className="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-3">
-                      <h3 className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                        <CheckCircle2 size={16} />
-                        Observed Technical Evidence (Facts)
-                      </h3>
-                      <p className="text-xs text-emerald-700/80">Extracted factually from raw headers and external network lookups:</p>
-                      <ul className="space-y-2 text-xs text-[#192837]">
-                        <li className="p-2.5 rounded-xl bg-white border border-emerald-100 font-mono">
-                          • Sender Domain: <b>{email?.sender || 'chase-secure-verify.net'}</b>
-                        </li>
-                        <li className="p-2.5 rounded-xl bg-white border border-emerald-100 font-mono">
-                          • SPF Status: <b>{email?.headers?.spf || 'fail'}</b>
-                        </li>
-                        <li className="p-2.5 rounded-xl bg-white border border-emerald-100 font-mono">
-                          • Source IP Fraud Score: <b>{ipIntel?.fraud_score ?? 85}/100</b>
-                        </li>
-                        <li className="p-2.5 rounded-xl bg-white border border-emerald-100 font-mono">
-                          • URLs Extracted: <b>{email?.urls?.length || 1} destination(s)</b>
-                        </li>
-                      </ul>
-                    </div>
-
-                    {/* Gemini AI Reasoning & Inferences */}
-                    <div className="p-5 rounded-2xl bg-[#7342E2]/5 border border-[#7342E2]/20 space-y-3">
-                      <h3 className="text-xs font-bold text-[#7342E2] uppercase tracking-wider flex items-center gap-1.5">
-                        <Cpu size={16} />
-                        Gemini AI Security Reasoning (Inference)
-                      </h3>
-                      <p className="text-xs text-[#7342E2]/80">NLP contextual analysis, behavioral intent & threat categorization:</p>
-                      <div className="space-y-2 text-xs">
-                        <div className="p-2.5 rounded-xl bg-white border border-[#7342E2]/10">
-                          <span className="font-bold text-[#7342E2] block mb-1">Social Engineering Intent:</span>
-                          <p className="text-[#192837]/80">
-                            {analysis?.ai_inferences?.social_engineering || 'Creates psychological urgency regarding financial loss to induce rushed click-through.'}
-                          </p>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white border border-[#7342E2]/10">
-                          <span className="font-bold text-[#7342E2] block mb-1">Target Strategy:</span>
-                          <p className="text-[#192837]/80">
-                            {analysis?.ai_inferences?.spoofing || 'Brand impersonation targeting corporate credentials via lookalike domain verification portal.'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Recommended Actions */}
-                  <div className="p-5 rounded-2xl bg-white border border-[#192837]/10 space-y-3">
-                    <h3 className="text-xs font-bold text-[#192837]/60 uppercase tracking-wider">SOC Recommended Remediation</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                      {(analysis?.recommended_actions || [
-                        'Block sender domain across perimeter firewall',
-                        'Quarantine identical messages across all employee mailboxes',
-                        'Force credential reset on targeted user account'
-                      ]).map((act: string, idx: number) => (
-                        <div key={idx} className="p-3 rounded-xl bg-[#FAF9F6] border border-[#192837]/10 flex items-start gap-2">
-                          <span className="w-5 h-5 rounded-full bg-[#7342E2] text-white flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
-                            {idx + 1}
-                          </span>
-                          <span className="font-semibold text-[#192837]">{act}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 5: TIMELINE */}
-              {activeTab === 'timeline' && (
-                <div className="space-y-4">
-                  <h3 className="text-xs font-bold text-[#192837]/60 uppercase tracking-wider">Forensic Investigation Event Trail</h3>
-                  <div className="space-y-3 relative pl-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-[#7342E2]/20">
-                    {timeline.length > 0 ? timeline.map((ev: any, idx: number) => (
-                      <div key={idx} className="relative p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/10">
-                        <div className="absolute -left-6 top-5 w-3 h-3 rounded-full bg-[#7342E2] border-2 border-white shadow-sm" />
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="font-bold text-[#7342E2]">{ev.title}</span>
-                          <span className="text-[10px] text-[#192837]/50">{new Date(ev.timestamp).toLocaleTimeString()}</span>
-                        </div>
-                        <p className="text-xs text-[#192837]/80">{ev.description}</p>
-                      </div>
-                    )) : (
-                      <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/10 text-xs text-[#192837]/60">
-                        Initial incident ingestion logged. Automated forensic pipeline executed.
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
