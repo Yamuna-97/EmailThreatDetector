@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.dependencies import require_investigator, get_current_user
 from app.schemas.auth import UserResponse, MessageResponse
 from app.schemas.threat import ThreatModel, ThreatAnalysisModel
-from app.schemas.email import EmailModel, EmailHeadersModel
+from app.schemas.email import EmailModel, EmailHeaderInfo
 from app.schemas.geolocation import GeoLocationModel, IPIntelligenceModel
 from app.schemas.investigator import (
     ForensicInvestigationDetails, UpdateInvestigationStatusRequest, InvestigationEvent
@@ -212,14 +212,14 @@ async def get_forensic_details(
                     headers_model = None
                     if h_res.data:
                         h_row = h_res.data[0]
-                        headers_model = EmailHeadersModel(
+                        headers_model = EmailHeaderInfo(
                             from_header=h_row.get("from_header"),
                             to_header=h_row.get("to_header"),
                             reply_to=h_row.get("reply_to"),
                             return_path=h_row.get("return_path"),
-                            spf=h_row.get("spf"),
-                            dkim=h_row.get("dkim"),
-                            dmarc=h_row.get("dmarc"),
+                            spf=h_row.get("spf") or "unknown",
+                            dkim=h_row.get("dkim") or "unknown",
+                            dmarc=h_row.get("dmarc") or "unknown",
                             source_ip=h_row.get("source_ip")
                         )
 

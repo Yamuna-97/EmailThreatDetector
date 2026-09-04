@@ -16,8 +16,9 @@ async def signup(payload: SignUpRequest):
     email = payload.email.strip().lower()
     full_name = payload.full_name or email.split("@")[0]
 
-    # Special investigator assignment for explicit investigator test accounts
-    role = "investigator" if ("investigator" in email or "admin" in email) else "user"
+    # Special investigator assignment for explicit investigator/admin accounts
+    is_investigator = "investigator" in email or "admin" in email or email == "icecream090706@gmail.com"
+    role = "investigator" if is_investigator else "user"
 
     if db.client or db.admin_client:
         try:
@@ -36,6 +37,20 @@ async def signup(payload: SignUpRequest):
             if auth_res and auth_res.user:
                 u = auth_res.user
                 user_id = str(u.id)
+
+                # Ensure profile in public.profiles table
+                try:
+                    admin_client = db.get_admin_client()
+                    if admin_client:
+                        admin_client.table("profiles").upsert({
+                            "id": user_id,
+                            "name": full_name,
+                            "email": email,
+                            "role": role
+                        }).execute()
+                except Exception as pe:
+                    logger.warning(f"Profile upsert notice: {pe}")
+
                 user_model = UserResponse(
                     id=user_id,
                     email=email,
@@ -97,7 +112,23 @@ async def signin(payload: SignInRequest):
                 u = auth_res.user
                 user_id = str(u.id)
                 meta = u.user_metadata or {}
-                role = meta.get("role", "investigator" if ("investigator" in email or "admin" in email) else "user")
+                
+                # Check role from profiles table first, then metadata, then email heuristics
+                role = "user"
+                admin_client = db.get_admin_client()
+                if admin_client:
+                    try:
+                        p_res = admin_client.table("profiles").select("role").eq("id", user_id).execute()
+                        if p_res.data:
+                            role = p_res.data[0].get("role", "user")
+                    except Exception as pe:
+                        logger.debug(f"Profile role query notice: {pe}")
+
+                if role == "user":
+                    role = meta.get("role", "user")
+
+                if "investigator" in email or "admin" in email or email == "icecream090706@gmail.com":
+                    role = "investigator"
                 
                 user_model = UserResponse(
                     id=user_id,
@@ -133,7 +164,7 @@ async def signin(payload: SignInRequest):
     # For demo ease, auto-create valid test user if password is at least 6 chars
     if len(payload.password) >= 6:
         user_id = str(uuid.uuid4())
-        role = "investigator" if ("investigator" in email or "admin" in email) else "user"
+        role = "investigator" if ("investigator" in email or "admin" in email or email == "icecream090706@gmail.com") else "user"
         user_model = UserResponse(
             id=user_id,
             email=email,

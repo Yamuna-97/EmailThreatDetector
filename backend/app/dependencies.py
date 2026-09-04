@@ -38,10 +38,22 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
                 user_id = str(u.id)
                 meta = u.user_metadata or {}
                 
-                cached_user = db.store["users"].get(user_id)
-                role = cached_user.role if cached_user else meta.get("role", "user")
+                role = "user"
+                # Check profiles table
+                admin_client = db.get_admin_client()
+                if admin_client:
+                    try:
+                        p_res = admin_client.table("profiles").select("role").eq("id", user_id).execute()
+                        if p_res.data:
+                            role = p_res.data[0].get("role", "user")
+                    except Exception as pe:
+                        logger.debug(f"Profile role query notice: {pe}")
+
+                if role == "user":
+                    cached_user = db.store["users"].get(user_id)
+                    role = cached_user.role if cached_user else meta.get("role", "user")
                 
-                if "investigator" in u.email.lower() or "admin" in u.email.lower():
+                if "investigator" in u.email.lower() or "admin" in u.email.lower() or u.email.lower() == "icecream090706@gmail.com":
                     role = "investigator"
 
                 user_model = UserResponse(
