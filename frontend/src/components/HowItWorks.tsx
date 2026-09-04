@@ -41,7 +41,7 @@ export const HowItWorks: React.FC = () => {
             </h2>
             <p className="font-body text-base text-[#192837]/75 leading-relaxed">
               From initial OAuth inbox connection to forensic timeline generation, discover the 10-stage automated workflow
-              that powers our SIH 2026 platform.
+              that powers our cyber defense platform.
             </p>
           </div>
         </ScrollReveal>

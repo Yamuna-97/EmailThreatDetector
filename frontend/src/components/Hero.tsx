@@ -144,7 +144,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
                 REAL-TIME PROTECTION ACTIVE
               </span>
               <span className="text-[11px] text-[#192837]/70 font-medium">
-                FastAPI SOC Engine • SIH 2026 Telemetry
+                FastAPI SOC Engine • Live Threat Telemetry
               </span>
             </div>
           </motion.div>

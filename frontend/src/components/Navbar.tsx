@@ -13,7 +13,7 @@ const navLinks = [
 ]
 
 const socialLinks = [
-  { label: 'SIH 2026 Portal', link: 'https://www.sih.gov.in/' },
+  { label: 'Security Documentation', link: '#about' },
   { label: 'FastAPI Backend', link: '#tech' },
   { label: 'Gemini AI Engine', link: '#ai-analysis' },
   { label: 'Threat Feeds', link: '#intelligence' },
@@ -39,25 +39,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) =
           <div className="flex flex-col">
             <span className="font-heading text-xl font-bold text-[#192837] tracking-tight flex items-center gap-1.5">
               VaultShield
-              <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-[#7342E2]/10 text-[#7342E2]">
-                SIH 2026
-              </span>
             </span>
           </div>
         </a>
-
-        {/* Center: Desktop Navigation Links */}
-        <div className="hidden lg:flex items-center gap-8">
-          {navLinks.map((item) => (
-            <a
-              key={item.label}
-              href={item.link}
-              className="text-sm font-medium text-[#192837] opacity-80 hover:opacity-100 hover:text-[#7342E2] transition-all duration-200"
-            >
-              {item.label}
-            </a>
-          ))}
-        </div>
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3">

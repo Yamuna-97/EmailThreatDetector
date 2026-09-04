@@ -101,7 +101,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
           setError(null)
         }} />
 
-        {/* Quick Fill Test Accounts for SIH 2026 Evaluation */}
+        {/* Quick Fill Test Accounts for Evaluation */}
         <div className="mb-4 flex items-center justify-center gap-2">
           <button
             type="button"
@@ -392,7 +392,7 @@ const TermsAndConditions: React.FC = () => (
     <a href="#" className="font-semibold text-[#7342E2] hover:underline">
       Privacy Policy
     </a>
-    . SOC2 & SIH 2026 Compliant.
+    . SOC2 & ISO 27001 Compliant.
   </p>
 )
 

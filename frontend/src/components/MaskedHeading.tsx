@@ -324,6 +324,7 @@ export const MaskedHeading: React.FC<MaskedHeadingProps> = ({
 
       <span ref={revealRef} className="masked-heading__reveal">
         <span className="masked-heading__clip" style={{ clipPath: `url(#${clipId})` }}>
+          <span className="masked-heading__dark-pink-bg" />
           <span ref={mediaRef} className="masked-heading__media">
             {mediaType === 'video' ? (
               <video className="masked-heading__source" src={src} poster={poster} autoPlay muted loop playsInline />
@@ -331,6 +332,7 @@ export const MaskedHeading: React.FC<MaskedHeadingProps> = ({
               <img className="masked-heading__source" src={src} alt="" draggable={false} />
             )}
           </span>
+          <span className="masked-heading__dark-pink-overlay" />
         </span>
       </span>
     </Tag>

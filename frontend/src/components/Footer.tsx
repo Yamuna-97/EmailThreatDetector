@@ -14,10 +14,10 @@ export const Footer: React.FC = () => {
             </div>
             <p className="font-body text-xs sm:text-sm text-[#192837]/70 leading-relaxed max-w-sm mb-4">
               AI-Powered Email Threat Detection, Geolocation and Forensic Intelligence Platform engineered for
-              Smart India Hackathon (SIH) 2026.
+              enterprise security and SOC operations.
             </p>
             <span className="text-xs font-bold text-[#7342E2] bg-[#7342E2]/10 px-3 py-1 rounded-full">
-              SIH 2026 Project
+              Enterprise Defense Platform
             </span>
           </div>
 
@@ -48,7 +48,7 @@ export const Footer: React.FC = () => {
                 </a>
               </li>
               <li>
-                <a href="#ai-analysis" className="hover:text-[#7342E2] transition-colors">
+                <a href="#about" className="hover:text-[#7342E2] transition-colors">
                   About
                 </a>
               </li>
@@ -78,7 +78,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <span className="text-xs text-[#192837]/50 block pt-1">
-                  Built for SIH 2026 • AI-Powered Cyber Defense
+                  AI-Powered Cyber Defense & Incident Intelligence
                 </span>
               </li>
             </ul>
@@ -87,7 +87,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#192837]/60">
-          <p>© 2026 VaultShield. All rights reserved. SIH 2026 Innovation Team.</p>
+          <p>© 2026 VaultShield. All rights reserved. Enterprise Security Team.</p>
           <div className="flex items-center gap-6">
             <a href="#privacy" className="hover:text-[#7342E2]">Privacy</a>
             <a href="#terms" className="hover:text-[#7342E2]">Terms</a>

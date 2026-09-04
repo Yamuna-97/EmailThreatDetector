@@ -118,7 +118,7 @@ export const ThreatOverview: React.FC = () => {
                     REAL-TIME PROTECTION
                   </span>
                   <span className="text-xs text-[#192837]/70 font-medium">
-                    Threat intelligence active • SIH 2026 Engine
+                    Threat intelligence active • Enterprise Engine
                   </span>
                 </div>
               </div>

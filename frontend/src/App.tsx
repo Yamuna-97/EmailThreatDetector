@@ -13,6 +13,7 @@ import EarlyWarning from './components/EarlyWarning'
 import HowItWorks from './components/HowItWorks'
 import DashboardPreview from './components/DashboardPreview'
 import TechStack from './components/TechStack'
+import About from './components/About'
 import Footer from './components/Footer'
 import AuthForm from './components/ui/auth-form'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -155,7 +156,10 @@ const AppContent: React.FC = () => {
             {/* 13. TECH STACK */}
             <TechStack />
 
-            {/* 14. FOOTER */}
+            {/* 14. ABOUT */}
+            <About />
+
+            {/* 15. FOOTER */}
             <Footer />
           </>
         )}

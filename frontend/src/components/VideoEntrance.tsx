@@ -30,7 +30,7 @@ export const VideoEntrance: React.FC = () => {
         <div className="w-full max-w-4xl mx-auto px-6 flex flex-col items-center text-center z-20">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold uppercase tracking-widest text-[#a78bfa] mb-6 border border-white/20 shadow-md">
             <ShieldCheck size={15} />
-            <span>SIH 2026 Platform</span>
+            <span>Cyber Defense Platform</span>
           </div>
 
           <div className="w-full max-w-2xl mb-4">

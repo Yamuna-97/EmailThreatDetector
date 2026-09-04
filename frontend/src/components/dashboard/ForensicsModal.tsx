@@ -68,13 +68,12 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
   const analysis = data?.analysis
   const ipIntel = data?.ip_intelligence
   const geo = data?.geolocation
-  const timeline = data?.timeline || []
 
   const severityColor =
     threat?.severity === 'critical' ? 'bg-red-500/10 text-red-600 border-red-500/30' :
-    threat?.severity === 'high' ? 'bg-orange-500/10 text-orange-600 border-orange-500/30' :
-    threat?.severity === 'medium' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' :
-    'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+      threat?.severity === 'high' ? 'bg-orange-500/10 text-orange-600 border-orange-500/30' :
+        threat?.severity === 'medium' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' :
+          'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm overflow-y-auto">
@@ -144,11 +143,10 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`py-3.5 px-3.5 text-xs font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer shrink-0 ${
-                  active
+                className={`py-3.5 px-3.5 text-xs font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer shrink-0 ${active
                     ? 'border-[#7342E2] text-[#7342E2]'
                     : 'border-transparent text-[#6B7280] hover:text-[#1F1F29]'
-                }`}
+                  }`}
               >
                 <Icon size={15} />
                 <span>{tab.label}</span>
@@ -300,8 +298,8 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
                             {isFail
                               ? `Fails ${proto.toUpperCase()} verification. High probability of address forgery.`
                               : isPass
-                              ? `Passed cryptographic validation.`
-                              : `No authoritative record published.`}
+                                ? `Passed cryptographic validation.`
+                                : `No authoritative record published.`}
                           </p>
                         </div>
                       )

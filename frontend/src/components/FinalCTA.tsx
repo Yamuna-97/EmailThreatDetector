@@ -13,7 +13,7 @@ export const FinalCTA: React.FC = () => {
           <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-xs font-bold uppercase tracking-wider text-[#a78bfa] mb-6 border border-white/10">
               <ShieldCheck size={15} />
-              <span>SIH 2026 Initiative</span>
+              <span>Enterprise Initiative</span>
             </div>
 
             <h2 className="font-heading text-3xl sm:text-5xl font-extrabold tracking-tight mb-5 leading-tight">
