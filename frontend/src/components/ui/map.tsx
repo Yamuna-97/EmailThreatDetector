@@ -21,22 +21,94 @@ export interface MapProps {
   bearing?: number
   mapStyle?: string | object
   className?: string
+  style?: React.CSSProperties
   children?: React.ReactNode
   interactive?: boolean
   onClick?: (e: maplibregl.MapMouseEvent) => void
 }
 
-// Free, fast, high-resolution basemap styles from CARTO / OpenStreetMap (No API token required)
+// Ultra-reliable high-resolution basemap styles (Raster tiles from CARTO & OpenStreetMap)
 export const MAP_STYLES = {
-  voyager: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-  positron: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  darkMatter: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+  voyager: {
+    version: 8,
+    sources: {
+      'carto-voyager': {
+        type: 'raster',
+        tiles: [
+          'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+          'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+          'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'
+        ],
+        tileSize: 256,
+        attribution: '&copy; CARTO &copy; OpenStreetMap'
+      }
+    },
+    layers: [
+      {
+        id: 'carto-voyager-layer',
+        type: 'raster',
+        source: 'carto-voyager',
+        minzoom: 0,
+        maxzoom: 20
+      }
+    ]
+  },
+  darkMatter: {
+    version: 8,
+    sources: {
+      'carto-dark': {
+        type: 'raster',
+        tiles: [
+          'https://a.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
+          'https://b.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png',
+          'https://c.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}@2x.png'
+        ],
+        tileSize: 256,
+        attribution: '&copy; CARTO &copy; OpenStreetMap'
+      }
+    },
+    layers: [
+      {
+        id: 'carto-dark-layer',
+        type: 'raster',
+        source: 'carto-dark',
+        minzoom: 0,
+        maxzoom: 20
+      }
+    ]
+  },
+  positron: {
+    version: 8,
+    sources: {
+      'carto-light': {
+        type: 'raster',
+        tiles: [
+          'https://a.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}@2x.png',
+          'https://b.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}@2x.png',
+          'https://c.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}@2x.png'
+        ],
+        tileSize: 256,
+        attribution: '&copy; CARTO &copy; OpenStreetMap'
+      }
+    },
+    layers: [
+      {
+        id: 'carto-light-layer',
+        type: 'raster',
+        source: 'carto-light',
+        minzoom: 0,
+        maxzoom: 20
+      }
+    ]
+  },
   osm: {
     version: 8,
     sources: {
       'osm-tiles': {
         type: 'raster',
-        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+        tiles: [
+          'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+        ],
         tileSize: 256,
         attribution: '&copy; OpenStreetMap Contributors'
       }
@@ -61,7 +133,8 @@ export const Map: React.FC<MapProps> = ({
   pitch = 0,
   bearing = 0,
   mapStyle = MAP_STYLES.voyager,
-  className = 'w-full h-full min-h-[350px] relative rounded-2xl overflow-hidden',
+  className = 'w-full h-full min-h-[460px] relative rounded-2xl overflow-hidden',
+  style,
   children,
   interactive = true,
   onClick
@@ -91,6 +164,11 @@ export const Map: React.FC<MapProps> = ({
       map.resize()
     })
 
+    // Additional resize passes to guarantee canvas fills the container
+    const t1 = setTimeout(() => map.resize(), 100)
+    const t2 = setTimeout(() => map.resize(), 400)
+    const t3 = setTimeout(() => map.resize(), 1000)
+
     if (onClick) {
       map.on('click', onClick)
     }
@@ -98,20 +176,38 @@ export const Map: React.FC<MapProps> = ({
     setMapInstance(map)
 
     return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
       map.remove()
     }
   }, [])
 
-  // Update center when prop changes dynamically
+  // Update style dynamically when user changes basemap
+  useEffect(() => {
+    if (mapInstance && mapStyle) {
+      try {
+        mapInstance.setStyle(mapStyle as any)
+      } catch (e) {
+        console.warn('Map style update notice:', e)
+      }
+    }
+  }, [mapStyle, mapInstance])
+
+  // Update center smoothly
   useEffect(() => {
     if (mapInstance && center) {
       mapInstance.flyTo({ center, duration: 1200, essential: true })
     }
-  }, [center?.[0], center?.[1]])
+  }, [center?.[0], center?.[1], mapInstance])
 
   return (
     <MapContext.Provider value={{ map: mapInstance, isLoaded }}>
-      <div ref={containerRef} className={className}>
+      <div
+        ref={containerRef}
+        className={className}
+        style={{ width: '100%', height: '100%', minHeight: '460px', ...style }}
+      >
         {isLoaded && children}
       </div>
     </MapContext.Provider>
@@ -164,7 +260,6 @@ export const MapMarker: React.FC<MapMarkerProps> = ({
   onClick
 }) => {
   const { map, isLoaded } = useMap()
-  const markerRef = useRef<maplibregl.Marker | null>(null)
   const elRef = useRef<HTMLDivElement>(document.createElement('div'))
 
   useEffect(() => {
@@ -184,22 +279,12 @@ export const MapMarker: React.FC<MapMarkerProps> = ({
       .setLngLat(coordinates)
       .addTo(map)
 
-    markerRef.current = marker
-
     return () => {
       marker.remove()
     }
   }, [map, isLoaded, coordinates[0], coordinates[1]])
 
-  return (
-    <MarkerPortal element={elRef.current}>
-      {children}
-    </MarkerPortal>
-  )
-}
-
-const MarkerPortal: React.FC<{ element: HTMLElement; children: React.ReactNode }> = ({ element, children }) => {
-  return createPortal(children, element)
+  return createPortal(children, elRef.current)
 }
 
 export default Map
