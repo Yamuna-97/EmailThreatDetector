@@ -277,8 +277,9 @@ export const UserDashboard: React.FC = () => {
                 {/* Scan Presets Selector */}
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-[#192837]/70 block">Select Scan Range:</label>
-                  <div className="grid grid-cols-5 gap-1">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-1">
                     {[
+                      { val: 1, label: 'Last 1' },
                       { val: 3, label: 'Last 3' },
                       { val: 5, label: 'Last 5' },
                       { val: 10, label: 'Last 10' },
@@ -515,7 +516,7 @@ export const UserDashboard: React.FC = () => {
                 {/* Quick Scan Action Buttons */}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-bold text-[#192837]/70">Scan:</span>
-                  {[3, 5, 10, 25, 50].map(cnt => (
+                  {[1, 3, 5, 10, 25, 50].map(cnt => (
                     <button
                       key={cnt}
                       type="button"
