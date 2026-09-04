@@ -30,10 +30,10 @@ export const gmailService = {
     })
   },
 
-  async scanInbox(limit: number = 10): Promise<any> {
+  async scanInbox(limit: number = 10, folder: 'all' | 'inbox' | 'spam' = 'all'): Promise<any> {
     return request('/gmail/scan', {
       method: 'POST',
-      body: JSON.stringify({ limit }),
+      body: JSON.stringify({ limit, folder }),
     })
   },
 }

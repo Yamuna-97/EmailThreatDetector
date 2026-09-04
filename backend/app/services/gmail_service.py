@@ -19,10 +19,24 @@ logger = logging.getLogger("vaultshield.gmail")
 GMAIL_MESSAGES_URL = "https://gmail.googleapis.com/gmail/v1/users/me/messages"
 
 class GmailService:
-    async def fetch_messages_list(self, access_token: str, max_results: int = 10) -> List[Dict[str, Any]]:
-        """Fetch list of message IDs from user's Gmail inbox."""
+    async def fetch_messages_list(
+        self,
+        access_token: str,
+        max_results: int = 10,
+        folder: str = "all"
+    ) -> List[Dict[str, Any]]:
+        """Fetch list of message IDs from user's Gmail inbox, spam, or both."""
         headers = {"Authorization": f"Bearer {access_token}"}
-        params = {"maxResults": max_results, "q": "in:inbox"}
+        
+        # Build Gmail query based on target folder
+        if folder == "spam":
+            query = "in:spam"
+        elif folder == "inbox":
+            query = "in:inbox"
+        else:
+            query = "in:inbox OR in:spam"
+
+        params = {"maxResults": max_results, "q": query}
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(GMAIL_MESSAGES_URL, headers=headers, params=params)
             if resp.status_code == 200:

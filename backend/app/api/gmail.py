@@ -125,7 +125,12 @@ async def scan_gmail_inbox(
     # If live Gmail access token is available, fetch messages
     if access_token:
         try:
-            messages = await gmail_service.fetch_messages_list(access_token, max_results=payload.limit)
+            target_folder = payload.folder or "all"
+            messages = await gmail_service.fetch_messages_list(
+                access_token,
+                max_results=payload.limit,
+                folder=target_folder
+            )
             scanned_results = []
             for msg_meta in messages:
                 m_id = msg_meta.get("id")

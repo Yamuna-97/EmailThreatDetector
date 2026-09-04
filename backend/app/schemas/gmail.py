@@ -14,6 +14,8 @@ class GmailStatusResponse(BaseModel):
 
 class GmailScanRequest(BaseModel):
     limit: int = 10
+    include_spam: bool = True
+    folder: Optional[str] = "all"  # "all", "inbox", "spam"
 
 class GmailAutoScanToggleRequest(BaseModel):
     enabled: bool

@@ -22,6 +22,7 @@ export const UserDashboard: React.FC = () => {
   const [selectedEmail, setSelectedEmail] = useState<EmailItem | null>(null)
   const [syncingGmail, setSyncingGmail] = useState<boolean>(false)
   const [scanLimit, setScanLimit] = useState<number>(5)
+  const [scanFolder, setScanFolder] = useState<'all' | 'inbox' | 'spam'>('all')
   const [emailSearch, setEmailSearch] = useState<string>('')
 
   const loadAllData = async () => {
@@ -79,10 +80,10 @@ export const UserDashboard: React.FC = () => {
     }
   }
 
-  const handleScanGmailWithOptions = async (limit: number) => {
+  const handleScanGmailWithOptions = async (limit: number, folder: 'all' | 'inbox' | 'spam' = scanFolder) => {
     setSyncingGmail(true)
     try {
-      await gmailService.scanInbox(limit)
+      await gmailService.scanInbox(limit, folder)
       await loadAllData()
       setActiveTab('emails')
     } catch (err) {
@@ -302,6 +303,31 @@ export const UserDashboard: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Target Mailbox Folder */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-[#192837]/70 block">Target Mailbox Source:</label>
+                  <div className="grid grid-cols-3 gap-1">
+                    {[
+                      { id: 'all', label: 'Inbox + Spam' },
+                      { id: 'inbox', label: 'Inbox Only' },
+                      { id: 'spam', label: 'Spam Only' },
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setScanFolder(f.id as any)}
+                        className={`py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                          scanFolder === f.id
+                            ? 'bg-[#192837] text-white'
+                            : 'bg-[#FAF9F6] border border-[#192837]/10 text-[#192837]/65 hover:bg-[#192837]/5'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between py-1 border-t border-[#192837]/5 pt-2">
                   <span className="font-semibold text-xs text-[#192837]/70">Auto-Scan Incoming:</span>
                   <button
@@ -515,13 +541,34 @@ export const UserDashboard: React.FC = () => {
 
                 {/* Quick Scan Action Buttons */}
                 <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center rounded-xl bg-[#FAF9F6] border border-[#192837]/10 p-0.5 text-[11px] font-bold">
+                    {[
+                      { id: 'all', label: 'Inbox+Spam' },
+                      { id: 'inbox', label: 'Inbox' },
+                      { id: 'spam', label: 'Spam' },
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setScanFolder(f.id as any)}
+                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                          scanFolder === f.id
+                            ? 'bg-[#192837] text-white shadow-xs'
+                            : 'text-[#192837]/60 hover:text-[#192837]'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+
                   <span className="text-xs font-bold text-[#192837]/70">Scan:</span>
                   {[1, 3, 5, 10, 25, 50].map(cnt => (
                     <button
                       key={cnt}
                       type="button"
                       disabled={syncingGmail}
-                      onClick={() => handleScanGmailWithOptions(cnt)}
+                      onClick={() => handleScanGmailWithOptions(cnt, scanFolder)}
                       className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#7342E2]/10 hover:bg-[#7342E2] hover:text-white text-[#7342E2] border border-[#7342E2]/20 transition-all cursor-pointer"
                     >
                       Last {cnt}
