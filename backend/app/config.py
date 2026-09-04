@@ -51,6 +51,13 @@ class Settings(BaseSettings):
     IP_GEOLOCATION_API_KEY: str = os.getenv("IP_GEOLOCATION_API_KEY", "")
     IP_GEOLOCATION_BASE_URL: str = os.getenv("IP_GEOLOCATION_BASE_URL", "https://ipapi.co")
 
+    # SMTP Email Alerting
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", 587))
+    SMTP_USER: str = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    ALERT_RECIPIENT_EMAIL: str = os.getenv("ALERT_RECIPIENT_EMAIL", "")
+
     # Threat Scoring Weights
     WEIGHT_AI: float = 0.35
     WEIGHT_IP_REPUTATION: float = 0.25

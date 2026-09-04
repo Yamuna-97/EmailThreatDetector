@@ -10,6 +10,7 @@ from app.services.ipqualityscore_service import ipqs_service
 from app.services.geolocation_service import geolocation_service
 from app.services.gemini_service import gemini_service
 from app.services.threat_engine import threat_engine
+from app.services.smtp_service import smtp_alert_service
 from app.schemas.email import EmailModel, EmailUrlInfo
 from app.schemas.threat import ThreatModel, ThreatAnalysisModel, ThreatIndicator, AlertModel
 from app.database import db
@@ -197,6 +198,15 @@ class GmailService:
                 created_at=datetime.now()
             )
             db.store["alerts"][alert_uuid] = alert_record
+
+        # Automated SMTP Email Warning Alert on CRITICAL threats
+        if final_severity == "critical" or final_risk_score >= 75:
+            await smtp_alert_service.send_critical_threat_alert_async(
+                recipient_email=recipient,
+                threat_data=threat_record.model_dump(),
+                email_data=email_record.model_dump(),
+                analysis_data=analysis_record.model_dump()
+            )
 
         # Timeline Event
         event_uuid = str(uuid.uuid4())

@@ -36,6 +36,10 @@ export const authService = {
     return request<UserProfile>('/auth/me')
   },
 
+  async getGoogleAuthUrl(): Promise<{ auth_url: string }> {
+    return request<{ auth_url: string }>('/auth/google/url')
+  },
+
   async logout(): Promise<{ message: string; success: boolean }> {
     return request<{ message: string; success: boolean }>('/auth/logout', {
       method: 'POST',

@@ -152,6 +152,15 @@ async def signin(payload: SignInRequest):
 
     raise HTTPException(status_code=401, detail="Invalid login credentials")
 
+@router.get("/google/url")
+async def get_google_oauth_url():
+    """Generate Google OAuth 2.0 authorization URL for single sign-on / registration."""
+    from app.services.google_oauth_service import google_oauth_service
+    from app.config import settings
+    state = f"auth_login_{uuid.uuid4().hex[:8]}"
+    auth_url = google_oauth_service.get_authorization_url(state=state)
+    return {"auth_url": auth_url}
+
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: UserResponse = Depends(get_current_user)):
     """Retrieve current authenticated user profile and verified role."""

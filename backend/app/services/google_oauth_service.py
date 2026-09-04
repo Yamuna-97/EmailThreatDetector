@@ -46,13 +46,18 @@ class GoogleOAuthService:
                 raise ValueError(f"Failed to exchange code: {resp.text}")
             return resp.json()
 
-    async def get_user_email(self, access_token: str) -> str:
-        """Fetch Google profile email with access token."""
+    async def get_user_profile(self, access_token: str) -> Dict[str, Any]:
+        """Fetch Google profile info (email, name, picture) with access token."""
         headers = {"Authorization": f"Bearer {access_token}"}
         async with httpx.AsyncClient(timeout=6.0) as client:
             resp = await client.get(GOOGLE_USERINFO_URL, headers=headers)
             if resp.status_code == 200:
-                return resp.json().get("email", "")
-            return ""
+                return resp.json()
+            return {}
+
+    async def get_user_email(self, access_token: str) -> str:
+        """Fetch Google profile email with access token."""
+        profile = await self.get_user_profile(access_token)
+        return profile.get("email", "")
 
 google_oauth_service = GoogleOAuthService()
