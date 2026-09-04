@@ -3,7 +3,7 @@ import {
   ShieldAlert, Globe, Users, BarChart3, FileText,
   Sparkles, Download, Eye, RefreshCw,
   Search, Terminal, LogOut, Play, ArrowUpDown, ChevronLeft, ChevronRight,
-  AlertTriangle, CheckCircle, Clock, ShieldCheck, Activity, MapPin
+  AlertTriangle, CheckCircle, Activity, MapPin
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { threatService, type ThreatItem } from '../../services/threats'
@@ -210,6 +210,7 @@ export const InvestigatorDashboard: React.FC = () => {
               <LogOut size={16} />
             </button>
           </div>
+        </div>
       </header>
 
       {/* Main Content */}
