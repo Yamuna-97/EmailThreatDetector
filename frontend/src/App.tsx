@@ -15,10 +15,15 @@ import DashboardPreview from './components/DashboardPreview'
 import TechStack from './components/TechStack'
 import Footer from './components/Footer'
 import AuthForm from './components/ui/auth-form'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import UserDashboard from './components/dashboard/UserDashboard'
+import InvestigatorDashboard from './components/dashboard/InvestigatorDashboard'
 
-export const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { isAuthenticated, role } = useAuth()
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
+  const [forceLanding, setForceLanding] = useState(false)
 
   const handleOpenAuth = (mode: 'signin' | 'signup') => {
     setAuthMode(mode)
@@ -27,6 +32,42 @@ export const App: React.FC = () => {
 
   const handleCloseAuth = () => {
     setAuthOpen(false)
+  }
+
+  // If user is authenticated and not explicitly viewing the public landing page:
+  if (isAuthenticated && !forceLanding) {
+    if (role === 'investigator' || role === 'admin') {
+      return (
+        <div>
+          {/* Quick Floating Switch to Landing View */}
+          <div className="fixed bottom-4 right-4 z-50">
+            <button
+              type="button"
+              onClick={() => setForceLanding(true)}
+              className="px-3 py-1.5 rounded-full bg-[#192837] text-white text-[11px] font-bold shadow-lg border border-white/10 hover:bg-[#7342E2] transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <span>View Landing Page</span>
+            </button>
+          </div>
+          <InvestigatorDashboard />
+        </div>
+      )
+    }
+
+    return (
+      <div>
+        <div className="fixed bottom-4 right-4 z-50">
+          <button
+            type="button"
+            onClick={() => setForceLanding(true)}
+            className="px-3 py-1.5 rounded-full bg-[#192837] text-white text-[11px] font-bold shadow-lg border border-white/10 hover:bg-[#7342E2] transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            <span>View Landing Page</span>
+          </button>
+        </div>
+        <UserDashboard />
+      </div>
+    )
   }
 
   return (
@@ -46,6 +87,20 @@ export const App: React.FC = () => {
           color: 'var(--color-text)',
         }}
       >
+        {/* Return to console floating button if authenticated on landing */}
+        {isAuthenticated && (
+          <div className="fixed top-20 right-6 z-50">
+            <button
+              type="button"
+              onClick={() => setForceLanding(false)}
+              className="px-4 py-2 rounded-full bg-[#7342E2] text-white text-xs font-bold shadow-lg shadow-[#7342E2]/30 hover:brightness-110 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <span>Return to {role === 'investigator' || role === 'admin' ? 'SOC Console' : 'Dashboard'}</span>
+              <span>→</span>
+            </button>
+          </div>
+        )}
+
         {/* Conditional Auth Screen Overlay */}
         {authOpen ? (
           <AuthForm
@@ -53,14 +108,18 @@ export const App: React.FC = () => {
             onBack={handleCloseAuth}
             onSuccess={() => {
               handleCloseAuth()
+              setForceLanding(false)
             }}
           />
         ) : (
           <>
             {/* 1. NAVBAR */}
-            <Navbar onOpenAuth={handleOpenAuth} />
+            <Navbar
+              onOpenAuth={handleOpenAuth}
+              onGoToDashboard={() => setForceLanding(false)}
+            />
 
-            {/* 2. HERO: ONLY STARTING FULLSCREEN VIDEO + BIG MASKED HEADING + START NOW / SIGN IN */}
+            {/* 2. HERO */}
             <Hero onOpenAuth={handleOpenAuth} />
 
             {/* 3. THREAT OVERVIEW & DEFENSE PIPELINE */}
@@ -102,6 +161,14 @@ export const App: React.FC = () => {
         )}
       </div>
     </ClickSpark>
+  )
+}
+
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 

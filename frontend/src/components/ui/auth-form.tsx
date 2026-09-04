@@ -1,14 +1,15 @@
 "use client"
 
 import React, { useState } from "react"
-import { ChevronLeft, Shield, Lock, Mail, ArrowRight, Eye, EyeOff } from "lucide-react"
+import { ChevronLeft, Shield, Lock, Mail, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle2, UserCheck } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import ShapeGrid from "../ShapeGrid"
+import { useAuth } from "../../context/AuthContext"
 
 export interface AuthFormProps {
   onBack?: () => void
   initialMode?: "signin" | "signup"
-  onSuccess?: (user: { email: string; name?: string }) => void
+  onSuccess?: (user: { email: string; name?: string; role?: string }) => void
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({
@@ -16,37 +17,60 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   initialMode = "signin",
   onSuccess,
 }) => {
+  const { login, signup } = useAuth()
   const [mode, setMode] = useState<"signin" | "signup">(initialMode)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+    setSuccessMsg(null)
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      if (onSuccess) {
-        onSuccess({ email, name: fullName || "Security Analyst" })
+
+    try {
+      if (mode === "signup") {
+        const user = await signup(email, password, fullName)
+        setSuccessMsg("Defense account created successfully! Redirecting...")
+        setTimeout(() => {
+          if (onSuccess) onSuccess(user)
+        }, 600)
+      } else {
+        const user = await login(email, password)
+        setSuccessMsg(`Welcome back, ${user.name}! Accessing console...`)
+        setTimeout(() => {
+          if (onSuccess) onSuccess(user)
+        }, 600)
       }
-    }, 1000)
+    } catch (err: any) {
+      setError(err.message || "Authentication failed. Please verify credentials.")
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleGoogleAuth = () => {
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      if (onSuccess) {
-        onSuccess({ email: "analyst@vaultshield.ai", name: "Google Enterprise User" })
-      }
-    }, 1000)
+  // Quick fill demo credentials for jury presentation
+  const handleQuickFill = (demoRole: "analyst" | "investigator") => {
+    setError(null)
+    if (demoRole === "investigator") {
+      setEmail("investigator@vaultshield.ai")
+      setPassword("InvestigatorPass123!")
+      setFullName("Lead Forensic Investigator")
+    } else {
+      setEmail("analyst@enterprise.com")
+      setPassword("SecPassword123!")
+      setFullName("Security Analyst")
+    }
   }
 
   return (
     <div className="relative min-h-screen w-full bg-[#FAF9F6] text-[#192837] selection:bg-[#7342E2]/15 selection:text-[#7342E2] flex flex-col justify-center py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Dynamic Interactive ShapeGrid Background from React Bits */}
+      {/* Dynamic Interactive ShapeGrid Background */}
       <div className="absolute inset-0 w-full h-full z-0 pointer-events-auto">
         <ShapeGrid
           direction="diagonal"
@@ -58,7 +82,6 @@ export const AuthForm: React.FC<AuthFormProps> = ({
           hoverTrailAmount={6}
           className="w-full h-full"
         />
-        {/* Soft center vignette scrim ensuring pristine auth card readability */}
         <div className="absolute inset-0 bg-radial from-transparent via-[#FAF9F6]/40 to-[#FAF9F6]/90 pointer-events-none" />
       </div>
 
@@ -72,14 +95,57 @@ export const AuthForm: React.FC<AuthFormProps> = ({
       >
         <Logo />
         
-        <Header mode={mode} onToggle={() => setMode(mode === "signin" ? "signup" : "signin")} />
+        <Header mode={mode} onToggle={() => {
+          setMode(mode === "signin" ? "signup" : "signin")
+          setError(null)
+        }} />
 
-        {/* Continue with Google Button ONLY */}
-        <div className="mb-6">
-          <GoogleButton onClick={handleGoogleAuth} loading={loading} />
+        {/* Quick Fill Test Accounts for SIH 2026 Evaluation */}
+        <div className="mb-4 flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleQuickFill("analyst")}
+            className="text-[11px] font-semibold text-[#7342E2] bg-[#7342E2]/8 hover:bg-[#7342E2]/15 px-3 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <UserCheck size={12} />
+            <span>Fill Analyst Demo</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickFill("investigator")}
+            className="text-[11px] font-semibold text-[#059669] bg-[#059669]/8 hover:bg-[#059669]/15 px-3 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <Shield size={12} />
+            <span>Fill Investigator Demo</span>
+          </button>
         </div>
 
-        <Divider />
+        {/* Feedback Alerts */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2"
+            >
+              <AlertCircle size={16} className="shrink-0 text-red-500" />
+              <span>{error}</span>
+            </motion.div>
+          )}
+
+          {successMsg && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium flex items-center gap-2"
+            >
+              <CheckCircle2 size={16} className="shrink-0 text-emerald-500" />
+              <span>{successMsg}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <LoginForm
           mode={mode}
@@ -114,27 +180,6 @@ const BackButton: React.FC<{ onBack?: () => void }> = ({ onBack }) => (
   </div>
 )
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  className?: string
-  loading?: boolean
-}
-
-const Button: React.FC<ButtonProps> = ({ children, className = "", loading, ...props }) => (
-  <button
-    className={`w-full rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] px-5 py-3.5 text-sm font-bold text-white 
-    shadow-lg shadow-[#7342E2]/25 ring-2 ring-[#7342E2]/30 ring-offset-2 ring-offset-white
-    transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2 ${className}`}
-    disabled={loading}
-    {...props}
-  >
-    {loading ? (
-      <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-    ) : (
-      children
-    )}
-  </button>
-)
-
 const Logo: React.FC = () => (
   <div className="mb-6 flex items-center justify-center gap-2.5">
     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] flex items-center justify-center text-white shadow-md shadow-[#7342E2]/20">
@@ -147,12 +192,12 @@ const Logo: React.FC = () => (
 )
 
 const Header: React.FC<{ mode: "signin" | "signup"; onToggle: () => void }> = ({ mode, onToggle }) => (
-  <div className="mb-6 text-center">
+  <div className="mb-4 text-center">
     <h1 className="font-heading text-2xl font-extrabold text-[#192837] tracking-tight">
-      {mode === "signin" ? "Sign in to your account" : "Create your defense account"}
+      {mode === "signin" ? "Sign in to Defense Console" : "Create Defense Account"}
     </h1>
     <p className="mt-2 text-xs sm:text-sm text-[#192837]/65 font-body">
-      {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
+      {mode === "signin" ? "Don't have an account?" : "Already registered?"}{" "}
       <button
         type="button"
         onClick={onToggle}
@@ -161,46 +206,6 @@ const Header: React.FC<{ mode: "signin" | "signup"; onToggle: () => void }> = ({
         {mode === "signin" ? "Create one." : "Sign in."}
       </button>
     </p>
-  </div>
-)
-
-const GoogleButton: React.FC<{ onClick: () => void; loading?: boolean }> = ({ onClick, loading }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    disabled={loading}
-    className="w-full relative z-0 flex items-center justify-center gap-3 rounded-2xl 
-    border border-[#192837]/15 bg-[#FAF9F6] hover:bg-white
-    px-4 py-3 font-semibold text-xs sm:text-sm text-[#192837] transition-all duration-300
-    hover:shadow-md hover:border-[#7342E2]/30 active:scale-[0.98] cursor-pointer"
-  >
-    <svg className="h-5 w-5" viewBox="0 0 24 24">
-      <path
-        fill="#4285F4"
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-      />
-    </svg>
-    <span>Continue with Google</span>
-  </button>
-)
-
-const Divider: React.FC = () => (
-  <div className="my-6 flex items-center gap-3">
-    <div className="h-[1px] w-full bg-[#192837]/10" />
-    <span className="text-[11px] font-bold uppercase tracking-wider text-[#192837]/45">OR</span>
-    <div className="h-[1px] w-full bg-[#192837]/10" />
   </div>
 )
 
@@ -284,17 +289,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
           <label htmlFor="password-input" className="block text-xs font-bold text-[#192837]/75 uppercase tracking-wide">
             Password
           </label>
-          {mode === "signin" && (
-            <a href="#forgot" className="text-xs font-semibold text-[#7342E2] hover:underline">
-              Forgot?
-            </a>
-          )}
         </div>
         <div className="relative">
           <input
             id="password-input"
             type={showPassword ? "text" : "password"}
             required
+            minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••••••"
@@ -313,17 +314,29 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </div>
 
       <div className="pt-2">
-        <Button type="submit" loading={loading}>
-          <span>{mode === "signin" ? "Sign in to Console" : "Create Defense Account"}</span>
-          <ArrowRight size={16} />
-        </Button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] px-5 py-3.5 text-sm font-bold text-white 
+          shadow-lg shadow-[#7342E2]/25 ring-2 ring-[#7342E2]/30 ring-offset-2 ring-offset-white
+          transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <>
+              <span>{mode === "signin" ? "Sign in to Console" : "Create Defense Account"}</span>
+              <ArrowRight size={16} />
+            </>
+          )}
+        </button>
       </div>
     </form>
   )
 }
 
 const TermsAndConditions: React.FC = () => (
-  <p className="mt-8 text-center text-[11px] text-[#192837]/60 leading-relaxed">
+  <p className="mt-6 text-center text-[11px] text-[#192837]/60 leading-relaxed">
     By signing in, you agree to VaultShield's{" "}
     <a href="#" className="font-semibold text-[#7342E2] hover:underline">
       Terms of Service
@@ -332,7 +345,7 @@ const TermsAndConditions: React.FC = () => (
     <a href="#" className="font-semibold text-[#7342E2] hover:underline">
       Privacy Policy
     </a>
-    . SOC2 & GDPR Compliant.
+    . SOC2 & SIH 2026 Compliant.
   </p>
 )
 

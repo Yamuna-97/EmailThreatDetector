@@ -1,7 +1,8 @@
 import React from 'react'
 import Logo from './Logo'
 import StaggeredMenu from './StaggeredMenu'
-import { ShieldCheck } from 'lucide-react'
+import { ShieldCheck, LogOut, LayoutDashboard } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 
 const navLinks = [
   { label: 'Detection', link: '#detection', ariaLabel: 'Go to Detection' },
@@ -20,9 +21,12 @@ const socialLinks = [
 
 export interface NavbarProps {
   onOpenAuth?: (mode: 'signin' | 'signup') => void
+  onGoToDashboard?: () => void
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) => {
+  const { isAuthenticated, role, logout } = useAuth()
+
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-[#192837]/8 transition-all">
       <nav
@@ -55,24 +59,48 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
           ))}
         </div>
 
-        {/* Right: Actions & Staggered Menu */}
+        {/* Right: Actions */}
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onOpenAuth ? onOpenAuth('signin') : null}
-            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-[#192837] bg-[#F2F2EE] hover:bg-[#e7e7e2] active:scale-95 transition-all shadow-sm cursor-pointer"
-          >
-            <ShieldCheck size={14} className="text-[#7342E2]" />
-            <span>Sign In</span>
-          </button>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onGoToDashboard}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] hover:brightness-110 active:scale-95 transition-all shadow-sm shadow-[#7342E2]/25 cursor-pointer"
+              >
+                <LayoutDashboard size={14} />
+                <span>{role === 'investigator' || role === 'admin' ? 'SOC Investigator Console' : 'My Dashboard'}</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => onOpenAuth ? onOpenAuth('signup') : null}
-            className="hidden sm:inline-flex px-5 py-2 rounded-full text-xs font-semibold text-white bg-[#7342E2] hover:brightness-110 active:scale-95 transition-all shadow-sm shadow-[#7342E2]/20 cursor-pointer"
-          >
-            Get Started
-          </button>
+              <button
+                type="button"
+                onClick={logout}
+                title="Sign Out"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[#192837]/60 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => onOpenAuth ? onOpenAuth('signin') : null}
+                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-[#192837] bg-[#F2F2EE] hover:bg-[#e7e7e2] active:scale-95 transition-all shadow-sm cursor-pointer"
+              >
+                <ShieldCheck size={14} className="text-[#7342E2]" />
+                <span>Sign In</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onOpenAuth ? onOpenAuth('signup') : null}
+                className="hidden sm:inline-flex px-5 py-2 rounded-full text-xs font-semibold text-white bg-[#7342E2] hover:brightness-110 active:scale-95 transition-all shadow-sm shadow-[#7342E2]/20 cursor-pointer"
+              >
+                Get Started
+              </button>
+            </>
+          )}
 
           {/* Staggered Menu from React Bits */}
           <div className="ml-1">
