@@ -72,6 +72,13 @@ export interface ThreatMapPoint {
   is_proxy: boolean
   is_tor: boolean
   disclaimer: string
+  threat_id?: string
+  user_email?: string
+  sender?: string
+  subject?: string
+  threat_type?: string
+  severity?: string
+  risk_score?: number
 }
 
 export const threatService = {

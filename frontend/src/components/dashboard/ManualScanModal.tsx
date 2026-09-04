@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { X, Sparkles, RefreshCw } from 'lucide-react'
 import { threatService } from '../../services/threats'
+import { CoreSpinLoader } from '../ui/core-spin-loader'
 
 interface ManualScanModalProps {
   isOpen: boolean
@@ -97,6 +98,20 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
         exit={{ opacity: 0, scale: 0.96, y: 15 }}
         className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-[#192837]/10 overflow-hidden text-[#192837]"
       >
+        {/* Loading Overlay */}
+        {scanning && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 backdrop-blur-md p-6 text-center">
+            <CoreSpinLoader customStates={[
+              'Analyzing Email...',
+              'Fetching Headers...',
+              'Checking IP Rep...',
+              'Reading Geolocation...',
+              'Evaluating AI...',
+              'Generating Analytics...'
+            ]} />
+          </div>
+        )}
+        
         {/* Header */}
         <div className="p-6 border-b border-[#192837]/10 flex items-center justify-between bg-[#FAF9F6]">
           <div className="flex items-center gap-3">

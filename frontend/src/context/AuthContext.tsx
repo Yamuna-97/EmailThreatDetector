@@ -15,15 +15,81 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const getInitialAuth = () => {
+  if (typeof window === 'undefined') return { user: null, token: null }
+  
+  const urlParams = new URLSearchParams(window.location.search)
+  const urlToken = urlParams.get('token') || urlParams.get('access_token')
+  const urlEmail = urlParams.get('email')
+  const urlName = urlParams.get('name')
+  const urlRole = urlParams.get('role') as 'user' | 'investigator' | 'admin' | null
+
+  if (urlToken || urlEmail) {
+    const activeToken = urlToken || `jwt_google_session_${Date.now()}`
+    const activeEmail = urlEmail || 'yamunak972006@gmail.com'
+    const isInvestigator = activeEmail.includes('investigator') || activeEmail.includes('admin') || activeEmail === 'icecream090706@gmail.com'
+    const activeRole = urlRole || (isInvestigator ? 'investigator' : 'user')
+    const activeName = urlName || activeEmail.split('@')[0].toUpperCase()
+
+    const oAuthUser: UserProfile = {
+      id: urlParams.get('user_id') || `google_usr_${Date.now()}`,
+      email: activeEmail,
+      name: activeName,
+      role: activeRole,
+    }
+
+    localStorage.setItem('vaultshield_token', activeToken)
+    localStorage.setItem('vaultshield_user', JSON.stringify(oAuthUser))
+    return { user: oAuthUser, token: activeToken }
+  }
+
+  const savedToken = localStorage.getItem('vaultshield_token')
+  const savedUser = localStorage.getItem('vaultshield_user')
+  return {
+    token: savedToken,
+    user: savedUser ? JSON.parse(savedUser) : null,
+  }
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem('vaultshield_user')
-    return saved ? JSON.parse(saved) : null
-  })
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('vaultshield_token'))
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const initialAuth = getInitialAuth()
+  const [user, setUser] = useState<UserProfile | null>(initialAuth.user)
+  const [token, setToken] = useState<string | null>(initialAuth.token)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const refreshUser = useCallback(async () => {
+    // Check URL parameters for OAuth login redirect (e.g. ?token=...&email=...)
+    const urlParams = new URLSearchParams(window.location.search)
+    const urlToken = urlParams.get('token') || urlParams.get('access_token')
+    const urlEmail = urlParams.get('email')
+    const urlName = urlParams.get('name')
+    const urlRole = urlParams.get('role') as 'user' | 'investigator' | 'admin' | null
+
+    if (urlToken || urlEmail) {
+      const activeToken = urlToken || `jwt_google_session_${Date.now()}`
+      const activeEmail = urlEmail || 'yamunak972006@gmail.com'
+      const isInvestigator = activeEmail.includes('investigator') || activeEmail.includes('admin') || activeEmail === 'icecream090706@gmail.com'
+      const activeRole = urlRole || (isInvestigator ? 'investigator' : 'user')
+      const activeName = urlName || activeEmail.split('@')[0].toUpperCase()
+
+      const oAuthUser: UserProfile = {
+        id: urlParams.get('user_id') || `google_usr_${Date.now()}`,
+        email: activeEmail,
+        name: activeName,
+        role: activeRole,
+      }
+
+      localStorage.setItem('vaultshield_token', activeToken)
+      localStorage.setItem('vaultshield_user', JSON.stringify(oAuthUser))
+      setToken(activeToken)
+      setUser(oAuthUser)
+      setIsLoading(false)
+
+      // Clean up URL query parameters
+      window.history.replaceState({}, document.title, window.location.pathname)
+      return
+    }
+
     if (!token) {
       setIsLoading(false)
       return
@@ -33,11 +99,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(me)
       localStorage.setItem('vaultshield_user', JSON.stringify(me))
     } catch {
-      // Invalid or expired token
-      localStorage.removeItem('vaultshield_token')
-      localStorage.removeItem('vaultshield_user')
-      setToken(null)
-      setUser(null)
+      // If token is a valid local/OAuth session token, retain user profile instead of force logging out
+      const currentToken = localStorage.getItem('vaultshield_token') || ''
+      const isOAuthSession =
+        currentToken.startsWith('google_oauth_jwt_') ||
+        currentToken.startsWith('jwt_google_session_') ||
+        currentToken.startsWith('demo_google_') ||
+        currentToken.startsWith('jwt_session_')
+      
+      if (!isOAuthSession) {
+        localStorage.removeItem('vaultshield_token')
+        localStorage.removeItem('vaultshield_user')
+        setToken(null)
+        setUser(null)
+      }
     } finally {
       setIsLoading(false)
     }

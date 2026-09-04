@@ -168,7 +168,7 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
               {activeTab === 'overview' && (
                 <div className="space-y-6">
                   {/* Top Score Matrix */}
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
                     <div className="p-4 rounded-2xl bg-white border border-[#D8C8FF] shadow-sm flex flex-col justify-between">
                       <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Final Risk Score</span>
                       <div className="flex items-baseline gap-2 mt-2">
@@ -182,9 +182,33 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
                       </span>
                     </div>
 
+                    {/* ML Model Detection Card */}
+                    <div className="p-4 rounded-2xl bg-white border border-[#D8C8FF] shadow-sm flex flex-col justify-between">
+                      <span className="text-[11px] font-bold text-[#7342E2] uppercase tracking-wider flex items-center gap-1">
+                        <span>🤖 ML Model Triage</span>
+                      </span>
+                      <div className="mt-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-extrabold uppercase px-2 py-0.5 rounded-md ${
+                            (analysis?.ml_prediction || 'safe').toLowerCase() === 'threat'
+                              ? 'bg-red-100 text-red-700 border border-red-200'
+                              : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          }`}>
+                            ML: {analysis?.ml_prediction ? analysis.ml_prediction.toUpperCase() : (threat?.risk_score >= 50 ? 'THREAT' : 'SAFE')}
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold text-[#1F1F29] mt-1.5">
+                          Risk: <span className="text-[#7342E2] font-extrabold">{analysis?.ml_risk_score ?? 0}/100</span>
+                        </p>
+                      </div>
+                      <span className="text-[10px] text-[#6B7280] font-semibold block mt-1">
+                        Confidence: {Math.round((analysis?.ml_probability ?? (threat?.confidence || 0.95)) * 100)}%
+                      </span>
+                    </div>
+
                     <div className="p-4 rounded-2xl bg-white border border-[#D8C8FF] shadow-sm flex flex-col justify-between">
                       <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">Threat Classification</span>
-                      <p className="text-lg font-bold font-heading text-[#1F1F29] mt-2">
+                      <p className="text-sm font-bold font-heading text-[#1F1F29] mt-2 truncate">
                         {threat?.threat_type}
                       </p>
                       <span className="text-[11px] font-semibold text-[#7342E2]">
@@ -193,19 +217,24 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
                     </div>
 
                     <div className="p-4 rounded-2xl bg-white border border-[#D8C8FF] shadow-sm flex flex-col justify-between">
-                      <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">AI Score vs IP Score</span>
-                      <div className="flex items-center gap-3 mt-2 text-xs font-bold">
+                      <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">AI vs IP vs ML</span>
+                      <div className="flex items-center gap-2 mt-2 text-xs font-bold">
                         <div>
                           <span className="text-[#6B7280] block text-[10px]">Gemini AI</span>
-                          <span className="text-sm text-[#7342E2]">{analysis?.ai_risk_score || threat?.risk_score}/100</span>
+                          <span className="text-xs text-[#7342E2]">{analysis?.ai_risk_score || threat?.risk_score}/100</span>
+                        </div>
+                        <div className="h-6 w-[1px] bg-[#D8C8FF]" />
+                        <div>
+                          <span className="text-[#6B7280] block text-[10px]">ML Model</span>
+                          <span className="text-xs text-[#7342E2]">{analysis?.ml_risk_score ?? 0}/100</span>
                         </div>
                         <div className="h-6 w-[1px] bg-[#D8C8FF]" />
                         <div>
                           <span className="text-[#6B7280] block text-[10px]">IP Fraud</span>
-                          <span className="text-sm text-red-600">{ipIntel?.fraud_score ?? 75}/100</span>
+                          <span className="text-xs text-red-600">{ipIntel?.fraud_score ?? 75}/100</span>
                         </div>
                       </div>
-                      <span className="text-[10px] text-[#6B7280] mt-1">Weighted formula applied</span>
+                      <span className="text-[10px] text-[#6B7280] mt-1">Weighted composite formula</span>
                     </div>
 
                     <div className="p-4 rounded-2xl bg-white border border-[#D8C8FF] shadow-sm flex flex-col justify-between">
@@ -215,7 +244,7 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
                           value={threat?.status || 'new'}
                           disabled={updatingStatus}
                           onChange={(e) => handleUpdateStatus(e.target.value)}
-                          className="w-full text-xs font-bold px-3 py-2 rounded-xl bg-white border border-[#D8C8FF] text-[#1F1F29] focus:outline-none focus:border-[#7342E2]"
+                          className="w-full text-xs font-bold px-2 py-1.5 rounded-xl bg-white border border-[#D8C8FF] text-[#1F1F29] focus:outline-none focus:border-[#7342E2]"
                         >
                           <option value="new">🔴 Status: NEW</option>
                           <option value="reviewing">🟡 Status: REVIEWING</option>
@@ -224,7 +253,7 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
                           <option value="resolved">🟢 Status: RESOLVED</option>
                         </select>
                       </div>
-                      <span className="text-[10px] text-[#6B7280] mt-1">Click to change incident verdict</span>
+                      <span className="text-[10px] text-[#6B7280] mt-1">Change incident verdict</span>
                     </div>
                   </div>
 

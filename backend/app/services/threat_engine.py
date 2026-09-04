@@ -49,6 +49,7 @@ class ThreatEngine:
     def compute_final_risk(
         self,
         ai_risk_score: int,
+        ml_risk_score: int,
         ip_fraud_score: int,
         spf: str,
         dkim: str,
@@ -57,20 +58,23 @@ class ThreatEngine:
     ) -> Tuple[int, str]:
         """
         Compute weighted composite risk score (0-100) and severity category.
-        Provides mathematical explainability alongside AI inference.
+        Includes Logistic Regression ML model prediction alongside AI & threat intelligence.
         """
         auth_score = self.calculate_auth_risk_score(spf, dkim, dmarc)
         url_score = self.calculate_url_risk_score(urls)
 
-        # Weighted calculation
+        # Weighted composite calculation
         final_score = int(
+            (ml_risk_score * getattr(settings, "WEIGHT_ML", 0.25)) +
             (ai_risk_score * settings.WEIGHT_AI) +
             (ip_fraud_score * settings.WEIGHT_IP_REPUTATION) +
             (auth_score * settings.WEIGHT_AUTH_RESULTS) +
             (url_score * settings.WEIGHT_URL_RISK)
         )
-        
+
         final_score = max(0, min(100, final_score))
+
+        logger.info(f"Final combined risk score: {final_score}")
 
         if final_score >= 75:
             severity = "critical"

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Globe2, Radio, Layers, MapPin, Info } from 'lucide-react'
 import { threatService, type ThreatMapPoint } from '../../services/threats'
 import { Map, MapControls, MapMarker, MAP_STYLES } from '../ui/map'
+import ForensicsModal from './ForensicsModal'
 
 export const ThreatMapView: React.FC = () => {
   const [points, setPoints] = useState<ThreatMapPoint[]>([])
@@ -9,6 +10,7 @@ export const ThreatMapView: React.FC = () => {
   const [activeStyle, setActiveStyle] = useState<keyof typeof MAP_STYLES>('voyager')
   const [mapCenter, setMapCenter] = useState<[number, number]>([15, 25])
   const [mapZoom, setMapZoom] = useState<number>(1.8)
+  const [selectedThreatId, setSelectedThreatId] = useState<string | null>(null)
 
   useEffect(() => {
     threatService.getThreatMap()
@@ -61,11 +63,10 @@ export const ThreatMapView: React.FC = () => {
                 key={styleKey}
                 type="button"
                 onClick={() => setActiveStyle(styleKey)}
-                className={`px-3 py-1 rounded-xl text-[11px] font-bold capitalize transition-all cursor-pointer ${
-                  activeStyle === styleKey
-                    ? 'bg-[#7342E2] text-white shadow-sm'
-                    : 'text-[#6B7280] hover:text-[#1F1F29] hover:bg-white'
-                }`}
+                className={`px-3 py-1 rounded-xl text-[11px] font-bold capitalize transition-all cursor-pointer ${activeStyle === styleKey
+                  ? 'bg-[#7342E2] text-white shadow-sm'
+                  : 'text-[#6B7280] hover:text-[#1F1F29] hover:bg-white'
+                  }`}
               >
                 {styleKey === 'darkMatter' ? 'Dark SOC' : styleKey === 'voyager' ? 'Voyager' : styleKey === 'positron' ? 'Light' : 'OSM'}
               </button>
@@ -105,16 +106,14 @@ export const ThreatMapView: React.FC = () => {
                   >
                     <div className="relative -translate-x-1/2 -translate-y-1/2 group cursor-pointer focus:outline-none">
                       {/* Pulsing Outer Ring */}
-                      <span className={`absolute -inset-2.5 rounded-full animate-ping opacity-75 ${
-                        isHighRisk ? 'bg-red-500' : 'bg-amber-500'
-                      }`} />
+                      <span className={`absolute -inset-2.5 rounded-full animate-ping opacity-75 ${isHighRisk ? 'bg-red-500' : 'bg-amber-500'
+                        }`} />
 
                       {/* Central Pin */}
-                      <div className={`relative px-2 py-1 rounded-full flex items-center gap-1 shadow-md border-2 border-white transition-all transform ${
-                        isSelected
-                          ? 'scale-125 ring-4 ring-[#7342E2] z-30'
-                          : 'hover:scale-110 z-10'
-                      } ${isHighRisk ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'}`}>
+                      <div className={`relative px-2 py-1 rounded-full flex items-center gap-1 shadow-md border-2 border-white transition-all transform ${isSelected
+                        ? 'scale-125 ring-4 ring-[#7342E2] z-30'
+                        : 'hover:scale-110 z-10'
+                        } ${isHighRisk ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'}`}>
                         <MapPin size={11} className="shrink-0" />
                         <span className="text-[10px] font-mono font-extrabold">{pt.country_code}</span>
                       </div>
@@ -160,6 +159,39 @@ export const ThreatMapView: React.FC = () => {
               </div>
 
               <div className="space-y-2.5 text-xs font-body">
+                {/* Monitored User Account Details (User Requirement: pointing shows corresponding email & user details) */}
+                <div className="p-3.5 rounded-2xl bg-[#F5F3FF] border border-[#D8C8FF] space-y-1.5 shadow-xs">
+                  <span className="text-[10px] font-extrabold text-[#7342E2] uppercase tracking-wider block">
+                    Target Monitored User Account
+                  </span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-xs text-[#1F1F29] font-mono">
+                      {selectedPoint.user_email || 'yamunak972006@gmail.com'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-[#7342E2]/10 text-[#7342E2] text-[10px] font-bold">
+                      Enterprise User
+                    </span>
+                  </div>
+                </div>
+
+                {/* Email & Threat Incident Details */}
+                <div className="p-3.5 rounded-2xl bg-red-50/60 border border-red-200 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold text-red-700 uppercase tracking-wider">
+                      {selectedPoint.threat_type || 'Phishing Scam Attack'}
+                    </span>
+                    <span className="text-[10px] font-mono font-bold text-red-700 bg-red-100 px-1.5 py-0.5 rounded">
+                      Risk {selectedPoint.risk_score || selectedPoint.fraud_score}/100
+                    </span>
+                  </div>
+                  <p className="font-bold text-xs text-[#1F1F29] line-clamp-2">
+                    {selectedPoint.subject || 'Urgent Security Account Verification Request'}
+                  </p>
+                  <p className="text-[11px] text-[#6B7280] font-mono truncate">
+                    Sender: {selectedPoint.sender || 'security-alert@suspicious-domain.com'}
+                  </p>
+                </div>
+
                 <div className="p-3 rounded-xl bg-[#FAF8FF] border border-[#D8C8FF]/60 flex justify-between items-center">
                   <span className="text-[#6B7280]">Source IP Address:</span>
                   <span className="font-mono font-bold text-[#7342E2]">{selectedPoint.ip}</span>
@@ -171,13 +203,8 @@ export const ThreatMapView: React.FC = () => {
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#FAF8FF] border border-[#D8C8FF]/60 flex justify-between items-center">
-                  <span className="text-[#6B7280]">ASN Network:</span>
-                  <span className="font-mono font-semibold text-[#1F1F29]">{selectedPoint.asn || 'AS13335'}</span>
-                </div>
-
-                <div className="p-3 rounded-xl bg-[#FAF8FF] border border-[#D8C8FF]/60 flex justify-between items-center">
-                  <span className="text-[#6B7280]">ISP Provider:</span>
-                  <span className="font-semibold text-right max-w-[150px] truncate text-[#1F1F29]">{selectedPoint.isp || 'External Network'}</span>
+                  <span className="text-[#6B7280]">ASN Network / ISP:</span>
+                  <span className="font-semibold text-right max-w-[150px] truncate text-[#1F1F29]">{selectedPoint.asn || 'AS13335'} ({selectedPoint.isp || 'Hosting Provider'})</span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#FAF8FF] border border-[#D8C8FF]/60 flex justify-between items-center">
@@ -187,6 +214,23 @@ export const ThreatMapView: React.FC = () => {
                   </span>
                 </div>
               </div>
+
+              {selectedPoint.threat_id && (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedPoint.threat_id) {
+                        setSelectedThreatId(selectedPoint.threat_id)
+                      }
+                    }}
+                    className="w-full py-2.5 rounded-2xl bg-[#7342E2] hover:bg-[#6032C4] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Inspect Deep Forensics Dossier</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              )}
 
               <div className="pt-2">
                 <p className="text-[11px] text-[#6B7280] leading-relaxed italic">
@@ -211,11 +255,10 @@ export const ThreatMapView: React.FC = () => {
                   key={i}
                   type="button"
                   onClick={() => handleSelectNode(pt)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold transition-all cursor-pointer ${
-                    selectedPoint?.ip === pt.ip
-                      ? 'bg-[#7342E2] text-white shadow-sm'
-                      : 'bg-[#FAF8FF] border border-[#D8C8FF] text-[#1F1F29] hover:bg-[#F5F3FF]'
-                  }`}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold transition-all cursor-pointer ${selectedPoint?.ip === pt.ip
+                    ? 'bg-[#7342E2] text-white shadow-sm'
+                    : 'bg-[#FAF8FF] border border-[#D8C8FF] text-[#1F1F29] hover:bg-[#F5F3FF]'
+                    }`}
                 >
                   {pt.country_code} • {pt.ip}
                 </button>
@@ -224,6 +267,12 @@ export const ThreatMapView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Forensic Deep Dive Modal from Map Pin */}
+      <ForensicsModal
+        threatId={selectedThreatId}
+        onClose={() => setSelectedThreatId(null)}
+      />
     </div>
   )
 }

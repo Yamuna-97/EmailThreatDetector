@@ -41,11 +41,11 @@ const AppContent: React.FC = () => {
       return (
         <div>
           {/* Quick Floating Switch to Landing View */}
-          <div className="fixed bottom-4 right-4 z-50">
+          <div className="fixed bottom-4 right-4 z-40">
             <button
               type="button"
               onClick={() => setForceLanding(true)}
-              className="px-3 py-1.5 rounded-full bg-[#192837] text-white text-[11px] font-bold shadow-lg border border-white/10 hover:bg-[#7342E2] transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-full bg-[#192837]/90 backdrop-blur-md text-white text-[11px] font-bold shadow-md border border-white/15 hover:bg-[#7342E2] transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>View Landing Page</span>
             </button>
@@ -57,11 +57,11 @@ const AppContent: React.FC = () => {
 
     return (
       <div>
-        <div className="fixed bottom-4 right-4 z-50">
+        <div className="fixed bottom-4 right-4 z-40">
           <button
             type="button"
             onClick={() => setForceLanding(true)}
-            className="px-3 py-1.5 rounded-full bg-[#192837] text-white text-[11px] font-bold shadow-lg border border-white/10 hover:bg-[#7342E2] transition-all cursor-pointer flex items-center gap-1.5"
+            className="px-3.5 py-1.5 rounded-full bg-[#192837]/90 backdrop-blur-md text-white text-[11px] font-bold shadow-md border border-white/15 hover:bg-[#7342E2] transition-all cursor-pointer flex items-center gap-1.5"
           >
             <span>View Landing Page</span>
           </button>

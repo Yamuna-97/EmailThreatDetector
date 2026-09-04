@@ -4,6 +4,7 @@ import logging
 import uuid
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+from app.ml.predict_email import predict_email
 from app.services.email_parser import email_parser
 from app.services.url_analyzer import url_analyzer
 from app.services.ipqualityscore_service import ipqs_service
@@ -27,7 +28,7 @@ class GmailService:
     ) -> List[Dict[str, Any]]:
         """Fetch list of message IDs from user's Gmail inbox, spam, or both."""
         headers = {"Authorization": f"Bearer {access_token}"}
-        
+
         # Build Gmail query based on target folder
         if folder == "spam":
             query = "in:spam"
@@ -93,10 +94,10 @@ class GmailService:
         2. Extract & analyze URLs
         3. Lookup IPQualityScore threat intel
         4. Lookup GeoLocation
-        5. Run Gemini AI reasoning
-        6. Compute composite Threat Engine score
-        7. Store in database
-        8. Generate Alert if high/critical
+        5. Run trained Logistic Regression ML Model threat inference
+        6. Run Gemini AI reasoning
+        7. Compute composite Threat Engine score (ML + AI + IP + Auth + URLs)
+        8. Store in database & alert if needed
         """
         # Step 1: Parse headers
         header_info = email_parser.parse_raw_headers(headers_data)
@@ -112,7 +113,21 @@ class GmailService:
         # Step 4: GeoLocation
         geo_intel = await geolocation_service.get_geolocation(source_ip)
 
-        # Step 5: Gemini AI Analysis
+        # Step 5: Trained Logistic Regression ML Model Prediction
+        email_ml_payload = {
+            "sender": sender,
+            "recipient": recipient,
+            "subject": subject,
+            "plain_text_body": body,
+            "html_body": "",
+            "headers": header_info,
+            "urls": urls_dict,
+            "attachments": [],
+            "message_id": message_id
+        }
+        ml_result = predict_email(email_ml_payload)
+
+        # Step 6: Gemini AI Analysis
         gemini_result = await gemini_service.analyze_email_threat(
             sender=sender,
             subject=subject,
@@ -123,9 +138,10 @@ class GmailService:
             geo_intel=geo_intel.model_dump(),
         )
 
-        # Step 6: Risk Engine Composite Calculation
+        # Step 7: Risk Engine Composite Calculation
         final_risk_score, final_severity = threat_engine.compute_final_risk(
             ai_risk_score=gemini_result.get("ai_risk_score", 10),
+            ml_risk_score=ml_result.get("risk_score", 0),
             ip_fraud_score=ip_intel.fraud_score,
             spf=header_info.spf or "unknown",
             dkim=header_info.dkim or "unknown",
@@ -159,7 +175,15 @@ class GmailService:
             ThreatIndicator(**i) if isinstance(i, dict) else i
             for i in gemini_result.get("indicators", [])
         ]
-        
+
+        observed_ev = gemini_result.get("observed_evidence", {})
+        observed_ev["ml_detection"] = {
+            "prediction": ml_result.get("prediction", "safe"),
+            "probability": ml_result.get("probability", 0.0),
+            "risk_score": ml_result.get("risk_score", 0),
+            "confidence_pct": f"{int(round(ml_result.get('probability', 0.0) * 100))}%"
+        }
+
         analysis_record = ThreatAnalysisModel(
             id=analysis_uuid,
             email_id=email_uuid,
@@ -167,11 +191,14 @@ class GmailService:
             classification=gemini_result.get("classification", "Phishing"),
             severity=final_severity,
             ai_risk_score=gemini_result.get("ai_risk_score", 10),
+            ml_prediction=ml_result.get("prediction", "safe"),
+            ml_probability=ml_result.get("probability", 0.0),
+            ml_risk_score=ml_result.get("risk_score", 0),
             final_risk_score=final_risk_score,
             confidence=float(gemini_result.get("confidence", 0.95)),
             summary=gemini_result.get("summary", "Automated threat analysis completed."),
             indicators=indicators,
-            observed_evidence=gemini_result.get("observed_evidence", {}),
+            observed_evidence=observed_ev,
             ai_inferences=gemini_result.get("ai_inferences", {}),
             recommended_actions=gemini_result.get("recommended_actions", []),
             created_at=datetime.now()
@@ -309,7 +336,7 @@ class GmailService:
                     "confidence": float(gemini_result.get("confidence", 0.95)),
                     "summary": gemini_result.get("summary", ""),
                     "indicators": [i.model_dump() for i in indicators],
-                    "observed_evidence": gemini_result.get("observed_evidence", {}),
+                    "observed_evidence": observed_ev,
                     "ai_inferences": gemini_result.get("ai_inferences", {}),
                     "recommended_actions": gemini_result.get("recommended_actions", [])
                 }).execute()

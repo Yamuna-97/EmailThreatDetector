@@ -14,6 +14,9 @@ class ThreatAnalysisModel(BaseModel):
     classification: str
     severity: Literal["low", "medium", "high", "critical"]
     ai_risk_score: int
+    ml_prediction: Optional[str] = "safe"
+    ml_probability: Optional[float] = 0.0
+    ml_risk_score: Optional[int] = 0
     final_risk_score: int
     confidence: float
     summary: str

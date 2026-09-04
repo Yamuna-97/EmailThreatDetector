@@ -1,7 +1,6 @@
 import React from 'react'
-import { Shield, Brain, Globe, Lock, Cpu, CheckCircle2, Award, Zap, Users } from 'lucide-react'
+import { Shield, Brain, Globe, Lock, Cpu, CheckCircle2, Award, Zap } from 'lucide-react'
 import ScrollReveal from './ScrollReveal'
-import Card from './Card'
 
 export const About: React.FC = () => {
   return (

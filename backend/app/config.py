@@ -59,10 +59,11 @@ class Settings(BaseSettings):
     ALERT_RECIPIENT_EMAIL: str = os.getenv("ALERT_RECIPIENT_EMAIL", "")
 
     # Threat Scoring Weights
-    WEIGHT_AI: float = 0.35
-    WEIGHT_IP_REPUTATION: float = 0.25
-    WEIGHT_AUTH_RESULTS: float = 0.20
-    WEIGHT_URL_RISK: float = 0.20
+    WEIGHT_ML: float = 0.25
+    WEIGHT_AI: float = 0.25
+    WEIGHT_IP_REPUTATION: float = 0.20
+    WEIGHT_AUTH_RESULTS: float = 0.15
+    WEIGHT_URL_RISK: float = 0.15
 
     class Config:
         env_file = ".env"
