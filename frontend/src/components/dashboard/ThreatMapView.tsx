@@ -1,25 +1,31 @@
 import React, { useState, useEffect } from 'react'
-import { Globe2, Radio } from 'lucide-react'
+import { Globe2, Radio, Layers, ShieldAlert, MapPin, Activity, Info } from 'lucide-react'
 import { threatService, type ThreatMapPoint } from '../../services/threats'
+import { Map, MapControls, MapMarker, MAP_STYLES } from '../ui/map'
 
 export const ThreatMapView: React.FC = () => {
   const [points, setPoints] = useState<ThreatMapPoint[]>([])
   const [selectedPoint, setSelectedPoint] = useState<ThreatMapPoint | null>(null)
+  const [activeStyle, setActiveStyle] = useState<keyof typeof MAP_STYLES>('voyager')
+  const [mapCenter, setMapCenter] = useState<[number, number]>([15, 25])
+  const [mapZoom, setMapZoom] = useState<number>(1.8)
 
   useEffect(() => {
     threatService.getThreatMap()
       .then(res => {
         setPoints(res)
-        if (res.length > 0) setSelectedPoint(res[0])
+        if (res.length > 0) {
+          setSelectedPoint(res[0])
+          setMapCenter([res[0].longitude, res[0].latitude])
+        }
       })
       .catch(err => console.error("Error loading threat map:", err))
   }, [])
 
-  // Approximate coordinate conversion to 2D SVG canvas percentages
-  const latLonToPercent = (lat: number, lon: number) => {
-    const x = ((lon + 180) / 360) * 100
-    const y = ((90 - lat) / 180) * 100
-    return { x: Math.max(5, Math.min(95, x)), y: Math.max(8, Math.min(92, y)) }
+  const handleSelectNode = (pt: ThreatMapPoint) => {
+    setSelectedPoint(pt)
+    setMapCenter([pt.longitude, pt.latitude])
+    setMapZoom(4.5)
   }
 
   return (
@@ -41,85 +47,104 @@ export const ThreatMapView: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-white/60 font-body mt-0.5">
-              Geographic distribution of identified origin mail servers, relay nodes & exit proxies
+              Geographic distribution of identified origin mail servers, relay nodes & exit proxies via MapLibre GL
             </p>
           </div>
         </div>
 
-        <div className="px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[11px] font-medium text-white/70">
-          ⚠️ Disclaimer: <span className="text-white font-semibold">IP-based approximate location</span>
+        {/* Basemap Switcher & Disclaimer */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+          <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/10 text-xs">
+            <Layers size={13} className="text-white/60 ml-1.5 mr-0.5" />
+            {(['voyager', 'darkMatter', 'positron', 'osm'] as const).map(styleKey => (
+              <button
+                key={styleKey}
+                type="button"
+                onClick={() => setActiveStyle(styleKey)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold capitalize transition-all cursor-pointer ${
+                  activeStyle === styleKey
+                    ? 'bg-[#7342E2] text-white shadow-sm'
+                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                {styleKey === 'darkMatter' ? 'Dark SOC' : styleKey === 'voyager' ? 'Voyager' : styleKey === 'positron' ? 'Light' : 'OSM'}
+              </button>
+            ))}
+          </div>
+
+          <div className="px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[11px] font-medium text-white/70 flex items-center gap-1.5">
+            <Info size={13} className="text-amber-400 shrink-0" />
+            <span>Approximate IP-based location</span>
+          </div>
         </div>
       </div>
 
-      {/* Map Canvas & Live Telemetry Layout */}
+      {/* Main Map & Live Telemetry Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Interactive World Map SVG Visualization */}
-        <div className="lg:col-span-2 relative min-h-[420px] rounded-3xl bg-[#0B1120] border border-[#192837]/20 p-6 flex flex-col justify-between overflow-hidden shadow-2xl">
-          {/* Subtle Grid Lines & Background Pattern */}
-          <div className="absolute inset-0 bg-[radial-gradient(#7342E2_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
+        {/* Interactive MapLibre GL / mapcn Map Container */}
+        <div className="lg:col-span-2 relative min-h-[480px] rounded-3xl bg-white border border-[#192837]/15 p-2 overflow-hidden shadow-xl flex flex-col justify-between">
+          <div className="relative w-full h-[470px] rounded-2xl overflow-hidden">
+            <Map
+              center={mapCenter}
+              zoom={mapZoom}
+              mapStyle={MAP_STYLES[activeStyle]}
+              className="w-full h-full"
+            >
+              <MapControls position="top-right" />
 
-          {/* SVG World Map Outline Graphic */}
-          <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 1000 500" fill="none">
-            <path
-              d="M150,150 Q200,100 280,120 T350,180 T250,260 T180,220 Z M450,120 Q550,80 650,100 T800,160 T700,280 T500,250 Z M200,320 Q240,300 280,360 T220,440 Z M520,320 Q600,310 650,380 T580,450 Z M750,340 Q820,330 880,400 T780,440 Z"
-              fill="#7342E2"
-            />
-          </svg>
+              {/* Render dynamic interactive markers for every detected threat IP */}
+              {points.map((pt, idx) => {
+                const isSelected = selectedPoint?.ip === pt.ip
+                const isHighRisk = (pt.fraud_score || 0) >= 75
 
-          {/* Header overlay */}
-          <div className="relative z-10 flex items-center justify-between text-xs text-white/60">
-            <span className="font-mono flex items-center gap-1.5 font-semibold text-[#8B5CF6]">
-              <Radio size={14} className="animate-pulse" />
-              GLOBAL SURVEILLANCE RADAR
-            </span>
-            <span className="font-mono">{points.length} IDENTIFIED VECTORS</span>
-          </div>
+                return (
+                  <MapMarker
+                    key={idx}
+                    coordinates={[pt.longitude, pt.latitude]}
+                    onClick={() => handleSelectNode(pt)}
+                  >
+                    <div className="relative -translate-x-1/2 -translate-y-1/2 group cursor-pointer focus:outline-none">
+                      {/* Pulsing Outer Ring */}
+                      <span className={`absolute -inset-2.5 rounded-full animate-ping opacity-75 ${
+                        isHighRisk ? 'bg-red-500' : 'bg-amber-500'
+                      }`} />
 
-          {/* Animated Threat Vector Markers */}
-          <div className="relative z-10 w-full h-[320px] my-auto">
-            {points.map((pt, idx) => {
-              const pos = latLonToPercent(pt.latitude, pt.longitude)
-              const isSelected = selectedPoint?.ip === pt.ip
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setSelectedPoint(pt)}
-                  style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer focus:outline-none"
-                >
-                  {/* Outer Pulsing Aura */}
-                  <span className={`absolute -inset-2.5 rounded-full animate-ping opacity-60 ${
-                    pt.fraud_score > 80 ? 'bg-red-500' : 'bg-amber-500'
-                  }`} />
-                  
-                  {/* Central Node */}
-                  <span className={`relative w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-lg transition-transform ${
-                    isSelected ? 'scale-125 ring-4 ring-[#7342E2]' : 'hover:scale-110'
-                  } ${pt.fraud_score > 80 ? 'bg-red-600' : 'bg-amber-500'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                  </span>
+                      {/* Central Pin */}
+                      <div className={`relative px-2 py-1 rounded-full flex items-center gap-1 shadow-lg border-2 border-white transition-all transform ${
+                        isSelected
+                          ? 'scale-125 ring-4 ring-[#7342E2] z-30'
+                          : 'hover:scale-110 z-10'
+                      } ${isHighRisk ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'}`}>
+                        <MapPin size={11} className="shrink-0" />
+                        <span className="text-[10px] font-mono font-extrabold">{pt.country_code}</span>
+                      </div>
 
-                  {/* Tooltip on hover */}
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:flex flex-col items-center z-20 pointer-events-none">
-                    <div className="px-2.5 py-1 rounded-lg bg-black/90 text-white text-[10px] font-mono whitespace-nowrap shadow-md border border-white/10">
-                      {pt.city}, {pt.country_code} ({pt.ip})
+                      {/* Floating Tooltip */}
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:flex flex-col items-center z-40 pointer-events-none">
+                        <div className="px-2.5 py-1.5 rounded-xl bg-[#192837] text-white text-[11px] font-mono whitespace-nowrap shadow-xl border border-white/20">
+                          <span className="font-bold text-[#8B5CF6] block">{pt.city}, {pt.country}</span>
+                          <span className="text-white/80">{pt.ip} • Fraud: {pt.fraud_score}/100</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              )
-            })}
+                  </MapMarker>
+                )
+              })}
+            </Map>
           </div>
 
-          {/* Bottom stats overlay */}
-          <div className="relative z-10 flex items-center justify-between text-[11px] text-white/50 border-t border-white/10 pt-3">
-            <span>Projection: WGS84 Mercator Approx</span>
-            <span className="text-[#8B5CF6] font-semibold">Active Threat Feed Nodes</span>
+          {/* Bottom Bar overlay */}
+          <div className="p-3 bg-[#FAF9F6] rounded-2xl mt-2 border border-[#192837]/5 flex items-center justify-between text-xs text-[#192837]/70">
+            <span className="font-mono flex items-center gap-1.5 font-semibold text-[#7342E2]">
+              <Radio size={14} className="animate-pulse" />
+              MAPCN / MAPLIBRE GL ENGINE
+            </span>
+            <span className="font-mono font-bold">{points.length} ACTIVE THREAT VECTORS INGESTED</span>
           </div>
         </div>
 
         {/* Selected Origin Telemetry Card */}
-        <div className="rounded-3xl bg-white border border-[#192837]/10 p-6 flex flex-col justify-between shadow-sm">
+        <div className="rounded-3xl bg-white border border-[#192837]/10 p-6 flex flex-col justify-between shadow-sm space-y-4">
           {selectedPoint ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-[#192837]/10">
@@ -142,7 +167,7 @@ export const ThreatMapView: React.FC = () => {
 
                 <div className="p-3 rounded-xl bg-[#FAF9F6] border border-[#192837]/10 flex justify-between items-center">
                   <span className="text-[#192837]/60">Coordinates:</span>
-                  <span className="font-mono">{selectedPoint.latitude}, {selectedPoint.longitude}</span>
+                  <span className="font-mono font-semibold">{selectedPoint.latitude}, {selectedPoint.longitude}</span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#FAF9F6] border border-[#192837]/10 flex justify-between items-center">
@@ -156,16 +181,16 @@ export const ThreatMapView: React.FC = () => {
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#FAF9F6] border border-[#192837]/10 flex justify-between items-center">
-                  <span className="text-[#192837]/60">Anonymizer Checks:</span>
+                  <span className="text-[#192837]/60">Anonymizer Routing:</span>
                   <span className="font-bold">
-                    {selectedPoint.is_tor ? '🔴 Tor Node' : selectedPoint.is_vpn ? '🔴 VPN Proxy' : '🟢 Standard Route'}
+                    {selectedPoint.is_tor ? '🔴 Tor Exit Node' : selectedPoint.is_vpn ? '🔴 VPN Proxy' : '🟢 Direct Relay'}
                   </span>
                 </div>
               </div>
 
               <div className="pt-2">
                 <p className="text-[11px] text-[#192837]/50 leading-relaxed italic">
-                  Note: Geolocation resolution derives from IP BGP routing table approximations, not physical client GPS hardware.
+                  Note: Geolocation represents approximate IP-based BGP routing data — not exact physical client location.
                 </p>
               </div>
             </div>
@@ -175,17 +200,17 @@ export const ThreatMapView: React.FC = () => {
             </div>
           )}
 
-          {/* Quick Filter List */}
+          {/* Quick Origin Nodes Filter Pills */}
           <div className="pt-4 border-t border-[#192837]/10">
             <span className="text-[10px] font-bold text-[#192837]/50 uppercase tracking-wider block mb-2">
               Detected Origin Nodes ({points.length})
             </span>
-            <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+            <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
               {points.map((pt, i) => (
                 <button
                   key={i}
                   type="button"
-                  onClick={() => setSelectedPoint(pt)}
+                  onClick={() => handleSelectNode(pt)}
                   className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold transition-all cursor-pointer ${
                     selectedPoint?.ip === pt.ip
                       ? 'bg-[#7342E2] text-white'
