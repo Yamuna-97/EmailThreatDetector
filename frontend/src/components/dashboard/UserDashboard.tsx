@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   ShieldAlert, ShieldCheck, Mail, Sparkles, RefreshCw, AlertTriangle,
-  Eye, Clock, Activity, LogOut, ChevronRight, Inbox, Search
+  Eye, Clock, Activity, LogOut, ChevronRight, Inbox, Search, CheckCircle, XCircle
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { gmailService, type GmailStatus } from '../../services/gmail'
@@ -24,6 +24,9 @@ export const UserDashboard: React.FC = () => {
   const [scanLimit, setScanLimit] = useState<number>(5)
   const [scanFolder, setScanFolder] = useState<'all' | 'inbox' | 'spam'>('all')
   const [emailSearch, setEmailSearch] = useState<string>('')
+  // OAuth return banner state
+  const [oauthBanner, setOauthBanner] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const oauthHandled = useRef(false)
 
   const loadAllData = async () => {
     setLoading(true)
@@ -46,6 +49,49 @@ export const UserDashboard: React.FC = () => {
   }
 
   useEffect(() => {
+    // ✅ FIX: Detect OAuth return params (?gmail_connected=true or ?error=...)
+    // This runs ONCE on mount. Clean up the URL so refresh doesn't re-trigger.
+    if (!oauthHandled.current) {
+      oauthHandled.current = true
+      const params = new URLSearchParams(window.location.search)
+      const connected = params.get('gmail_connected')
+      const oauthError = params.get('error')
+
+      if (connected === 'true') {
+        // Remove query params from URL without page reload
+        const cleanUrl = window.location.pathname
+        window.history.replaceState({}, '', cleanUrl)
+
+        // Show success banner
+        setOauthBanner({ type: 'success', message: '✅ Gmail connected successfully! Scanning your inbox now…' })
+
+        // Load data first, then auto-trigger a scan to populate emails
+        loadAllData().then(() => {
+          setSyncingGmail(true)
+          gmailService.scanInbox(10, 'all')
+            .then(() => loadAllData())
+            .then(() => setActiveTab('emails'))
+            .catch(console.error)
+            .finally(() => setSyncingGmail(false))
+        })
+
+        // Auto-dismiss banner after 6 seconds
+        setTimeout(() => setOauthBanner(null), 6000)
+        return
+      }
+
+      if (oauthError) {
+        const cleanUrl = window.location.pathname
+        window.history.replaceState({}, '', cleanUrl)
+        const errorMessages: Record<string, string> = {
+          oauth_cancelled: 'Gmail connection was cancelled.',
+          token_exchange_failed: 'Gmail connection failed — token exchange error. Please try again.',
+        }
+        setOauthBanner({ type: 'error', message: errorMessages[oauthError] || 'Gmail connection error. Please try again.' })
+        setTimeout(() => setOauthBanner(null), 7000)
+      }
+    }
+
     loadAllData()
   }, [])
 
@@ -116,6 +162,29 @@ export const UserDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#192837] flex flex-col font-body">
+      {/* ✅ OAuth Return Banner — success or error after Gmail OAuth redirect */}
+      {oauthBanner && (
+        <div
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold transition-all animate-fade-in border ${
+            oauthBanner.type === 'success'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}
+        >
+          {oauthBanner.type === 'success'
+            ? <CheckCircle size={18} className="text-emerald-500 shrink-0" />
+            : <XCircle size={18} className="text-red-500 shrink-0" />}
+          <span>{oauthBanner.message}</span>
+          <button
+            type="button"
+            onClick={() => setOauthBanner(null)}
+            className="ml-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer text-xs"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top SOC Navbar */}
       <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-[#192837]/10">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-3 flex items-center justify-between">

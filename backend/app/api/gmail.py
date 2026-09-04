@@ -16,6 +16,71 @@ from app.database import db
 logger = logging.getLogger("vaultshield.api.gmail")
 router = APIRouter(prefix="/gmail", tags=["Gmail Integration"])
 
+
+def _load_gmail_account_from_supabase(user_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Attempt to restore a user's Gmail account record from Supabase into the
+    in-memory store. Returns the account dict if found, else None.
+    This is the fix for the 'disconnected after refresh' problem — tokens
+    previously only lived in db.store (RAM), now they are restored from DB.
+    """
+    admin_client = db.get_admin_client()
+    if not admin_client:
+        return None
+    try:
+        res = admin_client.table("gmail_accounts") \
+            .select("*") \
+            .eq("user_id", user_id) \
+            .eq("is_connected", True) \
+            .order("created_at", desc=True) \
+            .limit(1) \
+            .execute()
+        if res.data:
+            row = res.data[0]
+            account = {
+                "email_address": row.get("email_address", ""),
+                "access_token": row.get("access_token", ""),
+                "refresh_token": row.get("refresh_token"),
+                "is_connected": row.get("is_connected", False),
+                "auto_scan_enabled": row.get("auto_scan_enabled", False),
+                "scan_limit": row.get("scan_limit", 10),
+                "last_synced_at": row.get("last_synced_at"),
+                "_supabase_id": row.get("id"),
+            }
+            # Restore into in-memory cache so subsequent requests are fast
+            db.store["gmail_accounts"][user_id] = account
+            logger.info(f"Restored Gmail account for user {user_id} from Supabase.")
+            return account
+    except Exception as e:
+        logger.warning(f"Could not restore Gmail account from Supabase: {e}")
+    return None
+
+
+def _persist_gmail_account_to_supabase(user_id: str, account: Dict[str, Any]) -> None:
+    """
+    Upsert the Gmail account record to Supabase so it survives restarts.
+    Uses UNIQUE(user_id, email_address) constraint for upsert.
+    """
+    admin_client = db.get_admin_client()
+    if not admin_client:
+        return
+    try:
+        admin_client.table("gmail_accounts").upsert({
+            "user_id": user_id,
+            "email_address": account.get("email_address", ""),
+            "access_token": account.get("access_token", ""),
+            "refresh_token": account.get("refresh_token"),
+            "is_connected": account.get("is_connected", True),
+            "auto_scan_enabled": account.get("auto_scan_enabled", False),
+            "scan_limit": account.get("scan_limit", 10),
+            "last_synced_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat(),
+        }, on_conflict="user_id,email_address").execute()
+        logger.info(f"Persisted Gmail account for user {user_id} to Supabase.")
+    except Exception as e:
+        logger.warning(f"Could not persist Gmail account to Supabase: {e}")
+
+
 @router.get("/connect", response_model=GmailConnectResponse)
 async def connect_gmail(current_user: UserResponse = Depends(get_current_user)):
     """Generate Google OAuth 2.0 authorization URL for Gmail API consent."""
@@ -27,6 +92,7 @@ async def connect_gmail(current_user: UserResponse = Depends(get_current_user)):
     state = f"user_{current_user.id}"
     auth_url = google_oauth_service.get_authorization_url(state=state)
     return GmailConnectResponse(auth_url=auth_url)
+
 
 @router.get("/callback")
 async def gmail_oauth_callback(
@@ -43,47 +109,83 @@ async def gmail_oauth_callback(
         tokens = await google_oauth_service.exchange_code_for_tokens(code)
         access_token = tokens.get("access_token")
         refresh_token = tokens.get("refresh_token")
-        
+
         user_email = await google_oauth_service.get_user_email(access_token)
 
         # Associate tokens with user
         user_id = state.replace("user_", "") if state and state.startswith("user_") else "default"
-        
-        db.store["gmail_accounts"][user_id] = {
+
+        account = {
             "email_address": user_email or "connected@gmail.com",
             "access_token": access_token,
             "refresh_token": refresh_token,
             "is_connected": True,
             "auto_scan_enabled": True,
             "scan_limit": 10,
-            "last_synced_at": datetime.now()
+            "last_synced_at": datetime.now(),
         }
+
+        # Store in fast in-memory cache
+        db.store["gmail_accounts"][user_id] = account
+
+        # ✅ FIX: Persist to Supabase so it survives restarts & re-logins
+        _persist_gmail_account_to_supabase(user_id, account)
 
         return RedirectResponse(url=f"{settings.FRONTEND_URL}/user/dashboard?gmail_connected=true")
     except Exception as e:
         logger.error(f"Callback processing error: {e}")
         return RedirectResponse(url=f"{settings.FRONTEND_URL}/user/dashboard?error=token_exchange_failed")
 
+
 @router.get("/status", response_model=GmailStatusResponse)
 async def get_gmail_status(current_user: UserResponse = Depends(get_current_user)):
     """Retrieve user's Gmail connection status and auto-scan configuration."""
+    # Check fast in-memory store first
     account = db.store["gmail_accounts"].get(current_user.id)
+
+    # ✅ FIX: If not in memory (e.g. after restart), restore from Supabase
+    if not account or not account.get("is_connected"):
+        account = _load_gmail_account_from_supabase(current_user.id)
+
     if account and account.get("is_connected"):
+        last_synced = account.get("last_synced_at")
+        if isinstance(last_synced, str):
+            try:
+                last_synced = datetime.fromisoformat(last_synced.replace("Z", "+00:00"))
+            except Exception:
+                last_synced = None
+
         return GmailStatusResponse(
             is_connected=True,
             email_address=account.get("email_address"),
             auto_scan_enabled=account.get("auto_scan_enabled", False),
             scan_limit=account.get("scan_limit", 10),
-            last_synced_at=account.get("last_synced_at")
+            last_synced_at=last_synced
         )
     return GmailStatusResponse(is_connected=False)
+
 
 @router.post("/disconnect", response_model=MessageResponse)
 async def disconnect_gmail(current_user: UserResponse = Depends(get_current_user)):
     """Disconnect Gmail integration and revoke local tokens."""
+    # Update in-memory store
     if current_user.id in db.store["gmail_accounts"]:
         db.store["gmail_accounts"][current_user.id]["is_connected"] = False
+
+    # ✅ FIX: Also update Supabase so disconnect persists
+    admin_client = db.get_admin_client()
+    if admin_client:
+        try:
+            admin_client.table("gmail_accounts") \
+                .update({"is_connected": False, "updated_at": datetime.now().isoformat()}) \
+                .eq("user_id", current_user.id) \
+                .execute()
+            logger.info(f"Disconnected Gmail for user {current_user.id} in Supabase.")
+        except Exception as e:
+            logger.warning(f"Could not update Supabase gmail_accounts on disconnect: {e}")
+
     return MessageResponse(message="Gmail account disconnected successfully.")
+
 
 @router.post("/toggle-auto-scan", response_model=GmailStatusResponse)
 async def toggle_auto_scan(
@@ -92,26 +194,54 @@ async def toggle_auto_scan(
 ):
     """Enable or disable background automatic scanning for incoming emails."""
     account = db.store["gmail_accounts"].get(current_user.id)
+
+    # ✅ FIX: Restore from Supabase if not in memory
     if not account:
-        # Create default mock connection if toggling in demo
+        account = _load_gmail_account_from_supabase(current_user.id)
+
+    if not account:
+        # Create default connection if toggling in demo
         account = {
             "email_address": current_user.email,
             "is_connected": True,
             "auto_scan_enabled": payload.enabled,
             "scan_limit": 10,
-            "last_synced_at": datetime.now()
+            "last_synced_at": datetime.now(),
         }
         db.store["gmail_accounts"][current_user.id] = account
     else:
         account["auto_scan_enabled"] = payload.enabled
+        db.store["gmail_accounts"][current_user.id] = account
+
+    # ✅ FIX: Persist auto_scan toggle to Supabase
+    admin_client = db.get_admin_client()
+    if admin_client:
+        try:
+            admin_client.table("gmail_accounts") \
+                .update({
+                    "auto_scan_enabled": payload.enabled,
+                    "updated_at": datetime.now().isoformat()
+                }) \
+                .eq("user_id", current_user.id) \
+                .execute()
+        except Exception as e:
+            logger.warning(f"Could not persist auto_scan toggle to Supabase: {e}")
+
+    last_synced = account.get("last_synced_at")
+    if isinstance(last_synced, str):
+        try:
+            last_synced = datetime.fromisoformat(last_synced.replace("Z", "+00:00"))
+        except Exception:
+            last_synced = None
 
     return GmailStatusResponse(
         is_connected=account["is_connected"],
         email_address=account["email_address"],
         auto_scan_enabled=account["auto_scan_enabled"],
         scan_limit=account.get("scan_limit", 10),
-        last_synced_at=account.get("last_synced_at")
+        last_synced_at=last_synced
     )
+
 
 @router.post("/scan")
 async def scan_gmail_inbox(
@@ -120,6 +250,11 @@ async def scan_gmail_inbox(
 ):
     """Scan recent Gmail inbox messages through Gemini AI threat engine."""
     account = db.store["gmail_accounts"].get(current_user.id)
+
+    # ✅ FIX: Restore from Supabase if not in memory (e.g., after restart)
+    if not account:
+        account = _load_gmail_account_from_supabase(current_user.id)
+
     access_token = account.get("access_token") if account else None
 
     # If live Gmail access token is available, fetch messages
@@ -137,7 +272,7 @@ async def scan_gmail_inbox(
                 # Prevent duplicate scanning
                 if any(e.message_id == m_id for e in db.store["emails"].values()):
                     continue
-                
+
                 detail = await gmail_service.get_message_detail(access_token, m_id)
                 if detail:
                     payload_data = detail.get("payload", {})
@@ -158,7 +293,22 @@ async def scan_gmail_inbox(
                         headers_data=headers_list
                     )
                     scanned_results.append(result["threat"])
-            
+
+            # ✅ Update last_synced_at in both memory and Supabase after successful scan
+            now = datetime.now()
+            if account:
+                account["last_synced_at"] = now
+                db.store["gmail_accounts"][current_user.id] = account
+            admin_client = db.get_admin_client()
+            if admin_client:
+                try:
+                    admin_client.table("gmail_accounts") \
+                        .update({"last_synced_at": now.isoformat(), "updated_at": now.isoformat()}) \
+                        .eq("user_id", current_user.id) \
+                        .execute()
+                except Exception as e:
+                    logger.debug(f"Could not update last_synced_at: {e}")
+
             return {
                 "success": True,
                 "scanned_count": len(scanned_results),
@@ -172,7 +322,7 @@ async def scan_gmail_inbox(
     from app.services.demo_service import demo_service
     results = await demo_service.seed_demo_data(user_id=current_user.id)
     threats = [r["threat"] for r in results]
-    
+
     return {
         "success": True,
         "scanned_count": len(threats),
