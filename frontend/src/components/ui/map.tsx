@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState, createContext, useContext } from 'react'
-import maplibregl, { Map as MapLibreMap, NavigationControl, Marker as MapLibreMarker, Popup as MapLibrePopup } from 'maplibre-gl'
+import { createPortal } from 'react-dom'
+import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 interface MapContextType {
-  map: MapLibreMap | null
+  map: maplibregl.Map | null
   isLoaded: boolean
 }
 
@@ -18,7 +19,7 @@ export interface MapProps {
   maxZoom?: number
   pitch?: number
   bearing?: number
-  mapStyle?: string
+  mapStyle?: string | object
   className?: string
   children?: React.ReactNode
   interactive?: boolean
@@ -66,7 +67,7 @@ export const Map: React.FC<MapProps> = ({
   onClick
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [mapInstance, setMapInstance] = useState<MapLibreMap | null>(null)
+  const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
@@ -133,7 +134,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
   useEffect(() => {
     if (!map || !isLoaded) return
 
-    const nav = new NavigationControl({
+    const nav = new maplibregl.NavigationControl({
       showCompass,
       showZoom,
       visualizePitch: true
@@ -155,17 +156,15 @@ export interface MapMarkerProps {
   coordinates: [number, number] // [lng, lat]
   children?: React.ReactNode
   onClick?: () => void
-  popup?: React.ReactNode
 }
 
 export const MapMarker: React.FC<MapMarkerProps> = ({
   coordinates,
   children,
-  onClick,
-  popup
+  onClick
 }) => {
   const { map, isLoaded } = useMap()
-  const markerRef = useRef<MapLibreMarker | null>(null)
+  const markerRef = useRef<maplibregl.Marker | null>(null)
   const elRef = useRef<HTMLDivElement>(document.createElement('div'))
 
   useEffect(() => {
@@ -192,15 +191,12 @@ export const MapMarker: React.FC<MapMarkerProps> = ({
     }
   }, [map, isLoaded, coordinates[0], coordinates[1]])
 
-  // Render children into marker element via React Portal or simple DOM update
   return (
     <MarkerPortal element={elRef.current}>
       {children}
     </MarkerPortal>
   )
 }
-
-import { createPortal } from 'react-dom'
 
 const MarkerPortal: React.FC<{ element: HTMLElement; children: React.ReactNode }> = ({ element, children }) => {
   return createPortal(children, element)

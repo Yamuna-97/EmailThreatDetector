@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Globe2, Radio, Layers, ShieldAlert, MapPin, Activity, Info } from 'lucide-react'
+import { Globe2, Radio, Layers, MapPin, Info } from 'lucide-react'
 import { threatService, type ThreatMapPoint } from '../../services/threats'
 import { Map, MapControls, MapMarker, MAP_STYLES } from '../ui/map'
 
