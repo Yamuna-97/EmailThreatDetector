@@ -31,22 +31,22 @@ export const ThreatMapView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-br from-[#192837] to-[#0F172A] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-[#12101F] via-[#211A3E] to-[#18122B] border border-[#7342E2]/30 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl shadow-[#7342E2]/10">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-[#7342E2]/20 border border-[#7342E2]/30 flex items-center justify-center text-[#7342E2]">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#A78BFA]/30 via-[#8B5CF6]/30 to-[#7342E2]/40 border border-[#7342E2]/40 flex items-center justify-center text-[#A78BFA] shadow-md shadow-[#7342E2]/25">
             <Globe2 size={26} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight">
+              <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white">
                 Global Threat Vector Map
               </h1>
-              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-bold uppercase">
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-bold uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
                 Live Ingestion
               </span>
             </div>
-            <p className="text-xs text-white/60 font-body mt-0.5">
+            <p className="text-xs text-purple-200/70 font-body mt-0.5">
               Geographic distribution of identified origin mail servers, relay nodes & exit proxies via MapLibre GL
             </p>
           </div>
@@ -54,8 +54,8 @@ export const ThreatMapView: React.FC = () => {
 
         {/* Basemap Switcher & Disclaimer */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
-          <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/10 text-xs">
-            <Layers size={13} className="text-white/60 ml-1.5 mr-0.5" />
+          <div className="flex items-center gap-1 bg-[#13111C]/80 p-1 rounded-xl border border-[#7342E2]/35 text-xs shadow-inner">
+            <Layers size={13} className="text-[#A78BFA] ml-1.5 mr-0.5" />
             {(['voyager', 'darkMatter', 'positron', 'osm'] as const).map(styleKey => (
               <button
                 key={styleKey}
@@ -63,8 +63,8 @@ export const ThreatMapView: React.FC = () => {
                 onClick={() => setActiveStyle(styleKey)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold capitalize transition-all cursor-pointer ${
                   activeStyle === styleKey
-                    ? 'bg-[#7342E2] text-white shadow-sm'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                    ? 'bg-gradient-to-r from-[#7342E2] to-[#8B5CF6] text-white shadow-md shadow-[#7342E2]/30 border border-white/10'
+                    : 'text-purple-200/70 hover:text-white hover:bg-[#7342E2]/20'
                 }`}
               >
                 {styleKey === 'darkMatter' ? 'Dark SOC' : styleKey === 'voyager' ? 'Voyager' : styleKey === 'positron' ? 'Light' : 'OSM'}
@@ -72,7 +72,7 @@ export const ThreatMapView: React.FC = () => {
             ))}
           </div>
 
-          <div className="px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[11px] font-medium text-white/70 flex items-center gap-1.5">
+          <div className="px-3.5 py-1.5 rounded-xl bg-[#13111C]/60 border border-[#7342E2]/30 text-[11px] font-medium text-purple-200/80 flex items-center gap-1.5">
             <Info size={13} className="text-amber-400 shrink-0" />
             <span>Approximate IP-based location</span>
           </div>

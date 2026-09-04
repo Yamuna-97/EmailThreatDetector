@@ -118,16 +118,16 @@ export const InvestigatorDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#192837] flex flex-col font-body">
       {/* Top Security Operations Center Header */}
-      <header className="sticky top-0 z-40 w-full bg-[#192837] text-white shadow-xl">
+      <header className="sticky top-0 z-40 w-full bg-[#12101F]/95 backdrop-blur-xl border-b border-[#7342E2]/25 text-white shadow-xl shadow-[#7342E2]/10">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] flex items-center justify-center text-white shadow-md shadow-[#7342E2]/30">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#A78BFA] via-[#8B5CF6] to-[#7342E2] flex items-center justify-center text-white shadow-lg shadow-[#7342E2]/35 border border-white/20">
               <ShieldAlert size={20} />
             </div>
             <div>
-              <span className="font-heading text-lg font-bold tracking-tight flex items-center gap-2">
+              <span className="font-heading text-lg font-bold tracking-tight flex items-center gap-2 text-white">
                 VaultShield
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#7342E2] text-white tracking-wider uppercase">
+                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#7342E2] to-[#8B5CF6] text-white tracking-wider uppercase shadow-sm border border-white/15">
                   SOC Tier 2 Investigator
                 </span>
               </span>
@@ -135,7 +135,7 @@ export const InvestigatorDashboard: React.FC = () => {
           </div>
 
           {/* Investigator Navigation */}
-          <nav className="hidden lg:flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/10">
+          <nav className="hidden lg:flex items-center gap-1 bg-[#1E1938]/80 p-1.5 rounded-2xl border border-[#7342E2]/30 shadow-inner">
             {[
               { id: 'dashboard', label: 'Overview', icon: BarChart3 },
               { id: 'threats', label: 'Threat Monitoring', icon: ShieldAlert, count: threats.length },
@@ -152,14 +152,14 @@ export const InvestigatorDashboard: React.FC = () => {
                   onClick={() => { setActiveTab(tab.id as any); setCurrentPage(1); }}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                     active
-                      ? 'bg-[#7342E2] text-white shadow-md'
-                      : 'text-white/70 hover:text-white hover:bg-white/5'
+                      ? 'bg-gradient-to-r from-[#7342E2] to-[#8B5CF6] text-white shadow-md shadow-[#7342E2]/30 border border-white/10'
+                      : 'text-purple-200/70 hover:text-white hover:bg-[#7342E2]/15'
                   }`}
                 >
                   <Icon size={14} />
                   <span>{tab.label}</span>
                   {tab.count !== undefined && tab.count > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-extrabold">
+                    <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-extrabold shadow-sm">
                       {tab.count}
                     </span>
                   )}
@@ -175,7 +175,7 @@ export const InvestigatorDashboard: React.FC = () => {
               onClick={loadInvestigatorData}
               disabled={loading}
               title="Refresh SOC Data"
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-purple-200/70 hover:text-white hover:bg-[#7342E2]/20 transition-all cursor-pointer border border-transparent hover:border-[#7342E2]/30"
             >
               <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             </button>
@@ -184,7 +184,7 @@ export const InvestigatorDashboard: React.FC = () => {
               type="button"
               onClick={handleSeedDemoScenarios}
               disabled={seedingDemo}
-              className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#7342E2]/20 text-purple-200 border border-[#7342E2]/40 hover:bg-[#7342E2]/35 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
               <Play size={12} className={seedingDemo ? 'animate-spin' : ''} />
               <span>{seedingDemo ? 'Seeding...' : 'Load Demo Scenarios'}</span>
@@ -193,24 +193,23 @@ export const InvestigatorDashboard: React.FC = () => {
             <button
               type="button"
               onClick={() => setScanModalOpen(true)}
-              className="hidden sm:inline-flex px-3.5 py-1.5 rounded-full text-xs font-bold text-white bg-[#7342E2] hover:brightness-110 active:scale-95 transition-all items-center gap-1.5 shadow-sm cursor-pointer"
+              className="hidden sm:inline-flex px-3.5 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-[#7342E2] to-[#8B5CF6] hover:brightness-110 active:scale-95 transition-all items-center gap-1.5 shadow-md shadow-[#7342E2]/25 cursor-pointer border border-white/10"
             >
               <Sparkles size={13} />
               <span>Manual Scan</span>
             </button>
 
-            <div className="h-5 w-[1px] bg-white/20" />
+            <div className="h-5 w-[1px] bg-[#7342E2]/30" />
 
             <button
               type="button"
               onClick={logout}
               title="Sign Out"
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white/60 hover:text-red-400 hover:bg-white/10 transition-all cursor-pointer"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-purple-200/60 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
             >
               <LogOut size={16} />
             </button>
           </div>
-        </div>
       </header>
 
       {/* Main Content */}
