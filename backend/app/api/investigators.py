@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from app.dependencies import require_investigator
+from app.dependencies import require_investigator, get_current_user
 from app.schemas.auth import UserResponse, MessageResponse
 from app.schemas.threat import ThreatModel
 from app.schemas.investigator import (
