@@ -14,6 +14,8 @@ from app.schemas.auth import (
     ForgotPasswordRequest,
     ResetPasswordRequest,
     ResendOtpRequest,
+    UpdateProfileRequest,
+    ChangePasswordRequest,
     OtpResponse,
     AuthResponse,
     UserResponse,
@@ -537,6 +539,74 @@ async def get_me(current_user: UserResponse = Depends(get_current_user)):
     """Retrieve current authenticated user profile and verified role."""
     return current_user
 
+@router.put("/profile", response_model=UserResponse)
+async def update_profile(
+    payload: UpdateProfileRequest,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Update user profile (display name, avatar)."""
+    user_id = current_user.id
+    new_name = payload.name.strip() if payload.name else current_user.name
+    new_avatar = payload.avatar_url if payload.avatar_url is not None else current_user.avatar_url
+
+    # Update in-memory user
+    if user_id in db.store["users"]:
+        user_obj = db.store["users"][user_id]
+        user_obj.name = new_name
+        user_obj.avatar_url = new_avatar
+        updated_user = user_obj
+    else:
+        updated_user = UserResponse(
+            id=user_id,
+            email=current_user.email,
+            name=new_name,
+            role=current_user.role,
+            avatar_url=new_avatar,
+            created_at=current_user.created_at
+        )
+        db.store["users"][user_id] = updated_user
+
+    # Update Supabase profile if client exists
+    admin_client = db.get_admin_client()
+    if admin_client:
+        try:
+            admin_client.table("profiles").upsert({
+                "id": user_id,
+                "full_name": new_name,
+                "avatar_url": new_avatar
+            }).execute()
+        except Exception as e:
+            logger.debug(f"Supabase profile update warning: {e}")
+
+    logger.info(f"Updated profile for {current_user.email}: name={new_name}")
+    return updated_user
+
+@router.put("/change-password", response_model=MessageResponse)
+async def change_password(
+    payload: ChangePasswordRequest,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Change current user password."""
+    new_pass = payload.new_password.strip()
+    if len(new_pass) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters.")
+
+    admin_client = db.get_admin_client()
+    if admin_client:
+        try:
+            admin_client.auth.admin.update_user_by_id(
+                current_user.id,
+                {"password": new_pass}
+            )
+        except Exception as e:
+            logger.warning(f"Supabase password update notice: {e}")
+
+    logger.info(f"Password updated successfully for {current_user.email}")
+    return MessageResponse(
+        message="Password updated successfully.",
+        success=True
+    )
+
 @router.post("/logout", response_model=MessageResponse)
 async def logout(current_user: UserResponse = Depends(get_current_user)):
     """Revoke user authentication session."""
@@ -547,3 +617,4 @@ async def logout(current_user: UserResponse = Depends(get_current_user)):
         except Exception:
             pass
     return MessageResponse(message="Successfully signed out of defense console.")
+

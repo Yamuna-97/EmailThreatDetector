@@ -9,6 +9,7 @@ interface AuthContextType {
   role: 'user' | 'investigator' | 'admin'
   login: (email: string, password: string) => Promise<UserProfile>
   signup: (email: string, password: string, fullName?: string) => Promise<UserProfile>
+  verifySignupOtp: (email: string, otp: string) => Promise<UserProfile>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -150,6 +151,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
+  const verifySignupOtp = async (email: string, otp: string): Promise<UserProfile> => {
+    setIsLoading(true)
+    try {
+      const res = await authService.verifySignupOtp({ email, otp })
+      localStorage.setItem('vaultshield_token', res.access_token)
+      localStorage.setItem('vaultshield_user', JSON.stringify(res.user))
+      setToken(res.access_token)
+      setUser(res.user)
+      return res.user
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const logout = async () => {
     try {
       await authService.logout()
@@ -176,6 +191,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role,
         login,
         signup,
+        verifySignupOtp,
         logout,
         refreshUser,
       }}

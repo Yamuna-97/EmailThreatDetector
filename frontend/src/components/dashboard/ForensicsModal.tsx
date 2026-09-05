@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   X, ShieldAlert, CheckCircle2, AlertTriangle, Globe,
-  Download, Lock, Activity, ShieldCheck
+  Download, Lock, Activity, ShieldCheck, Cpu
 } from 'lucide-react'
 import { threatService } from '../../services/threats'
+import { InvestigatorRAGCopilot } from './InvestigatorRAGCopilot'
 
 interface ForensicsModalProps {
   threatId: string | null
@@ -17,7 +18,7 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
   const [loading, setLoading] = useState<boolean>(true)
   const [downloading, setDownloading] = useState<boolean>(false)
   const [updatingStatus, setUpdatingStatus] = useState<boolean>(false)
-  const [activeTab, setActiveTab] = useState<'overview' | 'headers' | 'intel'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'headers' | 'intel' | 'copilot'>('overview')
 
   useEffect(() => {
     if (!threatId) return
@@ -136,6 +137,7 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
             { id: 'overview', label: 'Threat Overview', icon: Activity },
             { id: 'headers', label: 'Headers & Auth (SPF/DKIM)', icon: Lock },
             { id: 'intel', label: 'IP & GeoLocation', icon: Globe },
+            { id: 'copilot', label: 'AI Forensic Copilot', icon: Cpu },
           ].map(tab => {
             const Icon = tab.icon
             const active = activeTab === tab.id
@@ -420,6 +422,17 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* TAB 4: AI FORENSIC COPILOT */}
+              {activeTab === 'copilot' && (
+                <div className="pt-2">
+                  <InvestigatorRAGCopilot
+                    emails={email ? [email] : []}
+                    selectedEmailId={email?.id}
+                    isModal={true}
+                  />
                 </div>
               )}
             </div>

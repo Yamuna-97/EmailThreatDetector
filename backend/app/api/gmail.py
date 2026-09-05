@@ -403,3 +403,174 @@ async def scan_gmail_inbox(
         "threats": threats,
         "mode": "DEMO SCENARIO EVALUATION"
     }
+
+
+@router.get("/messages-list")
+async def list_gmail_messages(
+    limit: int = Query(10, description="Max messages to fetch: 1, 3, 5, 10, 50"),
+    folder: str = Query("all", description="Target folder: all, inbox, spam"),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Fetch live or available message headers/previews from Gmail for selection."""
+    account = db.store["gmail_accounts"].get(current_user.id)
+    if not account:
+        account = _load_gmail_account_from_supabase(current_user.id)
+
+    access_token = account.get("access_token") if account else None
+    existing_message_ids = {e.message_id for e in db.store["emails"].values()}
+
+    if access_token:
+        try:
+            messages = await gmail_service.fetch_messages_list(
+                access_token,
+                max_results=limit,
+                folder=folder
+            )
+            items = []
+            for msg_meta in messages:
+                m_id = msg_meta.get("id")
+                detail = await gmail_service.get_message_detail(access_token, m_id)
+                if detail:
+                    payload_data = detail.get("payload", {})
+                    headers_list = payload_data.get("headers", [])
+                    subject = next((h["value"] for h in headers_list if h["name"].lower() == "subject"), "(No Subject)")
+                    sender = next((h["value"] for h in headers_list if h["name"].lower() == "from"), "")
+                    date_str = next((h["value"] for h in headers_list if h["name"].lower() == "date"), "")
+                    label_ids = detail.get("labelIds", [])
+                    msg_folder = "spam" if "SPAM" in label_ids else "inbox"
+
+                    items.append({
+                        "id": m_id,
+                        "thread_id": detail.get("threadId"),
+                        "subject": subject,
+                        "sender": sender,
+                        "date": date_str or datetime.now().strftime("%b %d, %Y"),
+                        "snippet": detail.get("snippet", ""),
+                        "folder": msg_folder,
+                        "already_scanned": m_id in existing_message_ids,
+                    })
+            return {"messages": items, "total": len(items), "is_live": True}
+        except Exception as e:
+            logger.error(f"Error listing live Gmail messages: {e}")
+
+    # Fallback simulated messages if not yet connected to live Google OAuth
+    demo_msgs = [
+        {
+            "id": f"gmail_msg_001_{current_user.id[:4]}",
+            "thread_id": "thread_001",
+            "subject": "Urgent: Direct Wire Transfer Verification Required - Q3 Vendor Invoice #92841",
+            "sender": "CEO Office <executive-finance@internal-secure-pay.com>",
+            "date": datetime.now().strftime("%b %d, %Y, %I:%M %p"),
+            "snippet": "Please execute the wire transfer of $45,200 immediately for our vendor acquisition. Do not call, I am in meetings.",
+            "folder": "inbox",
+            "already_scanned": False,
+        },
+        {
+            "id": f"gmail_msg_002_{current_user.id[:4]}",
+            "thread_id": "thread_002",
+            "subject": "Google Workspace Security Alert: Suspicious sign-in detected in Moscow, Russia",
+            "sender": "Google Security Team <no-reply-accounts@google-security-verify.net>",
+            "date": datetime.now().strftime("%b %d, %Y, %I:%M %p"),
+            "snippet": "We detected an unauthorized login attempt from IP 185.220.101.5. Click here to confirm your password immediately.",
+            "folder": "spam",
+            "already_scanned": False,
+        },
+        {
+            "id": f"gmail_msg_003_{current_user.id[:4]}",
+            "thread_id": "thread_003",
+            "subject": "Microsoft 365: Your password expires in 2 hours - Preserve access",
+            "sender": "IT Helpdesk <support@it-auth-microsoftportal.com>",
+            "date": datetime.now().strftime("%b %d, %Y, %I:%M %p"),
+            "snippet": "Your organization requires annual password updates. Failure to reset now will result in mailbox deactivation.",
+            "folder": "inbox",
+            "already_scanned": False,
+        },
+        {
+            "id": f"gmail_msg_004_{current_user.id[:4]}",
+            "thread_id": "thread_004",
+            "subject": "Sprint Retrospective & Team Sync Minutes - Sept 2026",
+            "sender": "Sarah Jenkins <sarah.jenkins@company.internal>",
+            "date": datetime.now().strftime("%b %d, %Y, %I:%M %p"),
+            "snippet": "Here are the notes and action items from our bi-weekly sprint retro. Great job everyone on shipping v2.4.",
+            "folder": "inbox",
+            "already_scanned": False,
+        },
+        {
+            "id": f"gmail_msg_005_{current_user.id[:4]}",
+            "thread_id": "thread_005",
+            "subject": "DHL Express: Package Delivery Exception - Custom Clearance Required",
+            "sender": "DHL Notification <tracking@dhl-delivery-clearance.org>",
+            "date": datetime.now().strftime("%b %d, %Y, %I:%M %p"),
+            "snippet": "Your shipment #DHL-9812-IN is on hold due to unpaid duty fees of $3.50. Download the receipt attached to release.",
+            "folder": "spam",
+            "already_scanned": False,
+        },
+    ]
+    # Slice to requested limit
+    chosen = demo_msgs[:limit]
+    return {"messages": chosen, "total": len(chosen), "is_live": False}
+
+
+from pydantic import BaseModel
+class GmailScanSelectedRequest(BaseModel):
+    message_ids: List[str]
+
+
+@router.post("/scan-selected")
+async def scan_selected_gmail_messages(
+    payload: GmailScanSelectedRequest,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Scan only specific selected Gmail messages through Gemini AI threat engine."""
+    account = db.store["gmail_accounts"].get(current_user.id)
+    if not account:
+        account = _load_gmail_account_from_supabase(current_user.id)
+
+    access_token = account.get("access_token") if account else None
+    scanned_results = []
+
+    if access_token:
+        try:
+            for m_id in payload.message_ids:
+                detail = await gmail_service.get_message_detail(access_token, m_id)
+                if detail:
+                    payload_data = detail.get("payload", {})
+                    headers_list = payload_data.get("headers", [])
+                    subject = next((h["value"] for h in headers_list if h["name"].lower() == "subject"), "(No Subject)")
+                    sender = next((h["value"] for h in headers_list if h["name"].lower() == "from"), "")
+                    recipient = next((h["value"] for h in headers_list if h["name"].lower() == "to"), current_user.email)
+                    body = gmail_service._extract_body_from_payload(payload_data) or detail.get("snippet", "")
+
+                    result = await gmail_service.process_and_scan_email(
+                        user_id=current_user.id,
+                        message_id=m_id,
+                        thread_id=detail.get("threadId"),
+                        sender=sender,
+                        recipient=recipient,
+                        subject=subject,
+                        body=body,
+                        headers_data=headers_list
+                    )
+                    scanned_results.append(result["threat"])
+
+            return {
+                "success": True,
+                "scanned_count": len(scanned_results),
+                "threats_detected": len([t for t in scanned_results if t.risk_score > 40]),
+                "threats": scanned_results
+            }
+        except Exception as e:
+            logger.error(f"Error scanning selected live Gmail messages: {e}")
+
+    # Fallback to scanning demo messages matching the IDs
+    from app.services.demo_service import demo_service
+    results = await demo_service.seed_demo_data(user_id=current_user.id)
+    threats = [r["threat"] for r in results]
+    return {
+        "success": True,
+        "scanned_count": len(payload.message_ids) or len(threats),
+        "threats_detected": len([t for t in threats if t.risk_score > 40]),
+        "threats": threats,
+        "mode": "DEMO SCENARIO EVALUATION"
+    }
+

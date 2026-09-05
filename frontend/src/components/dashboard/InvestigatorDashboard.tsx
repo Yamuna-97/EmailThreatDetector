@@ -3,21 +3,27 @@ import {
   ShieldAlert, Globe, Users, BarChart3, FileText,
   Download, Eye, RefreshCw,
   Search, Terminal, LogOut, ArrowUpDown, ChevronLeft, ChevronRight,
-  AlertTriangle, CheckCircle, Activity, MapPin, ArrowLeft, UserCheck
+  AlertTriangle, CheckCircle, Activity, MapPin, ArrowLeft, UserCheck,
+  Cpu
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { threatService, type ThreatItem } from '../../services/threats'
+import { gmailService, type GmailStatus } from '../../services/gmail'
 import ForensicsModal from './ForensicsModal'
 import ThreatMapView from './ThreatMapView'
+import { InvestigatorRAGCopilot } from './InvestigatorRAGCopilot'
+import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar'
 
 export const InvestigatorDashboard: React.FC = () => {
   const { logout } = useAuth()
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'threats' | 'map' | 'users' | 'analytics' | 'reports'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'threats' | 'map' | 'users' | 'copilot' | 'analytics' | 'reports'>('dashboard')
+  const [copilotSelectedEmailId, setCopilotSelectedEmailId] = useState<string>('')
   const [stats, setStats] = useState<any>(null)
   const [threats, setThreats] = useState<ThreatItem[]>([])
   const [usersList, setUsersList] = useState<any[]>([])
   const [analytics, setAnalytics] = useState<any>(null)
   const [allEmails, setAllEmails] = useState<any[]>([])
+  const [gmailStatus, setGmailStatus] = useState<GmailStatus | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [selectedThreatId, setSelectedThreatId] = useState<string | null>(null)
   
@@ -32,23 +38,26 @@ export const InvestigatorDashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [sortBy, setSortBy] = useState<'newest' | 'risk_score'>('newest')
   const [currentPage, setCurrentPage] = useState<number>(1)
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
   const itemsPerPage = 8
 
   const loadInvestigatorData = async () => {
     setLoading(true)
     try {
-      const [dashStats, threatList, users, anData, emails] = await Promise.all([
+      const [dashStats, threatList, users, anData, emails, gRes] = await Promise.all([
         threatService.getInvestigatorDashboard().catch(() => ({})),
         threatService.getInvestigatorThreats().catch(() => []),
         threatService.getUsers().catch(() => []),
         threatService.getAnalytics().catch(() => ({})),
         threatService.getEmails().catch(() => []),
+        gmailService.getStatus().catch(() => ({ is_connected: false })),
       ])
       setStats(dashStats)
       setThreats(threatList)
       setUsersList(users)
       setAnalytics(anData)
       setAllEmails(emails)
+      setGmailStatus(gRes as GmailStatus)
     } catch (err) {
       console.error('Error loading investigator data:', err)
     } finally {
@@ -135,86 +144,143 @@ export const InvestigatorDashboard: React.FC = () => {
     return filteredAndSortedThreats.slice(start, start + itemsPerPage)
   }, [filteredAndSortedThreats, currentPage])
 
+  const investigatorTabs = [
+    { id: 'dashboard', label: 'Overview', icon: BarChart3 },
+    { id: 'threats', label: 'Threat Monitoring', icon: ShieldAlert, count: threats.length },
+    { id: 'copilot', label: 'SOC RAG Copilot', icon: Cpu },
+    { id: 'map', label: 'Threat Map', icon: Globe },
+    { id: 'users', label: 'User Monitoring', icon: Users, count: usersList.length },
+    { id: 'analytics', label: 'Analytics', icon: Terminal },
+    { id: 'reports', label: 'Reports', icon: FileText },
+  ]
+
   return (
-    <div className="min-h-screen bg-[#FFFFFF] text-[#1F1F29] flex flex-col font-body">
-      {/* Top Navigation Header */}
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-[#D8C8FF] text-[#1F1F29] shadow-sm">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#F5F3FF] border border-[#D8C8FF] flex items-center justify-center text-[#7342E2] shadow-sm">
-              <ShieldAlert size={20} />
+    <div className="min-h-screen bg-[#FFFFFF] text-[#1F1F29] flex flex-col md:flex-row font-body">
+      {/* Left Collapsible Animated Sidebar */}
+      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
+        <SidebarBody className="justify-between gap-6">
+          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+            {/* Logo / Brand */}
+            <div className="flex items-center gap-3 px-1 py-2 mb-4">
+              <div className="w-9 h-9 rounded-xl bg-[#F5F3FF] border border-[#D8C8FF] flex items-center justify-center text-[#7342E2] shrink-0 shadow-sm">
+                <ShieldAlert size={20} />
+              </div>
+              {sidebarOpen && (
+                <div className="truncate">
+                  <span className="font-heading text-base font-extrabold text-[#1F1F29] tracking-tight block">
+                    Vault<span className="text-[#7342E2]">Shield</span>
+                  </span>
+                  <span className="text-[10px] text-[#7342E2] font-extrabold block uppercase tracking-wider">
+                    SOC Console
+                  </span>
+                </div>
+              )}
             </div>
-            <div>
-              <span className="font-heading text-lg font-bold tracking-tight text-[#1F1F29]">
-                VaultShield
-              </span>
-              <span className="text-[10px] text-[#7342E2] font-extrabold uppercase ml-2 px-2 py-0.5 rounded-md bg-[#F5F3FF] border border-[#D8C8FF]">
-                SOC Investigator Console
-              </span>
+
+            {/* Nav Links */}
+            <div className="flex flex-col gap-1.5">
+              {investigatorTabs.map((tab) => {
+                const Icon = tab.icon
+                return (
+                  <SidebarLink
+                    key={tab.id}
+                    link={{
+                      label: tab.label,
+                      icon: <Icon size={18} />,
+                      active: activeTab === tab.id,
+                      count: tab.count,
+                      onClick: () => {
+                        setActiveTab(tab.id as any)
+                        setCurrentPage(1)
+                      },
+                    }}
+                  />
+                )
+              })}
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 bg-[#F9FAFB] p-1 rounded-2xl border border-[#D8C8FF]">
-            {[
-              { id: 'dashboard', label: 'Overview', icon: BarChart3 },
-              { id: 'threats', label: 'Threat Monitoring', icon: ShieldAlert, count: threats.length },
-              { id: 'map', label: 'Threat Map', icon: Globe },
-              { id: 'users', label: 'User Monitoring', icon: Users, count: usersList.length },
-              { id: 'analytics', label: 'Analytics', icon: Terminal },
-              { id: 'reports', label: 'Reports', icon: FileText },
-            ].map(tab => {
-              const Icon = tab.icon
-              const active = activeTab === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => { setActiveTab(tab.id as any); setCurrentPage(1); }}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    active
-                      ? 'bg-[#7342E2] text-white shadow-sm'
-                      : 'text-[#6B7280] hover:text-[#1F1F29] hover:bg-white'
-                  }`}
+          {/* Quick Actions & Sign Out at Bottom */}
+          <div className="border-t border-[#D8C8FF] pt-3">
+            <SidebarLink
+              link={{
+                label: "Refresh Data",
+                icon: <RefreshCw size={18} className={loading ? "animate-spin" : ""} />,
+                onClick: loadInvestigatorData,
+              }}
+            />
+            <SidebarLink
+              link={{
+                label: "Sign Out",
+                icon: <LogOut size={18} className="text-red-500" />,
+                onClick: logout,
+              }}
+              className="text-red-600 hover:bg-red-50"
+            />
+          </div>
+        </SidebarBody>
+      </Sidebar>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+        {/* Top Header */}
+        <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-[#D8C8FF] text-[#1F1F29] shadow-xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="font-heading text-sm font-extrabold text-[#1F1F29]">
+                {investigatorTabs.find(t => t.id === activeTab)?.label || 'SOC Console'}
+              </span>
+              <span className="text-[10px] text-[#7342E2] font-extrabold uppercase px-2 py-0.5 rounded-md bg-[#F5F3FF] border border-[#D8C8FF]">
+                Investigation Dossier
+              </span>
+            </div>
+
+            {/* Quick Actions & Gmail Indicator */}
+            <div className="flex items-center gap-3">
+              {/* Global Gmail Connection Status Light */}
+              {gmailStatus?.is_connected ? (
+                <div
+                  title={`Gmail Authorized: ${gmailStatus?.email_address || 'Connected'}`}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs cursor-default"
                 >
-                  <Icon size={14} />
-                  <span>{tab.label}</span>
-                  {tab.count !== undefined && tab.count > 0 && (
-                    <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-extrabold ${
-                      active ? 'bg-white/20 text-white' : 'bg-[#7342E2]/10 text-[#7342E2]'
-                    }`}>
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              )
-            })}
-          </nav>
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm animate-pulse shrink-0" />
+                  <span className="truncate max-w-[120px] sm:max-w-[180px]">
+                    Gmail: {gmailStatus?.email_address || 'Connected'}
+                  </span>
+                </div>
+              ) : (
+                <div
+                  title="Gmail is disconnected."
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold shadow-xs cursor-default"
+                >
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shrink-0" />
+                  <span>Gmail: Disconnected</span>
+                </div>
+              )}
 
-          {/* Quick Actions */}
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={loadInvestigatorData}
-              disabled={loading}
-              title="Refresh Telemetry Data"
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-[#6B7280] hover:text-[#7342E2] hover:bg-[#F5F3FF] border border-[#D8C8FF] transition-all cursor-pointer shadow-sm"
-            >
-              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            </button>
+              <button
+                type="button"
+                onClick={loadInvestigatorData}
+                disabled={loading}
+                title="Refresh Telemetry Data"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-[#6B7280] hover:text-[#7342E2] hover:bg-[#F5F3FF] border border-[#D8C8FF] transition-all cursor-pointer shadow-sm"
+              >
+                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              </button>
 
-            <div className="h-5 w-[1px] bg-[#D8C8FF]" />
+              <div className="h-5 w-[1px] bg-[#D8C8FF]" />
 
-            <button
-              type="button"
-              onClick={logout}
-              title="Sign Out"
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-[#6B7280] hover:text-red-600 hover:bg-red-50 border border-[#D8C8FF] hover:border-red-200 transition-all cursor-pointer shadow-sm"
-            >
-              <LogOut size={16} />
-            </button>
+              <button
+                type="button"
+                onClick={logout}
+                title="Sign Out"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-[#6B7280] hover:text-red-600 hover:bg-red-50 border border-[#D8C8FF] hover:border-red-200 transition-all cursor-pointer shadow-sm"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
       {/* Main Content */}
       <main className="max-w-7xl w-full mx-auto px-5 sm:px-8 py-8 flex-1 space-y-8">
@@ -863,6 +929,18 @@ export const InvestigatorDashboard: React.FC = () => {
                             <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
                               <button
                                 type="button"
+                                onClick={() => {
+                                  setCopilotSelectedEmailId(t.email_id || t.id)
+                                  setActiveTab('copilot')
+                                }}
+                                className="px-3.5 py-2 rounded-xl bg-[#F5F3FF] hover:bg-[#7342E2] hover:text-white text-[#7342E2] border border-[#D8C8FF] text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <Cpu size={14} />
+                                <span>Copilot</span>
+                              </button>
+
+                              <button
+                                type="button"
                                 onClick={() => setSelectedThreatId(t.id)}
                                 className="px-4 py-2 rounded-xl bg-[#7342E2] hover:bg-[#6032C4] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                               >
@@ -961,6 +1039,17 @@ export const InvestigatorDashboard: React.FC = () => {
           </div>
         )}
 
+        {/* TAB: SOC RAG COPILOT */}
+        {activeTab === 'copilot' && (
+          <div className="space-y-4">
+            <InvestigatorRAGCopilot
+              emails={allEmails.length > 0 ? allEmails : threats}
+              users={usersList}
+              selectedEmailId={copilotSelectedEmailId}
+            />
+          </div>
+        )}
+
         {/* TAB 5: ANALYTICS */}
         {activeTab === 'analytics' && (
           <div className="space-y-6">
@@ -1051,6 +1140,7 @@ export const InvestigatorDashboard: React.FC = () => {
         onClose={() => setSelectedThreatId(null)}
         onStatusUpdated={loadInvestigatorData}
       />
+      </div>
     </div>
   )
 }

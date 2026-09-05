@@ -1,17 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react'
 import {
   ShieldAlert, ShieldCheck, Mail, Sparkles, RefreshCw, AlertTriangle,
-  Eye, Clock, Activity, LogOut, ChevronRight, Inbox, Search, CheckCircle, XCircle, Menu, X
+  Eye, Clock, Activity, LogOut, ChevronRight, Inbox, Search, CheckCircle, XCircle, X,
+  User
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { gmailService, type GmailStatus } from '../../services/gmail'
+import { gmailService, type GmailStatus, type MonitoringStatus } from '../../services/gmail'
 import { threatService, type ThreatItem, type EmailItem, type AlertItem } from '../../services/threats'
 import ManualScanModal from './ManualScanModal'
 import ForensicsModal from './ForensicsModal'
+import { UserRAGAssistant } from './UserRAGAssistant'
 import { CoreSpinLoader } from '../ui/core-spin-loader'
+import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar'
+import { IncidentReportCard } from '@/components/ui/area-chart-1'
+import { UserProfileView } from './UserProfileView'
+import { GmailScannerView } from './GmailScannerView'
 
 interface NavTabItem {
-  id: 'dashboard' | 'emails' | 'alerts' | 'history'
+  id: 'dashboard' | 'gmail-scan' | 'emails' | 'ai-advisor' | 'alerts' | 'history' | 'profile'
   label: string
   icon: React.ComponentType<{ size?: number; className?: string }>
   count?: number
@@ -19,20 +25,23 @@ interface NavTabItem {
 
 export const UserDashboard: React.FC = () => {
   const { user, logout } = useAuth()
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'emails' | 'alerts' | 'history'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'gmail-scan' | 'emails' | 'ai-advisor' | 'alerts' | 'history' | 'profile'>('dashboard')
+
+  const [advisorSelectedEmailId, setAdvisorSelectedEmailId] = useState<string>('')
   const [threats, setThreats] = useState<ThreatItem[]>([])
   const [emails, setEmails] = useState<EmailItem[]>([])
   const [alerts, setAlerts] = useState<AlertItem[]>([])
   const [gmailStatus, setGmailStatus] = useState<GmailStatus | null>(null)
+  const [monitoringStatus, setMonitoringStatus] = useState<MonitoringStatus | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [scanModalOpen, setScanModalOpen] = useState<boolean>(false)
   const [selectedThreatId, setSelectedThreatId] = useState<string | null>(null)
   const [selectedEmail, setSelectedEmail] = useState<EmailItem | null>(null)
   const [syncingGmail, setSyncingGmail] = useState<boolean>(false)
-  const [scanLimit, setScanLimit] = useState<number>(5)
   const [scanFolder, setScanFolder] = useState<'all' | 'inbox' | 'spam'>('all')
   const [emailSearch, setEmailSearch] = useState<string>('')
-  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false)
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
+  const monitoringPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // OAuth return banner state
   const [oauthBanner, setOauthBanner] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
@@ -45,12 +54,18 @@ export const UserDashboard: React.FC = () => {
         threatService.getThreats(),
         threatService.getEmails(),
         threatService.getAlerts(),
-        gmailService.getStatus().catch(() => ({ is_connected: false, auto_scan_enabled: false, scan_limit: 10 })),
+        gmailService.getStatus().catch(() => ({ is_connected: false, auto_scan_enabled: false, scan_limit: 10, monitoring_active: false, emails_auto_processed: 0, warnings_sent: 0 })),
       ])
       setThreats(tRes)
       setEmails(eRes)
       setAlerts(aRes)
-      setGmailStatus(gRes)
+      setGmailStatus(gRes as GmailStatus)
+      // Also refresh monitoring status
+      if ((gRes as GmailStatus).is_connected) {
+        gmailService.getMonitoringStatus()
+          .then(ms => setMonitoringStatus(ms))
+          .catch(() => null)
+      }
     } catch (err) {
       console.error('Error loading dashboard data:', err)
     } finally {
@@ -70,17 +85,8 @@ export const UserDashboard: React.FC = () => {
         const cleanUrl = window.location.pathname
         window.history.replaceState({}, '', cleanUrl)
 
-        setOauthBanner({ type: 'success', message: 'Gmail connected successfully! Scanning your inbox now…' })
-
-        loadAllData().then(() => {
-          setSyncingGmail(true)
-          gmailService.scanInbox(10, 'all')
-            .then(() => loadAllData())
-            .then(() => setActiveTab('emails'))
-            .catch(console.error)
-            .finally(() => setSyncingGmail(false))
-        })
-
+        setOauthBanner({ type: 'success', message: 'Gmail connected successfully! You can now scan your inbox or enable automatic monitoring.' })
+        loadAllData().then(() => setActiveTab('dashboard'))
         setTimeout(() => setOauthBanner(null), 6000)
         return
       }
@@ -100,45 +106,50 @@ export const UserDashboard: React.FC = () => {
     loadAllData()
   }, [])
 
-  const handleConnectGmail = async () => {
-    try {
-      const res = await gmailService.connect()
-      if (res.auth_url) {
-        window.location.href = res.auth_url
-      }
-    } catch (err) {
-      alert('Failed to initialize Google OAuth connect.')
+  // Poll monitoring status every 30s while monitoring is active
+  useEffect(() => {
+    if (monitoringPollRef.current) {
+      clearInterval(monitoringPollRef.current)
+      monitoringPollRef.current = null
     }
-  }
+    if (monitoringStatus?.monitoring_active && gmailStatus?.is_connected) {
+      monitoringPollRef.current = setInterval(() => {
+        gmailService.getMonitoringStatus()
+          .then(ms => setMonitoringStatus(ms))
+          .catch(() => null)
+        // Also refresh email/threat counts
+        Promise.all([threatService.getThreats(), threatService.getEmails(), threatService.getAlerts()])
+          .then(([t, e, a]) => { setThreats(t); setEmails(e); setAlerts(a) })
+          .catch(() => null)
+      }, 30_000)
+    }
+    return () => {
+      if (monitoringPollRef.current) clearInterval(monitoringPollRef.current)
+    }
+  }, [monitoringStatus?.monitoring_active, gmailStatus?.is_connected])
 
-  const handleDisconnectGmail = async () => {
-    if (!confirm('Are you sure you want to disconnect Gmail?')) return
-    try {
-      await gmailService.disconnect()
-      await loadAllData()
-    } catch (err) {
-      alert('Failed to disconnect Gmail.')
-    }
-  }
+  const scanCancelledRef = useRef(false)
 
-  const handleToggleAutoScan = async () => {
-    if (!gmailStatus) return
-    try {
-      const updated = await gmailService.toggleAutoScan(!gmailStatus.auto_scan_enabled)
-      setGmailStatus(updated)
-    } catch (err) {
-      alert('Failed to update auto scan setting.')
-    }
+  const handleCancelScan = () => {
+    scanCancelledRef.current = true
+    setSyncingGmail(false)
+    setOauthBanner({ type: 'error', message: 'Gmail email scan was cancelled.' })
+    setTimeout(() => setOauthBanner(null), 4000)
   }
 
   const handleScanGmailWithOptions = async (limit: number, folder: 'all' | 'inbox' | 'spam' = scanFolder) => {
+    scanCancelledRef.current = false
     setSyncingGmail(true)
     try {
       await gmailService.scanInbox(limit, folder)
-      await loadAllData()
-      setActiveTab('emails')
-    } catch (err) {
-      alert('Scan failed.')
+      if (!scanCancelledRef.current) {
+        await loadAllData()
+        setActiveTab('emails')
+      }
+    } catch (err: any) {
+      if (!scanCancelledRef.current) {
+        alert('Scan failed: ' + (err?.message || 'Network error'))
+      }
     } finally {
       setSyncingGmail(false)
     }
@@ -179,13 +190,16 @@ export const UserDashboard: React.FC = () => {
 
   const navTabs: NavTabItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
-    { id: 'emails', label: 'My Emails', icon: Mail, count: emails.length },
+    { id: 'gmail-scan', label: 'Gmail Scanner', icon: Mail },
+    { id: 'emails', label: 'My Emails', icon: Inbox, count: emails.length },
+    { id: 'ai-advisor', label: 'AI Security Advisor', icon: Sparkles },
     { id: 'alerts', label: 'Threat Alerts', icon: AlertTriangle, count: unreadAlertsCount },
     { id: 'history', label: 'History', icon: Clock },
+    { id: 'profile', label: 'Profile Settings', icon: User },
   ]
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-[#192837] flex flex-col font-body selection:bg-[#7342E2]/20 selection:text-[#7342E2]">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#192837] flex flex-col md:flex-row font-body selection:bg-[#7342E2]/20 selection:text-[#7342E2]">
       {/* OAuth Banner Notification */}
       {oauthBanner && (
         <div
@@ -209,139 +223,157 @@ export const UserDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-[#192837]/10 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] flex items-center justify-center text-white shadow-md shadow-[#7342E2]/25">
-              <ShieldCheck size={22} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-heading text-lg font-extrabold text-[#192837] tracking-tight">
-                  VaultShield
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#7342E2]/10 text-[#7342E2] uppercase tracking-wider whitespace-nowrap">
-                  User Portal
-                </span>
+      {/* Left Collapsible Animated Sidebar */}
+      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
+        <SidebarBody className="justify-between gap-6">
+          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+            {/* Logo / Brand Header */}
+            <div className="flex items-center gap-3 px-1 py-2 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] flex items-center justify-center text-white shrink-0 shadow-md shadow-[#7342E2]/25">
+                <ShieldCheck size={22} />
               </div>
-              <span className="text-[11px] text-[#192837]/50 block font-medium">
-                AI Email Threat Intelligence
+              {sidebarOpen && (
+                <div className="truncate">
+                  <span className="font-heading text-base font-extrabold text-[#192837] tracking-tight block">
+                    Vault<span className="text-[#7342E2]">Shield</span>
+                  </span>
+                  <span className="text-[10px] text-[#7342E2] font-bold block uppercase tracking-wider">
+                    User Portal
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar Navigation Links */}
+            <div className="flex flex-col gap-1.5">
+              {navTabs.map((tab) => {
+                const Icon = tab.icon
+                return (
+                  <SidebarLink
+                    key={tab.id}
+                    link={{
+                      label: tab.label,
+                      icon: <Icon size={18} />,
+                      active: activeTab === tab.id,
+                      count: tab.count,
+                      onClick: () => setActiveTab(tab.id as any),
+                    }}
+                  />
+                )
+              })}
+            </div>
+
+            {/* Quick Manual Scan in Sidebar */}
+            <div className="mt-4 pt-3 border-t border-[#192837]/10">
+              <SidebarLink
+                link={{
+                  label: "Manual Scan",
+                  icon: <Sparkles size={18} className="text-[#7342E2]" />,
+                  onClick: () => setScanModalOpen(true),
+                }}
+                className="bg-[#7342E2]/10 hover:bg-[#7342E2]/20 text-[#7342E2] font-semibold"
+              />
+            </div>
+          </div>
+
+          {/* User Profile & Sign Out at Bottom */}
+          <div className="border-t border-[#192837]/10 pt-3">
+            <SidebarLink
+              link={{
+                label: user?.name || "Profile & Settings",
+                icon: user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user?.name || "User"}
+                    className="w-7 h-7 rounded-xl object-cover ring-2 ring-[#7342E2]/40 shrink-0"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-xl bg-[#7342E2] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs ring-2 ring-transparent hover:ring-[#7342E2]/30 transition-all">
+                    {user?.name ? user.name[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : "U"}
+                  </div>
+                ),
+                active: activeTab === 'profile',
+                onClick: () => setActiveTab('profile'),
+              }}
+              className="cursor-pointer hover:bg-[#7342E2]/10"
+            />
+            <SidebarLink
+              link={{
+                label: "Sign Out",
+                icon: <LogOut size={18} className="text-red-500" />,
+                onClick: logout,
+              }}
+              className="text-red-600 hover:bg-red-50 hover:text-red-700"
+            />
+          </div>
+        </SidebarBody>
+      </Sidebar>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+        {/* Top Navbar Header with Live Red / Green Gmail Status Indicator */}
+        <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-[#192837]/10 shadow-xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <span className="font-heading text-base font-extrabold text-[#192837]">
+                {navTabs.find(t => t.id === activeTab)?.label || 'Dashboard'}
+              </span>
+              <span className="text-[11px] text-[#192837]/50 hidden sm:inline">
+                &bull; AI Email Threat Intelligence
               </span>
             </div>
-          </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 bg-[#FAF9F6] p-1.5 rounded-2xl border border-[#192837]/8">
-            {navTabs.map(tab => {
-              const Icon = tab.icon
-              const active = activeTab === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-                    active
-                      ? 'bg-white text-[#7342E2] shadow-xs font-bold'
-                      : 'text-[#192837]/70 hover:text-[#192837] hover:bg-white/50'
-                  }`}
+            {/* Actions & Gmail Live Red/Green Indicator */}
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Global Gmail Connection Status Light */}
+              {gmailStatus?.is_connected ? (
+                <div
+                  title={`Gmail Authorized: ${gmailStatus?.email_address || user?.email}`}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs cursor-default"
                 >
-                  <Icon size={15} />
-                  <span>{tab.label}</span>
-                  {tab.count !== undefined && tab.count > 0 && (
-                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      tab.id === 'alerts' ? 'bg-red-500 text-white' : 'bg-[#7342E2]/15 text-[#7342E2]'
-                    }`}>
-                      {tab.count}
-                    </span>
-                  )}
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm animate-pulse shrink-0" />
+                  <span className="truncate max-w-[120px] sm:max-w-[200px]">
+                    Gmail: {gmailStatus?.email_address || 'Connected'}
+                  </span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('profile')}
+                  title="Gmail is disconnected. Click to connect in Profile & Settings"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                >
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shrink-0" />
+                  <span>Gmail: Disconnected</span>
                 </button>
-              )
-            })}
-          </nav>
+              )}
 
-          {/* Actions & Profile */}
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={() => setScanModalOpen(true)}
-              className="px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] hover:brightness-110 active:scale-95 shadow-md shadow-[#7342E2]/20 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-            >
-              <Sparkles size={14} />
-              <span>Manual Scan</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setScanModalOpen(true)}
+                className="px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] hover:brightness-110 active:scale-95 shadow-md shadow-[#7342E2]/20 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              >
+                <Sparkles size={14} />
+                <span>Manual Scan</span>
+              </button>
 
-            <div className="hidden sm:block h-6 w-[1px] bg-[#192837]/10" />
-
-            <div className="hidden sm:flex items-center gap-2.5 bg-[#FAF9F6] border border-[#192837]/8 px-3 py-1.5 rounded-xl">
-              <div className="w-7 h-7 rounded-lg bg-[#7342E2] text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                {user?.name ? user.name[0].toUpperCase() : 'U'}
-              </div>
-              <div className="text-left text-xs max-w-[140px] truncate">
-                <span className="font-bold text-[#192837] block leading-tight truncate">{user?.name}</span>
-                <span className="text-[10px] text-[#192837]/50 block truncate">{user?.email}</span>
-              </div>
+              <button
+                type="button"
+                onClick={logout}
+                title="Sign Out"
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-[#192837]/60 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-all cursor-pointer shrink-0"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={logout}
-              title="Sign Out"
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-[#192837]/60 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-all cursor-pointer shrink-0"
-            >
-              <LogOut size={16} />
-            </button>
-
-            {/* Mobile Menu Toggle Button */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-[#192837]/70 hover:bg-[#FAF9F6] cursor-pointer"
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
           </div>
-        </div>
+        </header>
 
-        {/* Mobile Dropdown Navigation */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-[#192837]/10 bg-white p-3 space-y-1 animate-fade-in">
-            {navTabs.map(tab => {
-              const Icon = tab.icon
-              const active = activeTab === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id as any)
-                    setMobileMenuOpen(false)
-                  }}
-                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                    active ? 'bg-[#7342E2]/10 text-[#7342E2] font-bold' : 'text-[#192837]/70 hover:bg-[#FAF9F6]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Icon size={16} />
-                    <span>{tab.label}</span>
-                  </div>
-                  {tab.count !== undefined && tab.count > 0 && (
-                    <span className="px-2 py-0.5 rounded-full bg-[#7342E2] text-white text-[10px] font-bold">
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        )}
-      </header>
+        {/* Main Body */}
+        <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
 
-      {/* Main Container */}
-      <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
-
-        {/* Compact Strip Header for Inner Tabs (Emails, Alerts, History) */}
-        {activeTab !== 'dashboard' && (
+        {/* Compact Strip Header for Inner Tabs */}
+        {activeTab !== 'dashboard' && activeTab !== 'profile' && activeTab !== 'gmail-scan' && (
           <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#192837]/10 shadow-xs">
             <div className="flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -349,6 +381,7 @@ export const UserDashboard: React.FC = () => {
                 {activeTab === 'emails' && `Mailbox Overview (${emails.length} Analyzed Emails)`}
                 {activeTab === 'alerts' && `Security Alert Logs (${alerts.length} Total Alerts)`}
                 {activeTab === 'history' && `Threat Audit History (${threats.length} Recorded Items)`}
+                {activeTab === 'ai-advisor' && `AI Cybersecurity Assistant & RAG Copilot`}
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs">
@@ -369,18 +402,53 @@ export const UserDashboard: React.FC = () => {
           </div>
         )}
 
+
         {/* TAB 1: MAIN DASHBOARD VIEW */}
         {activeTab === 'dashboard' && (
           <>
-            {/* Top Overview & Scanner Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* User Protection Summary Banner */}
-              <div className="lg:col-span-2 p-6 sm:p-7 rounded-3xl bg-white border border-[#192837]/10 shadow-xs flex flex-col justify-between space-y-6">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#7342E2]/10 text-[#7342E2]">
-                      Real-Time SOC Defense Active
+            {/* Active Scanning Indicator with Cancel Option */}
+            {syncingGmail && (
+              <div className="p-4 rounded-3xl bg-gradient-to-r from-[#FAF8FF] via-white to-[#F5F3FF] border border-[#7342E2]/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-2xl bg-[#7342E2]/10 border border-[#7342E2]/25 text-[#7342E2] flex items-center justify-center shrink-0">
+                    <RefreshCw size={18} className="animate-spin" />
+                  </div>
+                  <div>
+                    <span className="font-heading font-extrabold text-xs sm:text-sm text-[#192837] block">
+                      Scanning Gmail Inbox ({scanFolder})...
                     </span>
+                    <span className="text-[11px] text-[#192837]/60 font-medium">
+                      Extracting headers, evaluating SPF/DKIM authentication & classifying threats.
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCancelScan}
+                  className="px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5"
+                >
+                  <X size={14} />
+                  <span>Cancel Scan</span>
+                </button>
+              </div>
+            )}
+
+            {/* Top Defense Overview Banner */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#192837]/10 shadow-xs flex flex-col justify-between space-y-6">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#7342E2]/10 text-[#7342E2]">
+                    Real-Time SOC Defense Active
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('gmail-scan')}
+                      className="px-3.5 py-1.5 rounded-xl bg-[#7342E2]/10 hover:bg-[#7342E2]/20 text-[#7342E2] text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Mail size={14} />
+                      <span>Open Gmail Scanner</span>
+                    </button>
                     <button
                       type="button"
                       onClick={loadAllData}
@@ -391,161 +459,40 @@ export const UserDashboard: React.FC = () => {
                       <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
                     </button>
                   </div>
-
-                  <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#192837] tracking-tight mt-3">
-                    Defense Overview
-                  </h1>
-                  <p className="text-xs sm:text-sm text-[#192837]/70 mt-1 font-medium leading-relaxed">
-                    AI-powered NLP analysis, DKIM/SPF domain validation & heuristic threat triage running continuously.
-                  </p>
                 </div>
 
-                {/* Key Metrics Widgets */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-[#192837]/8">
-                  <div className="p-3.5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
-                    <span className="text-[10px] font-bold text-[#192837]/60 uppercase tracking-wider block">Total Scanned</span>
-                    <span className="text-2xl font-extrabold font-heading text-[#192837] mt-0.5 block">{totalScanned}</span>
-                  </div>
-                  <div className="p-3.5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
-                    <span className="text-[10px] font-bold text-orange-700 uppercase tracking-wider block">Active Threats</span>
-                    <span className="text-2xl font-extrabold font-heading text-orange-600 mt-0.5 block">{threatCount}</span>
-                  </div>
-                  <div className="p-3.5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
-                    <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider block">Critical</span>
-                    <span className="text-2xl font-extrabold font-heading text-red-600 mt-0.5 block">{criticalCount}</span>
-                  </div>
-                  <div className="p-3.5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
-                    <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Clean & Safe</span>
-                    <span className="text-2xl font-extrabold font-heading text-emerald-600 mt-0.5 block">{safeCount}</span>
-                  </div>
-                </div>
+                <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#192837] tracking-tight mt-3">
+                  Defense Overview
+                </h1>
+                <p className="text-xs sm:text-sm text-[#192837]/70 mt-1 font-medium leading-relaxed">
+                  AI-powered NLP analysis, DKIM/SPF domain validation & heuristic threat triage running continuously.
+                </p>
               </div>
 
-              {/* Gmail API Integration Panel */}
-              <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-xs flex flex-col justify-between space-y-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center border border-red-100">
-                      <Mail size={19} />
-                    </div>
-                    <div>
-                      <h3 className="font-heading text-sm font-bold text-[#192837]">Gmail Ingestion</h3>
-                      <span className="text-[10px] text-[#192837]/50 font-medium block">Google OAuth 2.0 API</span>
-                    </div>
-                  </div>
-
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                    gmailStatus?.is_connected ? 'bg-emerald-100 text-emerald-800' : 'bg-[#192837]/8 text-[#192837]/60'
-                  }`}>
-                    {gmailStatus?.is_connected ? '● Connected' : 'Disconnected'}
-                  </span>
+              {/* Key Metrics Widgets */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-[#192837]/8">
+                <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
+                  <span className="text-[10px] font-bold text-[#192837]/60 uppercase tracking-wider block">Total Scanned</span>
+                  <span className="text-2xl sm:text-3xl font-extrabold font-heading text-[#192837] mt-0.5 block">{totalScanned}</span>
                 </div>
-
-                {gmailStatus?.is_connected ? (
-                  <div className="space-y-3.5 text-xs">
-                    <div className="p-2.5 rounded-xl bg-[#FAF9F6] border border-[#192837]/8 text-xs font-semibold text-[#192837] truncate">
-                      <span className="text-[10px] text-[#192837]/50 block font-normal">Connected Account:</span>
-                      <span className="truncate block mt-0.5">{gmailStatus.email_address || user?.email}</span>
-                    </div>
-
-                    {/* Scan Presets Pill Selector */}
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-[#192837]/75 block">Scan Range (Recent Emails):</label>
-                      <div className="grid grid-cols-6 gap-1">
-                        {[1, 3, 5, 10, 25, 50].map(val => (
-                          <button
-                            key={val}
-                            type="button"
-                            onClick={() => setScanLimit(val)}
-                            className={`py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                              scanLimit === val
-                                ? 'bg-[#7342E2] text-white shadow-xs'
-                                : 'bg-[#FAF9F6] border border-[#192837]/10 text-[#192837]/70 hover:bg-[#7342E2]/10'
-                            }`}
-                          >
-                            {val}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Target Mailbox Folder */}
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-[#192837]/75 block">Target Folder:</label>
-                      <div className="grid grid-cols-3 gap-1">
-                        {[
-                          { id: 'all', label: 'Inbox+Spam' },
-                          { id: 'inbox', label: 'Inbox' },
-                          { id: 'spam', label: 'Spam' },
-                        ].map(f => (
-                          <button
-                            key={f.id}
-                            type="button"
-                            onClick={() => setScanFolder(f.id as any)}
-                            className={`py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                              scanFolder === f.id
-                                ? 'bg-[#192837] text-white'
-                                : 'bg-[#FAF9F6] border border-[#192837]/10 text-[#192837]/70 hover:bg-[#192837]/5'
-                            }`}
-                          >
-                            {f.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Auto-Scan Toggle */}
-                    <div className="flex items-center justify-between py-1.5 border-t border-[#192837]/8 pt-2">
-                      <span className="font-semibold text-xs text-[#192837]/80">Auto-Scan Incoming</span>
-                      <button
-                        type="button"
-                        onClick={handleToggleAutoScan}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
-                          gmailStatus.auto_scan_enabled ? 'bg-[#7342E2]' : 'bg-[#192837]/20'
-                        }`}
-                      >
-                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                          gmailStatus.auto_scan_enabled ? 'translate-x-4.5' : 'translate-x-1'
-                        }`} />
-                      </button>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => handleScanGmailWithOptions(scanLimit)}
-                        disabled={syncingGmail}
-                        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] hover:brightness-110 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                      >
-                        <RefreshCw size={13} className={syncingGmail ? 'animate-spin' : ''} />
-                        <span>{syncingGmail ? 'Scanning...' : `Scan (${scanLimit})`}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleDisconnectGmail}
-                        className="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs transition-all cursor-pointer"
-                      >
-                        Disconnect
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <p className="text-xs text-[#192837]/70 leading-relaxed font-medium">
-                      Authorize Google OAuth 2.0 to scan inbox emails directly with Gemini AI security model.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleConnectGmail}
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] text-white font-bold text-xs shadow-md shadow-[#7342E2]/20 hover:brightness-110 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <Mail size={16} />
-                      <span>Connect Gmail Account</span>
-                    </button>
-                  </div>
-                )}
+                <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
+                  <span className="text-[10px] font-bold text-orange-700 uppercase tracking-wider block">Active Threats</span>
+                  <span className="text-2xl sm:text-3xl font-extrabold font-heading text-orange-600 mt-0.5 block">{threatCount}</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
+                  <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider block">Critical</span>
+                  <span className="text-2xl sm:text-3xl font-extrabold font-heading text-red-600 mt-0.5 block">{criticalCount}</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
+                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Clean & Safe</span>
+                  <span className="text-2xl sm:text-3xl font-extrabold font-heading text-emerald-600 mt-0.5 block">{safeCount}</span>
+                </div>
               </div>
+            </div>
+
+            {/* Incident & Threat Intelligence Analysis Section */}
+            <div className="w-full">
+              <IncidentReportCard title="Threat Intelligence & Email Ingestion Telemetry" />
             </div>
 
             {/* Bottom Grid: Recent Threats + Security Alerts */}
@@ -622,10 +569,10 @@ export const UserDashboard: React.FC = () => {
                       {gmailStatus?.is_connected && (
                         <button
                           type="button"
-                          onClick={() => handleScanGmailWithOptions(scanLimit)}
+                          onClick={() => setActiveTab('gmail-scan')}
                           className="text-xs font-bold text-[#7342E2] hover:underline cursor-pointer"
                         >
-                          Scan Gmail inbox now →
+                          Open Gmail Scanner now →
                         </button>
                       )}
                     </div>
@@ -829,6 +776,18 @@ export const UserDashboard: React.FC = () => {
                         <span className="text-[11px] text-[#192837]/50 font-medium whitespace-nowrap">
                           {new Date(e.date).toLocaleDateString()}
                         </span>
+                        <button
+                          type="button"
+                          onClick={(ev) => {
+                            ev.stopPropagation()
+                            setAdvisorSelectedEmailId(e.id)
+                            setActiveTab('ai-advisor')
+                          }}
+                          className="px-2.5 py-1 rounded-xl bg-cyan-50 border border-cyan-200 text-xs font-bold text-cyan-700 hover:bg-cyan-600 hover:text-white transition-all cursor-pointer shadow-xs flex items-center gap-1"
+                        >
+                          <Sparkles size={13} />
+                          AI Explain
+                        </button>
                         {matchingThreat && (
                           <button
                             type="button"
@@ -865,13 +824,26 @@ export const UserDashboard: React.FC = () => {
                       Email Content Inspector
                     </h3>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedEmail(null)}
-                    className="text-xs font-bold text-[#192837]/50 hover:text-[#192837] cursor-pointer"
-                  >
-                    Close Preview ✕
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAdvisorSelectedEmailId(selectedEmail.id)
+                        setActiveTab('ai-advisor')
+                      }}
+                      className="px-3 py-1 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-xs font-bold flex items-center gap-1.5 hover:from-cyan-500 hover:to-blue-500 transition-all shadow-xs cursor-pointer"
+                    >
+                      <Sparkles size={13} />
+                      Ask AI Advisor
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedEmail(null)}
+                      className="text-xs font-bold text-[#192837]/50 hover:text-[#192837] cursor-pointer"
+                    >
+                      Close Preview ✕
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-3.5 text-xs">
@@ -902,7 +874,17 @@ export const UserDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 3: THREAT ALERTS VIEW */}
+        {/* TAB 3: AI SECURITY ADVISOR (USER RAG) */}
+        {activeTab === 'ai-advisor' && (
+          <div className="space-y-4">
+            <UserRAGAssistant
+              emails={emails}
+              selectedEmailId={advisorSelectedEmailId}
+            />
+          </div>
+        )}
+
+        {/* TAB 4: THREAT ALERTS VIEW */}
         {activeTab === 'alerts' && (
           <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#192837]/8">
@@ -996,6 +978,26 @@ export const UserDashboard: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* TAB 5: GMAIL SCANNER & INBOX INGESTION (DEDICATED FULL PAGE) */}
+        {activeTab === 'gmail-scan' && (
+          <GmailScannerView
+            gmailStatus={gmailStatus}
+            monitoringStatus={monitoringStatus}
+            onRefreshAllData={loadAllData}
+            onNavigateToProfile={() => setActiveTab('profile')}
+            onNavigateToEmails={() => setActiveTab('emails')}
+          />
+        )}
+
+        {/* TAB 6: USER PROFILE & ACCOUNT SETTINGS (DEDICATED FULL PAGE) */}
+        {activeTab === 'profile' && (
+          <UserProfileView
+            gmailStatus={gmailStatus}
+            monitoringStatus={monitoringStatus}
+            onRefreshGmailStatus={loadAllData}
+          />
+        )}
       </main>
 
       {/* Manual Threat Scanner Modal */}
@@ -1029,6 +1031,7 @@ export const UserDashboard: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

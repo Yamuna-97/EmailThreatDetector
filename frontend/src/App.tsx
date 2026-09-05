@@ -19,6 +19,7 @@ import AuthForm from './components/ui/auth-form'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import UserDashboard from './components/dashboard/UserDashboard'
 import InvestigatorDashboard from './components/dashboard/InvestigatorDashboard'
+import FloatingRAGChatWidget from './components/dashboard/FloatingRAGChatWidget'
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, role } = useAuth()
@@ -40,33 +41,16 @@ const AppContent: React.FC = () => {
     if (role === 'investigator' || role === 'admin') {
       return (
         <div>
-          {/* Quick Floating Switch to Landing View */}
-          <div className="fixed bottom-4 right-4 z-40">
-            <button
-              type="button"
-              onClick={() => setForceLanding(true)}
-              className="px-3.5 py-1.5 rounded-full bg-[#192837]/90 backdrop-blur-md text-white text-[11px] font-bold shadow-md border border-white/15 hover:bg-[#7342E2] transition-all cursor-pointer flex items-center gap-1.5"
-            >
-              <span>View Landing Page</span>
-            </button>
-          </div>
           <InvestigatorDashboard />
+          <FloatingRAGChatWidget />
         </div>
       )
     }
 
     return (
       <div>
-        <div className="fixed bottom-4 right-4 z-40">
-          <button
-            type="button"
-            onClick={() => setForceLanding(true)}
-            className="px-3.5 py-1.5 rounded-full bg-[#192837]/90 backdrop-blur-md text-white text-[11px] font-bold shadow-md border border-white/15 hover:bg-[#7342E2] transition-all cursor-pointer flex items-center gap-1.5"
-          >
-            <span>View Landing Page</span>
-          </button>
-        </div>
         <UserDashboard />
+        <FloatingRAGChatWidget />
       </div>
     )
   }
@@ -163,6 +147,9 @@ const AppContent: React.FC = () => {
             <Footer />
           </>
         )}
+
+        {/* Global Floating RAG Assistant in Bottom Left Corner */}
+        <FloatingRAGChatWidget />
       </div>
     </ClickSpark>
   )

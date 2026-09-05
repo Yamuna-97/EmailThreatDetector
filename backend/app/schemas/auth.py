@@ -53,6 +53,15 @@ class AuthResponse(BaseModel):
     expires_in: Optional[int] = 3600
     user: UserResponse
 
+class UpdateProfileRequest(BaseModel):
+    name: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+class ChangePasswordRequest(BaseModel):
+    current_password: Optional[str] = None
+    new_password: str = Field(..., min_length=6, description="New password must be at least 6 characters")
+
 class MessageResponse(BaseModel):
     message: str
     success: bool = True
+
