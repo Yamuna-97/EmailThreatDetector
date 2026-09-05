@@ -72,7 +72,14 @@ async def get_investigator_dashboard(investigator: UserResponse = Depends(requir
 
     # Calculate threats detected today
     today_str = date.today().isoformat()
-    threats_today = len([t for t in threats_data if t.get("created_at", "").startswith(today_str)])
+    def _is_today(c_at):
+        if not c_at:
+            return False
+        if isinstance(c_at, (date, datetime)):
+            return c_at.isoformat().startswith(today_str)
+        return str(c_at).startswith(today_str)
+
+    threats_today = len([t for t in threats_data if _is_today(t.get("created_at"))])
 
     # Active investigations
     active_investigations = len([t for t in threats_data if t.get("status") in ["new", "reviewing", "in_progress"]])

@@ -39,10 +39,20 @@ class Settings(BaseSettings):
         "https://www.googleapis.com/auth/userinfo.profile"
     ]
 
+    # Gmail Automatic Monitoring — Pub/Sub push (production)
+    # Leave GOOGLE_PUBSUB_PROJECT_ID empty to use fallback polling mode (local dev)
+    GOOGLE_PUBSUB_PROJECT_ID: str = os.getenv("GOOGLE_PUBSUB_PROJECT_ID", "")
+    GOOGLE_PUBSUB_TOPIC_ID: str = os.getenv("GOOGLE_PUBSUB_TOPIC_ID", "gmail-watch-topic")
+    # Secret token sent as ?token= query param on push endpoint to validate legitimate Pub/Sub calls
+    GOOGLE_PUBSUB_PUSH_TOKEN: str = os.getenv("GOOGLE_PUBSUB_PUSH_TOKEN", "")
+    # Fallback polling interval in seconds (used when Pub/Sub not configured)
+    AUTO_MONITOR_POLL_INTERVAL_SECONDS: int = int(os.getenv("AUTO_MONITOR_POLL_INTERVAL_SECONDS", "60"))
+
     # Gemini AI
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_FAST_MODEL: str = os.getenv("GEMINI_FAST_MODEL", "gemini-2.5-flash")
     GEMINI_PRO_MODEL: str = os.getenv("GEMINI_PRO_MODEL", "gemini-2.5-pro")
+    GEMINI_EMBEDDING_MODEL: str = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-2")
 
     # IPQualityScore
     IPQS_API_KEY: str = os.getenv("IPQS_API_KEY", "")

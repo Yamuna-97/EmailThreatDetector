@@ -11,6 +11,7 @@ from app.schemas.gmail import (
 )
 from app.services.google_oauth_service import google_oauth_service
 from app.services.gmail_service import gmail_service
+from app.services import monitoring_service
 from app.database import db
 
 logger = logging.getLogger("vaultshield.api.gmail")
@@ -196,7 +197,10 @@ async def get_gmail_status(current_user: UserResponse = Depends(get_current_user
             email_address=account.get("email_address"),
             auto_scan_enabled=account.get("auto_scan_enabled", False),
             scan_limit=account.get("scan_limit", 10),
-            last_synced_at=last_synced
+            last_synced_at=last_synced,
+            monitoring_active=account.get("monitoring_active", False),
+            emails_auto_processed=account.get("emails_auto_processed", 0),
+            warnings_sent=account.get("warnings_sent", 0),
         )
     return GmailStatusResponse(is_connected=False)
 
@@ -228,42 +232,72 @@ async def toggle_auto_scan(
     payload: GmailAutoScanToggleRequest,
     current_user: UserResponse = Depends(get_current_user)
 ):
-    """Enable or disable background automatic scanning for incoming emails."""
+    """Enable or disable automatic Gmail monitoring (Watch + polling engine)."""
     account = db.store["gmail_accounts"].get(current_user.id)
 
-    # ✅ FIX: Restore from Supabase if not in memory
+    # Restore from Supabase if not in memory
     if not account:
         account = _load_gmail_account_from_supabase(current_user.id)
 
     if not account:
-        # Create default connection if toggling in demo
+        # Create default connection record if toggling in demo
         account = {
             "email_address": current_user.email,
             "is_connected": True,
             "auto_scan_enabled": payload.enabled,
+            "monitoring_active": False,
             "scan_limit": 10,
             "last_synced_at": datetime.now(),
+            "emails_auto_processed": 0,
+            "warnings_sent": 0,
         }
         db.store["gmail_accounts"][current_user.id] = account
     else:
         account["auto_scan_enabled"] = payload.enabled
         db.store["gmail_accounts"][current_user.id] = account
 
-    # ✅ FIX: Persist auto_scan toggle to Supabase
+    # Actually start or stop the monitoring engine
+    if payload.enabled:
+        try:
+            await monitoring_service.start_monitoring(current_user.id, account)
+        except Exception as e:
+            logger.error(f"Failed to start monitoring for user {current_user.id}: {e}")
+            # Don't raise — still persist the flag and return current state
+    else:
+        try:
+            await monitoring_service.stop_monitoring(current_user.id)
+        except Exception as e:
+            logger.debug(f"Stop monitoring notice for user {current_user.id}: {e}")
+
+    # Persist auto_scan toggle + monitoring_active to Supabase
     admin_client = db.get_admin_client()
     if admin_client:
-        try:
-            admin_client.table("gmail_accounts") \
-                .update({
-                    "auto_scan_enabled": payload.enabled,
-                    "updated_at": datetime.now().isoformat()
-                }) \
-                .eq("user_id", current_user.id) \
-                .execute()
-        except Exception as e:
-            logger.warning(f"Could not persist auto_scan toggle to Supabase: {e}")
+            account_now = db.store["gmail_accounts"].get(current_user.id, account)
+            try:
+                admin_client.table("gmail_accounts") \
+                    .update({
+                        "auto_scan_enabled": payload.enabled,
+                        "monitoring_active": account_now.get("monitoring_active", payload.enabled),
+                        "updated_at": datetime.now().isoformat()
+                    }) \
+                    .eq("user_id", current_user.id) \
+                    .execute()
+            except Exception as e:
+                # Fallback without monitoring_active if schema column not yet created
+                try:
+                    admin_client.table("gmail_accounts") \
+                        .update({
+                            "auto_scan_enabled": payload.enabled,
+                            "updated_at": datetime.now().isoformat()
+                        }) \
+                        .eq("user_id", current_user.id) \
+                        .execute()
+                except Exception as e2:
+                    logger.debug(f"Could not persist auto_scan toggle to Supabase: {e2}")
 
-    last_synced = account.get("last_synced_at")
+    # Read fresh state for response
+    account_fresh = db.store["gmail_accounts"].get(current_user.id, account)
+    last_synced = account_fresh.get("last_synced_at")
     if isinstance(last_synced, str):
         try:
             last_synced = datetime.fromisoformat(last_synced.replace("Z", "+00:00"))
@@ -271,11 +305,14 @@ async def toggle_auto_scan(
             last_synced = None
 
     return GmailStatusResponse(
-        is_connected=account["is_connected"],
-        email_address=account["email_address"],
-        auto_scan_enabled=account["auto_scan_enabled"],
-        scan_limit=account.get("scan_limit", 10),
-        last_synced_at=last_synced
+        is_connected=account_fresh.get("is_connected", True),
+        email_address=account_fresh.get("email_address"),
+        auto_scan_enabled=account_fresh.get("auto_scan_enabled", payload.enabled),
+        scan_limit=account_fresh.get("scan_limit", 10),
+        last_synced_at=last_synced,
+        monitoring_active=account_fresh.get("monitoring_active", False),
+        emails_auto_processed=account_fresh.get("emails_auto_processed", 0),
+        warnings_sent=account_fresh.get("warnings_sent", 0),
     )
 
 

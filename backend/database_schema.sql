@@ -54,9 +54,40 @@ CREATE TABLE IF NOT EXISTS public.gmail_accounts (
     auto_scan_enabled BOOLEAN NOT NULL DEFAULT false,
     scan_limit INTEGER NOT NULL DEFAULT 10,
     last_synced_at TIMESTAMPTZ,
+    -- Automatic monitoring fields
+    monitoring_active BOOLEAN NOT NULL DEFAULT false,
+    watch_expiry TIMESTAMPTZ,             -- Gmail Watch expiry (Pub/Sub mode)
+    last_history_id TEXT,                 -- Last processed Gmail historyId
+    emails_auto_processed INTEGER NOT NULL DEFAULT 0,  -- Count of auto-processed emails
+    warnings_sent INTEGER NOT NULL DEFAULT 0,          -- Count of SMTP warnings sent
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(user_id, email_address)
+);
+
+-- Migration: add new monitoring columns to existing gmail_accounts table if they don't exist
+ALTER TABLE public.gmail_accounts ADD COLUMN IF NOT EXISTS monitoring_active BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE public.gmail_accounts ADD COLUMN IF NOT EXISTS watch_expiry TIMESTAMPTZ;
+ALTER TABLE public.gmail_accounts ADD COLUMN IF NOT EXISTS last_history_id TEXT;
+ALTER TABLE public.gmail_accounts ADD COLUMN IF NOT EXISTS emails_auto_processed INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE public.gmail_accounts ADD COLUMN IF NOT EXISTS warnings_sent INTEGER NOT NULL DEFAULT 0;
+
+-- 2b. PROCESSED GMAIL MESSAGES TABLE
+-- Tracks which Gmail message IDs have been analyzed to prevent duplicate processing
+-- and duplicate warning emails.
+CREATE TABLE IF NOT EXISTS public.processed_gmail_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    gmail_message_id TEXT NOT NULL,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    -- Status: 'processing' | 'done' | 'failed'
+    processing_status TEXT NOT NULL DEFAULT 'processing',
+    -- Null = safe / low, else the threat severity level
+    threat_severity TEXT,
+    -- Whether a warning email was sent for this message
+    warning_email_sent BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(gmail_message_id, user_id)
 );
 
 -- 3. EMAILS TABLE

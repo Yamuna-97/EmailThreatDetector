@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import Optional, Dict, Any
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -87,12 +88,25 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
         for uid, u in db.store["users"].items():
             if uid in token or getattr(u, "_token", None) == token:
                 return u
-        
-        # Default user fallback for Google OAuth session
+
+        # Generate deterministic valid UUID from email so PostgreSQL UUID type validation always succeeds
+        fallback_email = "yamunak972006@gmail.com"
+        valid_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, fallback_email))
+
+        # Check if user profile already exists in Supabase
+        admin_client = db.get_admin_client() or db.get_client()
+        if admin_client:
+            try:
+                p_res = admin_client.table("profiles").select("id, role, name").eq("email", fallback_email).limit(1).execute()
+                if p_res.data and len(p_res.data) > 0:
+                    valid_uuid = p_res.data[0]["id"]
+            except Exception as pe:
+                logger.debug(f"Profile lookup notice: {pe}")
+
         is_investigator = "investigator" in token or "admin" in token
         user_model = UserResponse(
-            id="google-user-session-id",
-            email="yamunak972006@gmail.com",
+            id=valid_uuid,
+            email=fallback_email,
             name="Yamuna",
             role="investigator" if is_investigator else "user"
         )

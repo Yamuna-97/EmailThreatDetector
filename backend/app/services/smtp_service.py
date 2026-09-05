@@ -214,4 +214,127 @@ VaultShield Platform - SIH 2026 AI Cybersecurity Defense
             logger.warning(f"SMTP alert delivery notice (587/465): {e465}. Threat recorded in database and dashboard alert.")
             return False
 
+    async def send_otp_email_async(self, recipient_email: str, otp_code: str, purpose: str = "signup", user_name: str = ""):
+        """Asynchronously dispatch 6-digit OTP email in background task."""
+        asyncio.create_task(
+            asyncio.to_thread(
+                self.send_otp_email_sync,
+                recipient_email,
+                otp_code,
+                purpose,
+                user_name
+            )
+        )
+
+    def send_otp_email_sync(self, recipient_email: str, otp_code: str, purpose: str = "signup", user_name: str = "") -> bool:
+        """
+        Send a branded VaultShield 6-digit OTP verification email for Sign Up or Password Reset.
+        """
+        if not self.smtp_user or not self.smtp_password:
+            logger.warning("SMTP skipped: Missing SMTP_USER or SMTP_PASSWORD in environment.")
+            return False
+
+        is_reset = "forgot" in purpose.lower() or "reset" in purpose.lower()
+        title = "Reset Your Password" if is_reset else "Verify Your Email Address"
+        action_text = "use the one-time security code below to reset your password" if is_reset else "use the one-time security code below to verify your account and complete registration"
+        greeting_name = f" {user_name}" if user_name else ""
+
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"🔐 Your VaultShield Verification Code: {otp_code}"
+        msg["From"] = f"VaultShield Security <{self.smtp_user}>"
+        msg["To"] = recipient_email
+
+        plain_text = f"""
+================================================================================
+VAULTSHIELD - IDENTITY VERIFICATION
+================================================================================
+Hello{greeting_name},
+
+Please {action_text}:
+
+YOUR 6-DIGIT VERIFICATION CODE:
+--------------------------------------------------------------------------------
+    >>  {otp_code}  <<
+--------------------------------------------------------------------------------
+
+This code will expire in 10 minutes.
+If you did not initiate this request, please disregard this email.
+
+VaultShield AI Cyber Defense Platform
+================================================================================
+"""
+
+        html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #FAF9F6; margin: 0; padding: 24px; }}
+    .card {{ max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #E2E8F0; box-shadow: 0 10px 25px rgba(115,66,226,0.08); }}
+    .header {{ background: linear-gradient(135deg, #8B5CF6, #7342E2); color: #ffffff; padding: 28px; text-align: center; }}
+    .logo {{ font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }}
+    .subtitle {{ font-size: 13px; opacity: 0.9; }}
+    .content {{ padding: 32px 28px; color: #192837; font-size: 14px; line-height: 1.6; text-align: center; }}
+    .otp-container {{ background: #FAF9F6; border: 2px dashed #7342E2; border-radius: 16px; padding: 20px; margin: 24px 0; }}
+    .otp-code {{ font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #7342E2; margin: 0; }}
+    .exp-text {{ font-size: 12px; color: #64748B; margin-top: 8px; }}
+    .footer {{ background: #F8FAFC; padding: 20px; text-align: center; font-size: 11px; color: #94A3B8; border-top: 1px solid #E2E8F0; }}
+    .badge {{ display: inline-block; padding: 4px 12px; border-radius: 9999px; background: rgba(255,255,255,0.2); font-weight: bold; font-size: 11px; margin-bottom: 8px; text-transform: uppercase; }}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="badge">🛡️ VaultShield Security</div>
+      <div class="logo">VaultShield AI</div>
+      <div class="subtitle">{title}</div>
+    </div>
+    <div class="content">
+      <p style="font-size: 15px; margin-top: 0;">Hello{greeting_name},</p>
+      <p style="color: #475569;">Please {action_text}:</p>
+      
+      <div class="otp-container">
+        <div class="otp-code">{otp_code}</div>
+        <div class="exp-text">⏱️ Code expires in <strong>10 minutes</strong></div>
+      </div>
+
+      <p style="font-size: 12px; color: #64748B; margin-bottom: 0;">
+        If you did not request this verification, your account is safe and you can safely ignore this email.
+      </p>
+    </div>
+    <div class="footer">
+      VaultShield &bull; SIH 2026 AI Threat Intelligence Platform &bull; Zero-Trust Verification
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+        msg.attach(MIMEText(plain_text, "plain"))
+        msg.attach(MIMEText(html_content, "html"))
+
+        # 1. Attempt TLS on 587
+        try:
+            with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=8) as server:
+                server.starttls()
+                server.login(self.smtp_user, self.smtp_password)
+                server.sendmail(self.smtp_user, [recipient_email], msg.as_string())
+                logger.info(f"OTP verification email successfully sent via TLS 587 to {recipient_email}")
+                return True
+        except Exception as e587:
+            logger.debug(f"SMTP OTP port 587 notice: {e587}. Trying SSL 465...")
+
+        # 2. Attempt SSL on 465
+        try:
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(self.smtp_host, 465, context=context, timeout=8) as server:
+                server.login(self.smtp_user, self.smtp_password)
+                server.sendmail(self.smtp_user, [recipient_email], msg.as_string())
+                logger.info(f"OTP verification email successfully sent via SSL 465 to {recipient_email}")
+                return True
+        except Exception as e465:
+            logger.warning(f"SMTP OTP delivery error (587/465): {e465}")
+            return False
+
 smtp_alert_service = SMTPAlertService()

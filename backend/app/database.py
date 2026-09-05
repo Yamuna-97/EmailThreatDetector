@@ -23,6 +23,9 @@ class Database:
             "reports": {},
             "ip_intelligence": {},
             "geolocations": {},
+            # Tracks processed Gmail message IDs to prevent duplicate analysis
+            # Key: f"{user_id}:{gmail_message_id}", Value: {status, severity, warning_sent}
+            "processed_messages": {},
         }
 
     def initialize(self):
