@@ -88,6 +88,42 @@ class GoogleOAuthService:
                 return resp.json()
             return {}
 
+    async def get_user_email(self, access_token: str) -> Optional[str]:
+        """
+        Retrieve the authenticated Google account email address using the Google OAuth2
+        userinfo endpoint, falling back to the Gmail API profile endpoint.
+        """
+        if not access_token:
+            return None
+
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+        # 1. Try Google OAuth userinfo endpoint
+        try:
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                resp = await client.get(GOOGLE_USERINFO_URL, headers=headers)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    email = data.get("email")
+                    if email:
+                        return str(email).strip().lower()
+        except Exception as e:
+            logger.debug(f"[OAuth] Could not fetch email from userinfo endpoint: {e}")
+
+        # 2. Try Gmail API profile endpoint (authenticated with Gmail scopes)
+        try:
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                resp = await client.get("https://gmail.googleapis.com/gmail/v1/users/me/profile", headers=headers)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    email = data.get("emailAddress")
+                    if email:
+                        return str(email).strip().lower()
+        except Exception as e:
+            logger.debug(f"[OAuth] Could not fetch email from Gmail profile endpoint: {e}")
+
+        return None
+
     async def revoke_token(self, token: str) -> bool:
         """Revoke a token (access or refresh) with Google's OAuth 2.0 revocation endpoint."""
         if not token:

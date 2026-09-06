@@ -158,6 +158,7 @@ def _persist_gmail_account_to_supabase(user_id: str, account: Dict[str, Any]) ->
             "token_expiry": account.get("token_expiry"),
             "is_connected": account.get("is_connected", True),
             "auto_scan_enabled": account.get("auto_scan_enabled", False),
+            "monitoring_active": account.get("monitoring_active", False),
             "scan_limit": account.get("scan_limit", 10),
             "last_synced_at": datetime.now(timezone.utc).isoformat(),
             "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -401,7 +402,8 @@ async def gmail_oauth_callback(
 
         user_email = await google_oauth_service.get_user_email(access_token)
         if not user_email:
-            user_email = "yamunak972006@gmail.com"
+            logger.error("Failed to retrieve Google user email from token response.")
+            raise ValueError("Failed to retrieve email address for authenticated Google account.")
 
         user_id = state.replace("user_", "").replace("auth_login_", "") if state else "default"
         if len(user_id) < 10:
@@ -443,7 +445,8 @@ async def gmail_oauth_callback(
             "refresh_token": refresh_token,
             "token_expiry": token_expiry,
             "is_connected": True,
-            "auto_scan_enabled": True,
+            "auto_scan_enabled": False,
+            "monitoring_active": False,
             "scan_limit": 10,
             "last_synced_at": datetime.now(timezone.utc).isoformat(),
         }
