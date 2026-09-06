@@ -647,8 +647,13 @@ async def list_gmail_messages(
     folder: str = Query("all", description="Target folder: all, inbox, spam"),
     current_user: UserResponse = Depends(get_current_user)
 ):
-    """Fetch live message headers/previews from Gmail for selection with auto token refresh."""
-    account = await get_authenticated_gmail_account(current_user.id, email=current_user.email)
+    try:
+        account = await get_authenticated_gmail_account(current_user.id, email=current_user.email)
+    except HTTPException as e:
+        if e.status_code == status.HTTP_401_UNAUTHORIZED:
+            return {"messages": [], "total": 0, "is_live": False, "connected": False}
+        raise
+
     access_token = account.get("access_token")
     existing_message_ids = {e.message_id for e in db.store["emails"].values()}
 

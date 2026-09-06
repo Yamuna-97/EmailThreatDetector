@@ -19,7 +19,7 @@ from app.dependencies import get_current_user
 from app.schemas.auth import UserResponse
 from app.schemas.gmail import GmailStatusResponse, MonitoringStatusResponse
 from app.database import db
-from app.api.gmail import _load_gmail_account_from_supabase
+from app.api.gmail import _load_gmail_account_from_supabase, get_authenticated_gmail_account
 from app.services import monitoring_service
 from app.config import settings
 
@@ -43,18 +43,15 @@ async def start_monitoring(
     """
     user_id = current_user.id
 
-    # Load account from memory, falling back to Supabase
-    account = db.store["gmail_accounts"].get(user_id)
-    if not account or not account.get("is_connected"):
-        account = _load_gmail_account_from_supabase(user_id)
-
-    if not account or not account.get("is_connected"):
+    try:
+        account = await get_authenticated_gmail_account(user_id, email=current_user.email)
+    except HTTPException:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Gmail account is not connected. Please connect Gmail first.",
         )
 
-    if not account.get("access_token"):
+    if not account or not account.get("access_token"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No Gmail access token available. Please reconnect Gmail.",
@@ -87,10 +84,13 @@ async def stop_monitoring(
     user_id = current_user.id
     try:
         await monitoring_service.stop_monitoring(user_id)
+        account = db.store["gmail_accounts"].get(user_id)
+        if not account:
+            account = _load_gmail_account_from_supabase(user_id, email=current_user.email) or {}
         return MonitoringStatusResponse(
             monitoring_active=False,
             mode="disabled",
-            email_address=db.store["gmail_accounts"].get(user_id, {}).get("email_address"),
+            email_address=account.get("email_address", current_user.email),
         )
     except Exception as e:
         logger.error(f"[api] stop_monitoring error for user {user_id}: {e}", exc_info=True)

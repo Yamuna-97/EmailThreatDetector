@@ -53,40 +53,58 @@ def _load_emails_from_supabase(user_id: str, is_investigator: bool) -> List[Emai
         return []
 
 
+def _safe_date_sort_key(email: EmailModel) -> float:
+    """Return a comparable timestamp float regardless of offset-aware vs naive datetimes."""
+    try:
+        d = email.date
+        if isinstance(d, datetime):
+            return d.timestamp()
+        if isinstance(d, str):
+            dt = datetime.fromisoformat(d.replace("Z", "+00:00"))
+            return dt.timestamp()
+        return 0.0
+    except Exception:
+        return 0.0
+
+
 @router.get("", response_model=List[EmailModel])
 async def list_emails(
     search: Optional[str] = None,
     current_user: UserResponse = Depends(get_current_user)
 ):
     """Retrieve emails for current user (or all emails if investigator)."""
-    is_investigator = current_user.role in ["investigator", "admin"]
-    emails = []
+    try:
+        is_investigator = current_user.role in ["investigator", "admin"]
+        emails = []
 
-    for email in db.store["emails"].values():
-        if is_investigator or email.user_id == current_user.id:
-            if search:
-                s_lower = search.lower()
-                if (s_lower in email.subject.lower() or
-                        s_lower in email.sender.lower() or
-                        s_lower in (email.plain_text_body or "").lower()):
+        for email in list(db.store["emails"].values()):
+            if is_investigator or email.user_id == current_user.id:
+                if search:
+                    s_lower = search.lower()
+                    if (s_lower in email.subject.lower() or
+                            s_lower in email.sender.lower() or
+                            s_lower in (email.plain_text_body or "").lower()):
+                        emails.append(email)
+                else:
                     emails.append(email)
-            else:
-                emails.append(email)
 
-    # ✅ FIX: If no results in memory (e.g. after restart), restore from Supabase
-    if not emails:
-        db_emails = _load_emails_from_supabase(current_user.id, is_investigator)
-        for email in db_emails:
-            if search:
-                s_lower = search.lower()
-                if (s_lower in email.subject.lower() or
-                        s_lower in email.sender.lower() or
-                        s_lower in (email.plain_text_body or "").lower()):
+        # If no results in memory (e.g. after restart), restore from Supabase
+        if not emails:
+            db_emails = _load_emails_from_supabase(current_user.id, is_investigator)
+            for email in db_emails:
+                if search:
+                    s_lower = search.lower()
+                    if (s_lower in email.subject.lower() or
+                            s_lower in email.sender.lower() or
+                            s_lower in (email.plain_text_body or "").lower()):
+                        emails.append(email)
+                else:
                     emails.append(email)
-            else:
-                emails.append(email)
 
-    return sorted(emails, key=lambda x: x.date, reverse=True)
+        return sorted(emails, key=_safe_date_sort_key, reverse=True)
+    except Exception as e:
+        logger.error(f"Error in list_emails for user {current_user.id}: {e}", exc_info=True)
+        return []
 
 
 @router.get("/{email_id}", response_model=EmailModel)

@@ -37,15 +37,16 @@ class Settings(BaseSettings):
         # Always include FRONTEND_URL if set
         if self.FRONTEND_URL and self.FRONTEND_URL not in origins:
             origins.append(self.FRONTEND_URL)
-        # Always allow localhost for local development
-        dev_origins = [
+        # Always allow production Vercel frontend and localhost for development
+        default_allowed = [
+            "https://email-threat-detector.vercel.app",
             "http://localhost:5173",
             "http://localhost:3000",
             "http://127.0.0.1:5173",
             "http://127.0.0.1:3000",
             "http://localhost:8000",
         ]
-        for o in dev_origins:
+        for o in default_allowed:
             if o not in origins:
                 origins.append(o)
         return origins
