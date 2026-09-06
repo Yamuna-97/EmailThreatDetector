@@ -35,31 +35,71 @@ _background_tasks = []
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application startup & shutdown events."""
+    """Application startup & shutdown lifecycle.
+
+    CRITICAL: yield must happen IMMEDIATELY so Uvicorn workers are responsive
+    to Render's port scanner and /api/health checks.
+
+    Pattern:
+        1. db.initialize()   — fast, synchronous, no network I/O
+        2. Schedule background tasks with asyncio.create_task() — non-blocking
+        3. yield             — PORT is open, /api/health returns 200 immediately
+        4. (server runs)
+        5. After yield       — graceful shutdown, cancel background tasks
+
+    All expensive work (RAG PDF parsing, monitoring restore, watch renewal)
+    runs as fire-and-forget coroutines that start AFTER the event loop yields
+    to Uvicorn's connection handler. This prevents the Render 502.
+    """
     logger.info(f"Starting {settings.PROJECT_NAME} v{settings.VERSION} [{settings.ENVIRONMENT}]")
+
+    # Fast synchronous DB client initialization — no network I/O
     db.initialize()
 
-    # Restore automatic monitoring for users who had it active before restart
-    await monitoring_service.restore_monitoring_on_startup()
+    # ------------------------------------------------------------------
+    # Schedule all background startup work as non-blocking tasks.
+    # create_task() returns immediately; the coroutines run concurrently
+    # with the HTTP server — they do NOT block the port from opening.
+    # ------------------------------------------------------------------
 
-    # Start Gmail Watch renewal loop (renews expiring watches every 6 hours)
+    async def _safe_restore_monitoring():
+        """Restore monitoring state; log schema errors without crashing."""
+        try:
+            # Small delay so Render health check can succeed first
+            await asyncio.sleep(3)
+            await monitoring_service.restore_monitoring_on_startup()
+        except Exception as exc:
+            logger.warning(f"[startup] Monitoring restore skipped (schema not migrated?): {exc}")
+
+    restore_task = asyncio.create_task(_safe_restore_monitoring())
+    _background_tasks.append(restore_task)
+
     renewal_task = asyncio.create_task(monitoring_service.watch_renewal_loop())
     _background_tasks.append(renewal_task)
 
-    # Initialize Dual RAG knowledge bases in background
     rag_init_task = asyncio.create_task(rag_service.initialize())
     _background_tasks.append(rag_init_task)
 
+    logger.info("[startup] Background tasks scheduled. Server accepting connections.")
+
+    # ------------------------------------------------------------------
+    # yield — Uvicorn workers are now fully available.
+    # Render port scanner will find the open port immediately.
+    # /api/health returns HTTP 200 from this point forward.
+    # ------------------------------------------------------------------
     yield
 
-    # Graceful shutdown
-    logger.info("Shutting down VaultShield Security Engine.")
+    # ------------------------------------------------------------------
+    # Graceful shutdown — cancel all long-running background tasks
+    # ------------------------------------------------------------------
+    logger.info("Shutting down CyberTrace — cancelling background tasks.")
     for task in _background_tasks:
         task.cancel()
         try:
             await task
         except asyncio.CancelledError:
             pass
+
 
 
 app = FastAPI(
