@@ -80,7 +80,8 @@ async def lifespan(app: FastAPI):
     rag_init_task = asyncio.create_task(rag_service.initialize())
     _background_tasks.append(rag_init_task)
 
-    logger.info("[startup] Background tasks scheduled. Server accepting connections.")
+    logger.info("[startup] Background tasks scheduled.")
+    logger.info("[startup] HTTP server ready — accepting connections.")
 
     # ------------------------------------------------------------------
     # yield — Uvicorn workers are now fully available.
@@ -151,6 +152,7 @@ async def health_check():
     return {
         "status": "healthy",
         "environment": settings.ENVIRONMENT,
+        "rag_ready": rag_service.is_initialized,
         "supabase_connected": db.is_connected,
         "gemini_configured": bool(settings.GEMINI_API_KEY),
         "ipqs_configured": bool(settings.IPQS_API_KEY),

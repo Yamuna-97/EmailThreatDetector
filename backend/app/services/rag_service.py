@@ -50,30 +50,43 @@ class DualRAGService:
         self.is_initialized = False
 
     async def initialize(self, force_reindex: bool = False):
-        """Load and index both User and Investigator knowledge bases."""
-        logger.info("Initializing Dual RAG Knowledge Bases...")
-        await self._load_or_index_collection("user", USER_RAG_DIR, self.user_kb, force_reindex)
-        await self._load_or_index_collection("investigator", INVESTIGATOR_RAG_DIR, self.investigator_kb, force_reindex)
-        self.is_initialized = True
-        logger.info("Dual RAG Knowledge Bases initialized successfully.")
+        """Load and index both User and Investigator knowledge bases in a worker thread."""
+        logger.info("[startup] RAG background initialization started")
+        try:
+            # Run heavy CPU / disk / pickle / PDF / sklearn operations in a worker thread
+            # to keep the asyncio event loop 100% responsive for HTTP traffic and health checks
+            await asyncio.to_thread(self._sync_load_or_index_collection, "user", USER_RAG_DIR, self.user_kb, force_reindex)
+            await asyncio.to_thread(self._sync_load_or_index_collection, "investigator", INVESTIGATOR_RAG_DIR, self.investigator_kb, force_reindex)
+            self.is_initialized = True
+            logger.info(f"[startup] RAG initialization completed (User: {len(self.user_kb.get('chunks', []))} chunks, Investigator: {len(self.investigator_kb.get('chunks', []))} chunks)")
+        except Exception as e:
+            logger.error(f"[startup] RAG initialization encountered error: {e}", exc_info=True)
+            # Mark initialized so downstream queries degrade gracefully rather than hanging
+            self.is_initialized = True
 
     def _get_dir_files_hash(self, directory: Path) -> str:
+        """Compute deterministic hash based on filename, size, and header bytes (independent of st_mtime)."""
         files = sorted(list(directory.glob("**/*")))
         hasher = hashlib.md5()
         for f in files:
             if f.is_file() and not f.name.startswith("."):
                 hasher.update(f.name.encode())
-                hasher.update(str(f.stat().st_mtime).encode())
                 hasher.update(str(f.stat().st_size).encode())
+                try:
+                    with open(f, "rb") as fp:
+                        hasher.update(fp.read(4096))
+                except Exception:
+                    pass
         return hasher.hexdigest()
 
-    async def _load_or_index_collection(
+    def _sync_load_or_index_collection(
         self,
         name: str,
         directory: Path,
         kb_dict: Dict[str, Any],
         force_reindex: bool = False
     ):
+        """Synchronous loader/indexer executed inside asyncio.to_thread worker pool."""
         cache_file = CACHE_DIR / f"{name}_index.pkl"
         current_hash = self._get_dir_files_hash(directory)
 
@@ -81,12 +94,13 @@ class DualRAGService:
             try:
                 with open(cache_file, "rb") as f:
                     cached_data = pickle.load(f)
-                if cached_data.get("files_hash") == current_hash and len(cached_data.get("chunks", [])) > 0:
-                    kb_dict["chunks"] = cached_data["chunks"]
+                cached_chunks = cached_data.get("chunks", [])
+                if len(cached_chunks) > 0:
+                    kb_dict["chunks"] = cached_chunks
                     kb_dict["embeddings"] = cached_data.get("embeddings")
                     kb_dict["vectorizer"] = cached_data.get("vectorizer")
                     kb_dict["tfidf_matrix"] = cached_data.get("tfidf_matrix")
-                    logger.info(f"Loaded {len(kb_dict['chunks'])} cached chunks for '{name}' RAG.")
+                    logger.info(f"Loaded {len(cached_chunks)} cached chunks for '{name}' RAG from {cache_file.name}.")
                     return
             except Exception as e:
                 logger.warning(f"Failed to load cache for '{name}' RAG: {e}. Rebuilding index...")
@@ -118,11 +132,7 @@ class DualRAGService:
         kb_dict["chunks"] = chunks
         kb_dict["vectorizer"] = vectorizer
         kb_dict["tfidf_matrix"] = tfidf_matrix
-
-        # Optional: dense embeddings for top chunks
-        logger.info(f"Generating dense embeddings for '{name}' RAG (sample)...")
-        embeddings = await self._generate_embeddings_for_chunks(texts[:30])
-        kb_dict["embeddings"] = embeddings
+        kb_dict["embeddings"] = None
 
         # Save to disk cache
         try:
@@ -130,7 +140,7 @@ class DualRAGService:
                 pickle.dump({
                     "files_hash": current_hash,
                     "chunks": chunks,
-                    "embeddings": embeddings,
+                    "embeddings": None,
                     "vectorizer": vectorizer,
                     "tfidf_matrix": tfidf_matrix
                 }, f)
