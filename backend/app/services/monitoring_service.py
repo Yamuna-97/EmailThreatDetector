@@ -26,7 +26,8 @@ import httpx
 
 from app.config import settings
 from app.database import db
-from app.services.gmail_service import gmail_service
+from app.services.google_oauth_service import google_oauth_service
+from app.services.gmail_service import gmail_service, GmailAuthExpiredError, GmailApiError
 from app.services.smtp_service import smtp_alert_service
 
 logger = logging.getLogger("vaultshield.monitoring")
@@ -53,42 +54,54 @@ async def refresh_access_token(user_id: str, account: Dict[str, Any]) -> Optiona
     """
     refresh_token = account.get("refresh_token")
     if not refresh_token:
+        # Check Supabase
+        admin_client = db.get_admin_client()
+        if admin_client:
+            try:
+                res = admin_client.table("gmail_accounts").select("refresh_token").eq("user_id", user_id).limit(1).execute()
+                if res.data and res.data[0].get("refresh_token"):
+                    refresh_token = res.data[0]["refresh_token"]
+                    account["refresh_token"] = refresh_token
+            except Exception:
+                pass
+
+    if not refresh_token:
         logger.warning(f"[monitor] No refresh_token stored for user {user_id}; cannot refresh.")
-        return None
-    if not settings.GOOGLE_CLIENT_ID or not settings.GOOGLE_CLIENT_SECRET:
-        logger.warning("[monitor] Google OAuth credentials not configured; cannot refresh token.")
         return None
 
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.post(GOOGLE_TOKEN_URL, data={
-                "client_id": settings.GOOGLE_CLIENT_ID,
-                "client_secret": settings.GOOGLE_CLIENT_SECRET,
-                "refresh_token": refresh_token,
-                "grant_type": "refresh_token",
-            })
-        if resp.status_code == 200:
-            data = resp.json()
-            new_token = data.get("access_token")
-            if new_token:
-                account["access_token"] = new_token
-                db.store["gmail_accounts"][user_id] = account
-                # Persist to Supabase
-                admin_client = db.get_admin_client()
-                if admin_client:
-                    try:
-                        admin_client.table("gmail_accounts") \
-                            .update({"access_token": new_token, "updated_at": datetime.now(timezone.utc).isoformat()}) \
-                            .eq("user_id", user_id) \
-                            .execute()
-                    except Exception as e:
-                        logger.debug(f"[monitor] Supabase token update notice: {e}")
-                logger.info(f"[monitor] Refreshed access_token for user {user_id}")
-                return new_token
-        logger.warning(f"[monitor] Token refresh failed for user {user_id}: {resp.status_code} {resp.text[:200]}")
+        token_data = await google_oauth_service.refresh_access_token(refresh_token)
+        new_token = token_data.get("access_token")
+        expires_in = token_data.get("expires_in", 3600)
+        from datetime import timedelta
+        token_expiry = (datetime.now(timezone.utc) + timedelta(seconds=expires_in)).isoformat()
+
+        if new_token:
+            account["access_token"] = new_token
+            account["token_expiry"] = token_expiry
+            account["is_connected"] = True
+            db.store["gmail_accounts"][user_id] = account
+            # Persist to Supabase
+            admin_client = db.get_admin_client()
+            if admin_client:
+                try:
+                    admin_client.table("gmail_accounts") \
+                        .update({
+                            "access_token": new_token,
+                            "token_expiry": token_expiry,
+                            "updated_at": datetime.now(timezone.utc).isoformat()
+                        }) \
+                        .eq("user_id", user_id) \
+                        .execute()
+                except Exception as e:
+                    logger.debug(f"[monitor] Supabase token update notice: {e}")
+            logger.info(f"[monitor] Refreshed access_token for user {user_id}")
+            return new_token
+        logger.warning(f"[monitor] Token refresh did not return access_token for user {user_id}")
     except Exception as e:
         logger.warning(f"[monitor] Token refresh error for user {user_id}: {e}")
     return None
+
 
 
 async def _get_valid_token(user_id: str, account: Dict[str, Any]) -> Optional[str]:
@@ -203,16 +216,20 @@ async def _process_single_message(
     mark_message_processing(message_id, user_id)
 
     try:
-        detail = await gmail_service.get_message_detail(access_token, message_id)
-        if not detail:
-            # Try token refresh once
+        detail = None
+        try:
+            detail = await gmail_service.get_message_detail(access_token, message_id)
+        except GmailAuthExpiredError:
             new_token = await refresh_access_token(user_id, account)
             if new_token:
+                access_token = new_token
                 detail = await gmail_service.get_message_detail(new_token, message_id)
-            if not detail:
-                logger.warning(f"[monitor] Could not fetch message {message_id}; skipping.")
-                mark_message_failed(message_id, user_id)
-                return False
+
+        if not detail:
+            logger.warning(f"[monitor] Could not fetch message {message_id}; skipping.")
+            mark_message_failed(message_id, user_id)
+            return False
+
 
         payload_data = detail.get("payload", {})
         headers_list = payload_data.get("headers", [])

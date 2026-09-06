@@ -416,7 +416,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         <div className="sm-panel-inner">
           <div className="pt-4">
             <div className="text-xs uppercase tracking-widest text-[#7342E2] font-semibold mb-6">
-              VaultShield • Threat Platform
+              CyberTrace • Threat Platform
             </div>
             <ul className="sm-panel-list" role="list" data-numbering={displayItemNumbering || undefined}>
               {items && items.length ? (

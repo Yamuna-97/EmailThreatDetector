@@ -37,7 +37,7 @@ export const FinalCTA: React.FC = () => {
                 href="#dashboard"
                 className="inline-flex items-center gap-2 px-7 py-4 rounded-full text-sm font-semibold text-white bg-white/10 hover:bg-white/15 active:scale-95 border border-white/15 transition-all"
               >
-                <span>Explore VaultShield</span>
+                <span>Explore CyberTrace</span>
               </a>
             </div>
           </div>

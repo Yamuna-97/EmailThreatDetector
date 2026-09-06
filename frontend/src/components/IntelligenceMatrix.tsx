@@ -15,7 +15,7 @@ export const IntelligenceMatrix: React.FC = () => {
               Unified Threat Intelligence Matrix
             </h2>
             <p className="font-body text-base text-[#192837]/75 leading-relaxed">
-              Explore VaultShield's interactive neural defense modules with real-time 3D cursor magnetism, particle sparks,
+              Explore CyberTrace's interactive neural defense modules with real-time 3D cursor magnetism, particle sparks,
               and dynamic purple spotlight tracing.
             </p>
           </div>

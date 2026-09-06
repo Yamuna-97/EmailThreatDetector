@@ -38,7 +38,7 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `VaultShield_Forensic_Incident_${threatId.slice(0, 8)}.pdf`
+      a.download = `CyberTrace_Forensic_Incident_${threatId.slice(0, 8)}.pdf`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)

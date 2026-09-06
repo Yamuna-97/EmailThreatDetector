@@ -76,7 +76,7 @@ export const ThreatDetection: React.FC = () => {
               Comprehensive Email Threat Detection
             </h2>
             <p className="font-body text-base text-[#192837]/75 leading-relaxed">
-              VaultShield intercepts advanced cyberattacks targeting corporate inboxes using multi-layer heuristic
+              CyberTrace intercepts advanced cyberattacks targeting corporate inboxes using multi-layer heuristic
               scoring, NLP intent extraction, and real-time threat intelligence.
             </p>
           </div>

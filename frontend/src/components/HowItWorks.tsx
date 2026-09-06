@@ -37,7 +37,7 @@ export const HowItWorks: React.FC = () => {
               Execution Flow Pipeline
             </span>
             <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
-              How VaultShield Operates End-to-End
+              How CyberTrace Operates End-to-End
             </h2>
             <p className="font-body text-base text-[#192837]/75 leading-relaxed">
               From initial OAuth inbox connection to forensic timeline generation, discover the 10-stage automated workflow

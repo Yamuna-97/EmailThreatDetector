@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   User, Mail, KeyRound, ShieldCheck, RefreshCw,
   Camera, CheckCircle2, AlertTriangle,
@@ -52,7 +52,12 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
   const [gmailMsg, setGmailMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const isGmailConnected = gmailStatus?.is_connected ?? false
-  const isAutoMonitoring = monitoringStatus?.monitoring_active ?? gmailStatus?.monitoring_active ?? false
+  const serverMonitoringActive = monitoringStatus?.monitoring_active ?? gmailStatus?.monitoring_active ?? false
+  const [localMonitoringActive, setLocalMonitoringActive] = useState<boolean>(serverMonitoringActive)
+
+  useEffect(() => {
+    setLocalMonitoringActive(serverMonitoringActive)
+  }, [serverMonitoringActive])
 
   // Handle Profile Update
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -163,23 +168,35 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
 
   // Handle Toggle Auto-Monitoring
   const handleToggleMonitoring = async () => {
+    if (!isGmailConnected) {
+      setGmailMsg({ type: 'error', text: 'Please connect your Gmail account above before enabling automated monitoring.' })
+      setTimeout(() => setGmailMsg(null), 4000)
+      return
+    }
+    if (togglingMonitor) return
+
+    const nextState = !localMonitoringActive
+    // Optimistic instant toggle for immediate visual animation
+    setLocalMonitoringActive(nextState)
     setTogglingMonitor(true)
     setGmailMsg(null)
-    const nextState = !isAutoMonitoring
+
     try {
       if (nextState) {
         await gmailService.startMonitoring()
       } else {
         await gmailService.stopMonitoring()
       }
-      onRefreshGmailStatus()
+      await onRefreshGmailStatus()
       setGmailMsg({
         type: 'success',
-        text: `Automated Gmail monitoring is now ${nextState ? 'ENABLED' : 'DISABLED'}.`,
+        text: `Automated Gmail monitoring is now ${nextState ? 'ACTIVE (scans every 60s)' : 'DISABLED'}.`,
       })
       setTimeout(() => setGmailMsg(null), 4000)
     } catch (err: any) {
-      setGmailMsg({ type: 'error', text: 'Failed to toggle Gmail monitoring.' })
+      // Revert optimistic state on failure
+      setLocalMonitoringActive(!nextState)
+      setGmailMsg({ type: 'error', text: err?.message || 'Failed to toggle Gmail monitoring.' })
     } finally {
       setTogglingMonitor(false)
     }
@@ -539,25 +556,70 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
 
           {/* Automated Monitoring Controls */}
           <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/10 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-heading text-sm font-bold text-[#192837]">Automated Background Monitoring</h3>
-                <p className="text-xs text-[#192837]/70 mt-0.5">Poll inbox every 30s & quarantine zero-day threats</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-heading text-sm font-bold text-[#192837]">Automated Background Monitoring</h3>
+                  {localMonitoringActive && isGmailConnected ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 shadow-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                      ACTIVE (60s SYNC)
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#192837]/10 text-[#192837]/60">
+                      PAUSED / MANUAL
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-[#192837]/70 leading-relaxed">
+                  Automatically syncs your Gmail inbox every 60s, executes Gemini AI threat analysis, and flags zero-day exploits.
+                </p>
               </div>
-              <button
-                type="button"
-                disabled={!isGmailConnected || togglingMonitor}
-                onClick={handleToggleMonitoring}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-40 ${
-                  isAutoMonitoring ? 'bg-[#7342E2]' : 'bg-[#192837]/20'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    isAutoMonitoring ? 'translate-x-5' : 'translate-x-0'
+
+              {/* Animated Toggle Switch */}
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-xs font-bold text-[#192837]/80 select-none">
+                  {localMonitoringActive && isGmailConnected ? 'ON' : 'OFF'}
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={localMonitoringActive && isGmailConnected}
+                  onClick={handleToggleMonitoring}
+                  disabled={togglingMonitor}
+                  title={
+                    !isGmailConnected
+                      ? 'Connect your Gmail account first to enable automated monitoring'
+                      : localMonitoringActive
+                      ? 'Click to pause automatic 60s monitoring'
+                      : 'Click to enable automatic 60s monitoring'
+                  }
+                  className={`relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full p-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#7342E2]/30 active:scale-95 ${
+                    !isGmailConnected
+                      ? 'bg-gray-200 cursor-not-allowed opacity-60'
+                      : localMonitoringActive
+                      ? 'bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] shadow-md shadow-[#7342E2]/30'
+                      : 'bg-gray-300 hover:bg-gray-400'
                   }`}
-                />
-              </button>
+                >
+                  <span className="sr-only">Toggle automated monitoring</span>
+                  <span
+                    style={{
+                      transform: (localMonitoringActive && isGmailConnected) ? 'translateX(28px)' : 'translateX(0px)',
+                      transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                    className="pointer-events-none flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md"
+                  >
+                    {togglingMonitor ? (
+                      <RefreshCw size={11} className="animate-spin text-[#7342E2]" />
+                    ) : (localMonitoringActive && isGmailConnected) ? (
+                      <span className="h-2 w-2 rounded-full bg-[#7342E2]" />
+                    ) : (
+                      <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                    )}
+                  </span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">

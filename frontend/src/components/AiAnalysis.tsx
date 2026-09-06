@@ -63,10 +63,10 @@ export const AiAnalysis: React.FC = () => {
                 Large Language Models & Deep Heuristics
               </span>
               <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-5">
-                How VaultShield AI Analyzes Every Incoming Email
+                How CyberTrace AI Analyzes Every Incoming Email
               </h2>
               <p className="font-body text-base text-[#192837]/80 leading-relaxed mb-8">
-                Traditional antispam filters rely on static blocklists that attackers easily evade. VaultShield pairs
+                Traditional antispam filters rely on static blocklists that attackers easily evade. CyberTrace pairs
                 <strong> Gemini AI </strong> reasoning with deep semantic NLP to examine content nuances, sender behavior,
                 and contextual anomalies in real time.
               </p>

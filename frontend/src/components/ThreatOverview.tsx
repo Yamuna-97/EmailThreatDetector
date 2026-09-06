@@ -80,7 +80,7 @@ export const ThreatOverview: React.FC = () => {
             {/* Description */}
             <ScrollReveal delay={0.24}>
               <p className="font-body text-base sm:text-lg text-[#192837]/80 leading-relaxed max-w-2xl mb-8">
-                VaultShield detects phishing, impersonation, business email compromise, malicious emails and suspicious
+                CyberTrace detects phishing, impersonation, business email compromise, malicious emails and suspicious
                 email infrastructure using AI and threat intelligence. Built for real-time inbox surveillance and forensic triage.
               </p>
             </ScrollReveal>

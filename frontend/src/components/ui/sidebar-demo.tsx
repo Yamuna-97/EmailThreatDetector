@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import { LayoutDashboard, UserCog, Settings, LogOut, Shield } from "lucide-react";
+import { LayoutDashboard, UserCog, Settings, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { CyberTraceLogoIcon } from "../CyberTraceLogo";
 
 export function SidebarDemo() {
   const links = [
@@ -78,16 +79,14 @@ export function SidebarDemo() {
 
 export const Logo = () => {
   return (
-    <div className="font-normal flex space-x-2 items-center text-sm text-[#192837] py-1 relative z-20">
-      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] flex items-center justify-center text-white shrink-0 shadow-sm">
-        <Shield size={16} />
-      </div>
+    <div className="font-normal flex space-x-2.5 items-center text-sm text-[#192837] py-1 relative z-20">
+      <CyberTraceLogoIcon size={32} className="shrink-0" />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="font-extrabold text-base text-[#192837] whitespace-pre font-heading"
       >
-        Vault<span className="text-[#7342E2]">Shield</span>
+        Cyber<span className="text-[#7342E2]">Trace</span>
       </motion.span>
     </div>
   );
@@ -96,9 +95,7 @@ export const Logo = () => {
 export const LogoIcon = () => {
   return (
     <div className="font-normal flex space-x-2 items-center text-sm text-[#192837] py-1 relative z-20">
-      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] flex items-center justify-center text-white shrink-0 shadow-sm">
-        <Shield size={16} />
-      </div>
+      <CyberTraceLogoIcon size={32} className="shrink-0" />
     </div>
   );
 };

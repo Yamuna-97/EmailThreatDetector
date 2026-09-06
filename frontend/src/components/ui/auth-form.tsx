@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import ShapeGrid from "../ShapeGrid"
 import { useAuth } from "../../context/AuthContext"
 import { authService } from "../../services/auth"
+import { CyberTraceLogo } from "../CyberTraceLogo"
 
 export type AuthFormMode = "signin" | "signup" | "signup_otp" | "forgot_password" | "forgot_password_otp"
 
@@ -263,7 +264,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   const handleQuickFill = (demoRole: "analyst" | "investigator") => {
     setError(null)
     if (demoRole === "investigator") {
-      setEmail("investigator@vaultshield.ai")
+      setEmail("investigator@cybertrace.ai")
       setPassword("InvestigatorPass123!")
       setFullName("Lead Forensic Investigator")
     } else {
@@ -921,13 +922,8 @@ const BackButton: React.FC<{ onBack?: () => void }> = ({ onBack }) => (
 )
 
 const Logo: React.FC = () => (
-  <div className="mb-6 flex items-center justify-center gap-2.5">
-    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] flex items-center justify-center text-white shadow-md shadow-[#7342E2]/20">
-      <Shield size={22} className="stroke-[2.5]" />
-    </div>
-    <span className="font-heading text-2xl font-extrabold tracking-tight text-[#192837]">
-      Vault<span className="text-[#7342E2]">Shield</span>
-    </span>
+  <div className="mb-6 flex items-center justify-center gap-3">
+    <CyberTraceLogo size="lg" />
   </div>
 )
 
@@ -956,7 +952,7 @@ const Header: React.FC<{
 
 const TermsAndConditions: React.FC = () => (
   <p className="mt-6 text-center text-[11px] text-[#192837]/60 leading-relaxed">
-    By signing in, you agree to VaultShield's{" "}
+    By signing in, you agree to CyberTrace's{" "}
     <a href="#" className="font-semibold text-[#7342E2] hover:underline">
       Terms of Service
     </a>{" "}

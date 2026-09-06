@@ -34,11 +34,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) =
         aria-label="Main Navigation"
       >
         {/* Left: Brand Identity */}
-        <a href="#" className="flex items-center gap-3 group focus:outline-none" aria-label="VaultShield Home">
-          <Logo size={32} />
+        <a href="#" className="flex items-center gap-3 group focus:outline-none" aria-label="CyberTrace Home">
+          <Logo size={36} />
           <div className="flex flex-col">
-            <span className="font-heading text-xl font-bold text-[#192837] tracking-tight flex items-center gap-1.5">
-              VaultShield
+            <span className="font-heading text-xl font-extrabold text-[#192837] tracking-tight flex items-center">
+              Cyber<span className="text-[#7342E2]">Trace</span>
             </span>
           </div>
         </a>

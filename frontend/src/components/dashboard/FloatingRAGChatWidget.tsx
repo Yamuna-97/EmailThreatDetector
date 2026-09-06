@@ -43,7 +43,7 @@ export const FloatingRAGChatWidget: React.FC = () => {
       sender: "bot",
       text: isInvestigator
         ? "Hello Investigator! I am your SOC Threat Intelligence Copilot. Ask me about RFC authentication protocols, MITRE ATT&CK techniques, forensic triage, or email incident containment."
-        : "Hi there! I am your VaultShield AI Security Assistant. Ask me anything about identifying dangerous emails, password safety, or how to protect your inbox.",
+        : "Hi there! I am your CyberTrace AI Security Assistant. Ask me anything about identifying dangerous emails, password safety, or how to protect your inbox.",
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ])
@@ -166,7 +166,7 @@ export const FloatingRAGChatWidget: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-heading text-sm font-extrabold flex items-center gap-1.5 leading-tight">
-                    <span>VaultShield AI</span>
+                    <span>CyberTrace AI</span>
                     <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full font-mono uppercase tracking-wider">
                       {activeMode === "investigator" ? "SOC RAG" : "Advisor"}
                     </span>

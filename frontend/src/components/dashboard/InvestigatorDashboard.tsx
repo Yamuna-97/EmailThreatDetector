@@ -13,6 +13,7 @@ import ForensicsModal from './ForensicsModal'
 import ThreatMapView from './ThreatMapView'
 import { InvestigatorRAGCopilot } from './InvestigatorRAGCopilot'
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar'
+import { CyberTraceLogoIcon } from '../CyberTraceLogo'
 
 export const InvestigatorDashboard: React.FC = () => {
   const { logout } = useAuth()
@@ -75,7 +76,7 @@ export const InvestigatorDashboard: React.FC = () => {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `VaultShield_Forensic_Report_${tId.slice(0, 8)}.pdf`
+      a.download = `CyberTrace_Forensic_Report_${tId.slice(0, 8)}.pdf`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
@@ -162,13 +163,11 @@ export const InvestigatorDashboard: React.FC = () => {
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
             {/* Logo / Brand */}
             <div className="flex items-center gap-3 px-1 py-2 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-[#F5F3FF] border border-[#D8C8FF] flex items-center justify-center text-[#7342E2] shrink-0 shadow-sm">
-                <ShieldAlert size={20} />
-              </div>
+              <CyberTraceLogoIcon size={36} className="shrink-0" />
               {sidebarOpen && (
                 <div className="truncate">
                   <span className="font-heading text-base font-extrabold text-[#1F1F29] tracking-tight block">
-                    Vault<span className="text-[#7342E2]">Shield</span>
+                    Cyber<span className="text-[#7342E2]">Trace</span>
                   </span>
                   <span className="text-[10px] text-[#7342E2] font-extrabold block uppercase tracking-wider">
                     SOC Console

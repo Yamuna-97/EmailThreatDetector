@@ -69,7 +69,7 @@ export const GeoIntelligence: React.FC = () => {
               Geolocation & Threat Intelligence Engine
             </h2>
             <p className="font-body text-base text-[#192837]/75 leading-relaxed">
-              Every email header contains digital breadcrumbs. VaultShield maps sender IP origins, flags Tor/VPN proxies,
+              Every email header contains digital breadcrumbs. CyberTrace maps sender IP origins, flags Tor/VPN proxies,
               and checks global threat feeds in milliseconds.
             </p>
           </div>

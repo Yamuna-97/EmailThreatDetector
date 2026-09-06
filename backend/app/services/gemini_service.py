@@ -49,7 +49,7 @@ class GeminiService:
         }
 
         system_instruction = (
-            "You are VaultShield's Advanced Forensic Cybersecurity Threat Classifier. "
+            "You are CyberTrace's Advanced Forensic Cybersecurity Threat Classifier. "
             "Analyze the provided email based strictly on observed factual evidence versus AI security inference. "
             "Do NOT invent fictional IP addresses or domains. "
             "Output valid JSON ONLY matching this exact schema:\n"

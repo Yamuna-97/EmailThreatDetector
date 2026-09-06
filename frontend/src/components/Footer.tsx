@@ -9,8 +9,10 @@ export const Footer: React.FC = () => {
           {/* Brand Info */}
           <div className="md:col-span-5 flex flex-col items-start">
             <div className="flex items-center gap-2.5 mb-4">
-              <Logo size={28} />
-              <span className="font-heading text-xl font-bold text-[#192837]">VaultShield</span>
+              <Logo size={32} />
+              <span className="font-heading text-xl font-extrabold text-[#192837]">
+                Cyber<span className="text-[#7342E2]">Trace</span>
+              </span>
             </div>
             <p className="font-body text-xs sm:text-sm text-[#192837]/70 leading-relaxed max-w-sm mb-4">
               AI-Powered Email Threat Detection, Geolocation and Forensic Intelligence Platform engineered for
@@ -87,7 +89,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#192837]/60">
-          <p>© 2026 VaultShield. All rights reserved. Enterprise Security Team.</p>
+          <p>© 2026 CyberTrace. All rights reserved. Enterprise Security Team.</p>
           <div className="flex items-center gap-6">
             <a href="#privacy" className="hover:text-[#7342E2]">Privacy</a>
             <a href="#terms" className="hover:text-[#7342E2]">Terms</a>

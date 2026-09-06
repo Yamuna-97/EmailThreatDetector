@@ -8,7 +8,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # App
-    PROJECT_NAME: str = "VaultShield AI Threat Intelligence API"
+    PROJECT_NAME: str = "CyberTrace AI Threat Intelligence API"
     VERSION: str = "2.0.0"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     PORT: int = int(os.getenv("PORT", 8000))

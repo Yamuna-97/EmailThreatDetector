@@ -39,7 +39,7 @@ class DualRAGService:
         self.embedding_model = settings.GEMINI_EMBEDDING_MODEL or "gemini-embedding-2"
         self.fast_model = settings.GEMINI_FAST_MODEL or "gemini-2.5-flash"
         self.pro_model = settings.GEMINI_PRO_MODEL or "gemini-2.5-pro"
-        self.fallback_models = ["gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-1.5-flash", "gemini-2.5-pro"]
+        self.fallback_models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-flash-latest", "gemini-2.5-pro"]
 
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         USER_RAG_DIR.mkdir(parents=True, exist_ok=True)
@@ -445,23 +445,20 @@ class DualRAGService:
             )
 
         system_prompt = (
-            "You are VaultShield's User Security Advisor. Your goal is to empower everyday users "
-            "with clear, reassuring, and easy-to-understand cybersecurity explanations. "
-            "Follow these strict principles:\n"
-            "1. Ground your answer in the provided knowledge base references and email facts.\n"
-            "2. Write in clear, human, accessible English. Avoid robotic or overly dense language.\n"
-            "3. If referring to the user's email, explain why it was flagged safe or dangerous, "
-            "pointing out the exact red flags (suspicious sender domain, urgency tactics, fake links).\n"
-            "4. Always provide concrete, bulleted 'What You Should Do' safety recommendations.\n"
-            "5. Cite the relevant source publications naturally.\n"
-            "6. Format with clean Markdown headings, bold keywords, and bullet points."
+            "You are CyberTrace's AI Security Advisor powered by Google Gemini Flash. "
+            "Your task is to provide everyday users with a crystal-clear, easy-to-understand 5 to 6 line summary. "
+            "Never write long dense paragraphs or academic jargon. Strictly format your response into 5 to 6 readable lines:\n\n"
+            "🛡️ Verdict: (1-2 clear lines in simple English: state if this is safe, phishing, or a scam and the danger level)\n"
+            "⚠️ Red Flags: (1-2 lines with the exact warning signs: spoofed sender, fake links, or urgent demands)\n"
+            "✅ Immediate Action: (1-2 lines: exactly what the user should do right now, e.g. delete, do not click, change password)\n\n"
+            "Keep the entire response strictly to 5-6 lines total!"
         )
 
         user_content = (
             f"KNOWLEDGE BASE CONTEXT:\n{context_str}\n\n"
             f"{email_str}\n"
             f"USER QUESTION: {query}\n\n"
-            f"Provide a thorough, easy-to-understand explanation with actionable recommendations."
+            f"Provide a concise, easy-to-understand 5 to 6 line summary with clear verdict, red flags, and immediate action."
         )
 
         answer = await self._generate_llm_response(
@@ -546,7 +543,7 @@ class DualRAGService:
             )
 
         system_prompt = (
-            "You are VaultShield's SOC Lead & Senior Forensic Threat Intelligence Investigator. "
+            "You are CyberTrace's SOC Lead & Senior Forensic Threat Intelligence Investigator. "
             "You provide comprehensive, technical, yet readable forensic intelligence for incident response teams, SOC analysts, "
             "and security auditors.\n"
             "Strictly adhere to the following:\n"
@@ -661,8 +658,8 @@ class DualRAGService:
         email_evidence: Optional[Dict[str, Any]],
         top_chunks: List[Dict[str, Any]]
     ) -> str:
-        """Construct user-friendly cybersecurity advice grounded in facts."""
-        out = []
+        """Construct user-friendly cybersecurity advice strictly in 5-6 concise lines."""
+        lines = []
 
         if email_evidence:
             subject = email_evidence.get("subject", "(No Subject)")
@@ -674,112 +671,70 @@ class DualRAGService:
             spf = headers.get("spf", "unknown")
             dmarc = headers.get("dmarc", "unknown")
             urls = email_evidence.get("extracted_urls", [])
-            indicators = email_evidence.get("threat_indicators", [])
 
-            is_high_risk = risk_score >= 50 or severity in ["HIGH", "CRITICAL"]
+            is_danger = risk_score >= 40 or severity in ["HIGH", "CRITICAL"]
 
-            out.append(f"## Security Analysis for \"{subject}\"\n")
-            out.append(
-                f"**Sender:** `{sender}`  \n"
-                f"**Threat Assessment:** **{classification}** ({severity} Risk — {risk_score}/100)\n"
-            )
-
-            if is_high_risk:
-                out.append("### ⚠️ Why this email is flagged as dangerous:\n")
+            # Line 1: Verdict
+            if is_danger:
+                lines.append(f"🛡️ **Verdict:** **{classification} Threat** ({severity} Risk — {risk_score}/100) — This email is dangerous and deceptive.")
             else:
-                out.append("### ℹ️ Threat Evaluation Breakdown:\n")
+                lines.append(f"🛡️ **Verdict:** **Verified Clean** ({severity} Risk — {risk_score}/100) — No active threat detected in this email.")
 
-            # Red flags breakdown
-            flags = []
+            # Line 2-3: Red Flags
             if spf == "fail" or dmarc == "fail":
-                flags.append(f"- **Fake Sender Domain (Spoofing):** Email authentication failed (`SPF: {spf}`, `DMARC: {dmarc}`). The sender address shown is forged and did not originate from the legitimate server.")
-            
-            if urls:
-                flags.append(f"- **Suspicious Hyperlinks:** Found {len(urls)} embedded link(s). Cybercriminals use deceptive links to redirect you to fraudulent login or credential-harvesting pages.")
-
-            if any(ind.get("type") == "social_engineering" for ind in indicators):
-                flags.append("- **Urgency & Psychological Pressure:** The email uses urgent language (such as account suspension or immediate payment warnings) to rush you into acting without verifying.")
-            elif "urgent" in subject.lower() or "action" in subject.lower() or "suspend" in subject.lower():
-                flags.append("- **Urgent Language Tactics:** The message creates artificial pressure to force hasty clicks.")
-
-            if not flags:
-                if is_high_risk:
-                    flags.append("- **Content & Heuristic Anomaly:** Content matches known social engineering and credential-phishing patterns identified in our threat database.")
-                else:
-                    flags.append("- **Standard Communication:** Authentication headers passed and no high-severity deceptive indicators were found.")
-
-            out.append("\n".join(flags) + "\n")
-
-            # Actionable steps
-            out.append("### 🛡️ Recommended Action Steps:\n")
-            if is_high_risk:
-                out.append(
-                    "1. **Do NOT click any links** or open any attachments inside this email.\n"
-                    "2. **Do NOT reply** or provide passwords, OTPs, or financial details.\n"
-                    "3. **Verify Out-of-Band:** If this claims to be from a known bank or company, contact them directly using their official website or customer support number.\n"
-                    "4. **Report & Quarantine:** Flag this email as Phishing in your email inbox so your provider can block future attempts."
-                )
+                lines.append(f"⚠️ **Red Flag:** Sender domain spoofed (`{sender}`). Authentication failed (SPF/DMARC: fail).")
+            elif urls:
+                lines.append(f"⚠️ **Red Flag:** Contains {len(urls)} suspicious external link(s) leading to unverified web pages.")
+            elif is_danger:
+                lines.append("⚠️ **Red Flag:** Content exhibits high-risk social engineering and urgency pressure tactics.")
             else:
-                out.append(
-                    "1. **Proceed with Normal Caution:** Although no major threat was detected, always double-check links before logging into accounts.\n"
-                    "2. **Verify Sender Identity:** Ensure you recognize the sender's actual email address, not just the display name."
-                )
+                lines.append("ℹ️ **Security Details:** Standard envelope formatting and legitimate security headers verified.")
+
+            # Line 4: Context
+            lines.append(f"🔍 **Analysis:** Email claims subject *\"{subject[:45]}\"* attempting unverified user interaction.")
+
+            # Line 5-6: Actions to Take
+            if is_danger:
+                lines.append("✅ **Action 1:** Do **NOT** click any links, download attachments, or reply with personal data.")
+                lines.append("✅ **Action 2:** Mark this message as **Phishing** in your inbox and delete it immediately.")
+            else:
+                lines.append("✅ **Action 1:** Safe to read, but always verify unfamiliar requests before sharing passwords.")
+                lines.append("✅ **Action 2:** Always check sender addresses directly when unexpected attachments are sent.")
 
         else:
-            # Conceptual cybersecurity guidance
-            out.append(f"## Cybersecurity Advisory: {query}\n")
-
+            # Concise 5-6 line summary for conceptual security questions
             if "spear" in q_lower or "difference" in q_lower:
-                out.append(
-                    "### Phishing vs. Spear Phishing Explained\n\n"
-                    "- **Regular Phishing:** Broadcasts generic, mass emails to thousands of people simultaneously (e.g., fake Netflix, lottery, or tax refund alerts) hoping a small percentage will fall for it.\n"
-                    "- **Spear Phishing:** Highly customized and targeted at a specific individual or organization. Attackers research your job title, colleagues, or vendors to craft convincing impersonation emails (such as fake invoices from your CEO or HR department).\n"
-                )
+                lines.append("🛡️ **Concept:** Phishing is broad mass email spam; Spear Phishing is highly targeted at you specifically.")
+                lines.append("⚠️ **How Attackers Work:** Attackers research your job, colleagues, or vendors to impersonate trusted contacts.")
+                lines.append("🔍 **Key Difference:** Spear phishing uses personalized details and tailored invoices to bypass suspicion.")
+                lines.append("✅ **Action 1:** Always verify financial or wire transfer requests via a separate phone call.")
+                lines.append("✅ **Action 2:** Check the sender's full email address and look for subtle spelling discrepancies.")
             elif "fake" in q_lower or "sender" in q_lower or "spoof" in q_lower:
-                out.append(
-                    "### How to Spot Fake or Spoofed Senders\n\n"
-                    "1. **Inspect the Full Email Address:** Look beyond the Display Name. Attackers often name themselves *'Microsoft Security'* but use an address like `support@micros0ft-verify.com` or a random Gmail account.\n"
-                    "2. **Look for Lookalike Domains (Typosquatting):** Check for subtle spelling tricks (e.g., `paypal-security.com` instead of `paypal.com`, or `paypa1.com` using the number 1).\n"
-                    "3. **Check Authentication Status:** Legitimate companies enforce SPF, DKIM, and DMARC. When these fail, the message is forged.\n"
-                )
+                lines.append("🛡️ **Concept:** Spoofed emails forge the visible display name to impersonate legitimate organizations.")
+                lines.append("⚠️ **How to Spot:** Expand the sender field to reveal the true email domain behind the display name.")
+                lines.append("🔍 **Lookalike Domains:** Watch out for typos like `paypa1.com` or extra subdomains (`security-apple.com`).")
+                lines.append("✅ **Action 1:** Never trust display names alone; inspect the full email address and SPF/DMARC status.")
+                lines.append("✅ **Action 2:** When in doubt, navigate directly to the company website instead of clicking email links.")
             elif "click" in q_lower or "clicked" in q_lower or "link" in q_lower:
-                out.append(
-                    "### Immediate Steps if You Clicked a Suspicious Link\n\n"
-                    "1. **Disconnect Network if Necessary:** If a file began downloading, disconnect Wi-Fi and do not open the file.\n"
-                    "2. **Change Passwords Immediately:** If you entered credentials on the fake page, change your password immediately from a secure device.\n"
-                    "3. **Enable Multi-Factor Authentication (MFA):** Ensure two-factor authentication (app-based or hardware key) is turned on for all critical accounts.\n"
-                    "4. **Run a Full Antivirus / Malware Scan** on your computer.\n"
-                )
+                lines.append("🛡️ **Emergency Protocol:** Immediate containment steps after clicking a suspicious link.")
+                lines.append("⚠️ **Immediate Risk:** Potential credential theft or silent background malware download.")
+                lines.append("✅ **Step 1:** Disconnect from Wi-Fi immediately if any unknown file started downloading.")
+                lines.append("✅ **Step 2:** Change your account password immediately from a separate secure device.")
+                lines.append("✅ **Step 3:** Enable Multi-Factor Authentication (MFA) and run a full system antivirus scan.")
             elif "bec" in q_lower or "business email" in q_lower:
-                out.append(
-                    "### What is Business Email Compromise (BEC)?\n\n"
-                    "Business Email Compromise (BEC) is a sophisticated scam where criminals compromise or spoof legitimate corporate email accounts to deceive employees into transferring funds or revealing sensitive data.\n\n"
-                    "**Common BEC Vectors:**\n"
-                    "- **CEO Fraud:** Posing as senior executives requesting urgent wire transfers.\n"
-                    "- **Vendor Invoice Fraud:** Impersonating suppliers with 'updated bank routing numbers'.\n"
-                    "- **Payroll Diversion:** Requesting HR to update direct deposit accounts.\n"
-                )
+                lines.append("🛡️ **Concept:** Business Email Compromise (BEC) tricks employees into fraudulent wire transfers or payroll changes.")
+                lines.append("⚠️ **Common Tactics:** Impersonating executives (CEO fraud) or urgent vendor invoice modification.")
+                lines.append("🔍 **Warning Sign:** Requests marked 'Urgent & Confidential' demanding quick payment bypassing normal approval.")
+                lines.append("✅ **Action 1:** Enforce strict verbal confirmation for any change to vendor bank accounts.")
+                lines.append("✅ **Action 2:** Report suspicious payment modification emails to your finance and IT security team.")
             else:
-                out.append(
-                    "### Key Security Principles & Best Practices\n\n"
-                    "- **Verify Sender Domains:** Always check the sender's actual envelope domain against official corporate domains.\n"
-                    "- **Beware of Artificial Urgency:** Legitimate organizations rarely demand immediate wire transfers or password resets under threat of immediate suspension.\n"
-                    "- **Never Share Passwords or OTPs:** No legitimate support team will ever request your one-time passcodes or master passwords.\n"
-                )
+                lines.append("🛡️ **CyberTrace Security Summary:** Core protection rules for email and inbox defense.")
+                lines.append("⚠️ **Top Threat Vector:** 91% of cyber attacks start with a phishing or credential-harvesting email.")
+                lines.append("🔍 **Key Rule:** Inspect links by hovering before clicking and check sender envelope domains.")
+                lines.append("✅ **Action 1:** Never share one-time passwords (OTPs), passcodes, or banking credentials over email.")
+                lines.append("✅ **Action 2:** Use strong unique passwords and activate Multi-Factor Authentication on all accounts.")
 
-            # Extract relevant context snippet if available
-            if top_chunks:
-                top_c = top_chunks[0]
-                out.append(f"\n> **Reference from {top_c.get('doc_name')}:**\n> \"{top_c.get('text', '')[:300]}...\"\n")
-
-            out.append(
-                "\n### 🛡️ Best Practice Checklist:\n"
-                "- Always inspect URLs by hovering before clicking.\n"
-                "- Use password managers and passkeys where available.\n"
-                "- Report unverified emails to your organization's security team."
-            )
-
-        return "\n".join(out)
+        return "\n".join(lines[:6])
 
     def _build_investigator_dynamic_response(
         self,

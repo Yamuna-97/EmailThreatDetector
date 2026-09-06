@@ -102,7 +102,7 @@ export const UserRAGAssistant: React.FC<UserRAGAssistantProps> = ({
           </div>
           <div>
             <h3 className="text-base sm:text-lg font-heading font-extrabold text-[#192837] flex items-center gap-2">
-              VaultShield AI Security Advisor
+              CyberTrace AI Security Advisor
               <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#7342E2]/10 text-[#7342E2] font-mono font-bold border border-[#7342E2]/20 uppercase">
                 User RAG v2.0
               </span>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import {
-  ShieldAlert, ShieldCheck, Mail, Sparkles, RefreshCw, AlertTriangle,
+  ShieldAlert, Mail, Sparkles, RefreshCw, AlertTriangle,
   Eye, Clock, Activity, LogOut, ChevronRight, Inbox, Search, CheckCircle, XCircle, X,
   User
 } from 'lucide-react'
@@ -12,9 +12,10 @@ import ForensicsModal from './ForensicsModal'
 import { UserRAGAssistant } from './UserRAGAssistant'
 import { CoreSpinLoader } from '../ui/core-spin-loader'
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar'
-import { IncidentReportCard } from '@/components/ui/area-chart-1'
+import { IncidentReportCard, buildUserTelemetry } from '@/components/ui/area-chart-1'
 import { UserProfileView } from './UserProfileView'
 import { GmailScannerView } from './GmailScannerView'
+import { CyberTraceLogoIcon } from '../CyberTraceLogo'
 
 interface NavTabItem {
   id: 'dashboard' | 'gmail-scan' | 'emails' | 'ai-advisor' | 'alerts' | 'history' | 'profile'
@@ -47,29 +48,42 @@ export const UserDashboard: React.FC = () => {
   const [oauthBanner, setOauthBanner] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const oauthHandled = useRef(false)
 
-  const loadAllData = async () => {
-    setLoading(true)
+  const loadAllData = async (silent = false) => {
+    if (!silent) setLoading(true)
     try {
-      const [tRes, eRes, aRes, gRes] = await Promise.all([
-        threatService.getThreats(),
-        threatService.getEmails(),
-        threatService.getAlerts(),
+      const [tRes, eRes, aRes, gRes, mRes] = await Promise.all([
+        threatService.getThreats().catch(() => []),
+        threatService.getEmails().catch(() => []),
+        threatService.getAlerts().catch(() => []),
         gmailService.getStatus().catch(() => ({ is_connected: false, auto_scan_enabled: false, scan_limit: 10, monitoring_active: false, emails_auto_processed: 0, warnings_sent: 0 })),
+        gmailService.getMonitoringStatus().catch(() => null),
       ])
       setThreats(tRes)
       setEmails(eRes)
       setAlerts(aRes)
       setGmailStatus(gRes as GmailStatus)
-      // Also refresh monitoring status
-      if ((gRes as GmailStatus).is_connected) {
-        gmailService.getMonitoringStatus()
-          .then(ms => setMonitoringStatus(ms))
-          .catch(() => null)
+      if (mRes) {
+        setMonitoringStatus(mRes)
+      } else if (gRes) {
+        setMonitoringStatus({
+          monitoring_active: (gRes as GmailStatus).monitoring_active ?? false,
+          mode: 'polling',
+          email_address: (gRes as GmailStatus).email_address,
+          emails_auto_processed: (gRes as GmailStatus).emails_auto_processed ?? 0,
+          threats_detected: (gRes as GmailStatus).warnings_sent ?? 0,
+          warnings_sent: (gRes as GmailStatus).warnings_sent ?? 0,
+        })
       }
+      // Keep selected email updated with latest data if one is open
+      setSelectedEmail(prev => {
+        if (!prev) return null
+        const fresh = eRes.find(e => e.id === prev.id)
+        return fresh || prev
+      })
     } catch (err) {
       console.error('Error loading dashboard data:', err)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
@@ -106,7 +120,7 @@ export const UserDashboard: React.FC = () => {
     loadAllData()
   }, [])
 
-  // Poll monitoring status every 30s while monitoring is active
+  // Poll monitoring status silently every 60s while monitoring is active (non-disruptive background sync)
   useEffect(() => {
     if (monitoringPollRef.current) {
       clearInterval(monitoringPollRef.current)
@@ -114,14 +128,9 @@ export const UserDashboard: React.FC = () => {
     }
     if (monitoringStatus?.monitoring_active && gmailStatus?.is_connected) {
       monitoringPollRef.current = setInterval(() => {
-        gmailService.getMonitoringStatus()
-          .then(ms => setMonitoringStatus(ms))
-          .catch(() => null)
-        // Also refresh email/threat counts
-        Promise.all([threatService.getThreats(), threatService.getEmails(), threatService.getAlerts()])
-          .then(([t, e, a]) => { setThreats(t); setEmails(e); setAlerts(a) })
-          .catch(() => null)
-      }, 30_000)
+        // Run silent background update — no UI flickers, no modal closure, no scroll reset
+        loadAllData(true)
+      }, 60_000)
     }
     return () => {
       if (monitoringPollRef.current) clearInterval(monitoringPollRef.current)
@@ -171,6 +180,12 @@ export const UserDashboard: React.FC = () => {
   const criticalCount = threats.filter(t => t.severity === 'critical' || t.risk_score >= 75).length
   const safeCount = Math.max(0, totalScanned - threatCount)
   const unreadAlertsCount = alerts.filter(a => !a.is_read).length
+
+  // Live Dynamic Telemetry & Chart Metrics computed directly from user's analytics
+  const userTelemetry = useMemo(
+    () => buildUserTelemetry(emails, threats, alerts),
+    [emails, threats, alerts]
+  )
 
   // Helper to sanitize raw divider ASCII strings from text bodies
   const cleanSnippet = (text?: string) => {
@@ -229,13 +244,11 @@ export const UserDashboard: React.FC = () => {
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
             {/* Logo / Brand Header */}
             <div className="flex items-center gap-3 px-1 py-2 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] flex items-center justify-center text-white shrink-0 shadow-md shadow-[#7342E2]/25">
-                <ShieldCheck size={22} />
-              </div>
+              <CyberTraceLogoIcon size={36} className="shrink-0" />
               {sidebarOpen && (
                 <div className="truncate">
                   <span className="font-heading text-base font-extrabold text-[#192837] tracking-tight block">
-                    Vault<span className="text-[#7342E2]">Shield</span>
+                    Cyber<span className="text-[#7342E2]">Trace</span>
                   </span>
                   <span className="text-[10px] text-[#7342E2] font-bold block uppercase tracking-wider">
                     User Portal
@@ -451,7 +464,7 @@ export const UserDashboard: React.FC = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={loadAllData}
+                      onClick={() => loadAllData()}
                       disabled={loading}
                       title="Refresh threat intelligence"
                       className="p-2 rounded-xl bg-[#FAF9F6] border border-[#192837]/10 text-[#192837]/70 hover:text-[#7342E2] hover:bg-white transition-all cursor-pointer"
@@ -490,9 +503,13 @@ export const UserDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Incident & Threat Intelligence Analysis Section */}
+            {/* Incident & Threat Intelligence Analysis Section (Dynamic User Analytics) */}
             <div className="w-full">
-              <IncidentReportCard title="Threat Intelligence & Email Ingestion Telemetry" />
+              <IncidentReportCard
+                title="Threat Intelligence & Email Ingestion Telemetry"
+                chartSeries={userTelemetry.chartSeries}
+                metrics={userTelemetry.metrics}
+              />
             </div>
 
             {/* Bottom Grid: Recent Threats + Security Alerts */}
@@ -657,7 +674,7 @@ export const UserDashboard: React.FC = () => {
                     Mailbox Intelligence ({emails.length})
                   </h2>
                   <p className="text-xs text-[#192837]/70 mt-0.5 font-medium">
-                    Filter and inspect scanned emails analyzed by VaultShield threat engine
+                    Filter and inspect scanned emails analyzed by CyberTrace threat engine
                   </p>
                 </div>
 
@@ -984,9 +1001,11 @@ export const UserDashboard: React.FC = () => {
           <GmailScannerView
             gmailStatus={gmailStatus}
             monitoringStatus={monitoringStatus}
+            threats={threats}
             onRefreshAllData={loadAllData}
             onNavigateToProfile={() => setActiveTab('profile')}
             onNavigateToEmails={() => setActiveTab('emails')}
+            onViewThreatReport={(tId) => setSelectedThreatId(tId)}
           />
         )}
 

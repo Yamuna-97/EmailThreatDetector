@@ -9,13 +9,13 @@ export const About: React.FC = () => {
         <ScrollReveal delay={0.05}>
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#F5F3FF] border border-[#D8C8FF] px-4 py-1.5 rounded-full inline-block mb-3">
-              About VaultShield
+              About CyberTrace
             </span>
             <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#1F1F29] tracking-tight mb-4">
               Autonomous Email Threat Intelligence & Forensic Defense
             </h2>
             <p className="font-body text-base text-[#6B7280] leading-relaxed">
-              VaultShield is an enterprise cybersecurity intelligence platform engineered to intercept sophisticated email attacks, credential harvesting campaigns, business email compromise (BEC), and zero-day phishing vectors with machine-speed precision.
+              CyberTrace is an enterprise cybersecurity intelligence platform engineered to intercept sophisticated email attacks, credential harvesting campaigns, business email compromise (BEC), and zero-day phishing vectors with machine-speed precision.
             </p>
           </div>
         </ScrollReveal>
@@ -82,7 +82,7 @@ export const About: React.FC = () => {
               Bridging the Gap Between Real-Time Email Protection and Deep Forensics
             </h3>
             <p className="text-sm text-[#6B7280] leading-relaxed">
-              Traditional email filters rely on static blocklists and signature databases that fail against novel domain permutations and sophisticated AI-generated lure texts. VaultShield combines continuous RFC header inspection with asynchronous threat enrichment, providing instant inbox defense for employees alongside deep forensic telemetry for SOC tier 2 investigators.
+              Traditional email filters rely on static blocklists and signature databases that fail against novel domain permutations and sophisticated AI-generated lure texts. CyberTrace combines continuous RFC header inspection with asynchronous threat enrichment, providing instant inbox defense for employees alongside deep forensic telemetry for SOC tier 2 investigators.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">

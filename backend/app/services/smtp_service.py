@@ -54,7 +54,7 @@ class SMTPAlertService:
         threat_type = threat_data.get("threat_type", "Critical Security Incident")
         risk_score = threat_data.get("risk_score", 95)
         severity = str(threat_data.get("severity", "CRITICAL")).upper()
-        summary = threat_data.get("summary", "Critical email threat detected by VaultShield.")
+        summary = threat_data.get("summary", "Critical email threat detected by CyberTrace.")
         
         sender = email_data.get("sender", "Unknown Sender")
         subject = email_data.get("subject", "No Subject")
@@ -68,17 +68,17 @@ class SMTPAlertService:
 
         # Prepare Message
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"🚨 [VAULTSHIELD ALERT] {severity} Threat Detected: {threat_type} ({risk_score}/100)"
-        msg["From"] = f"VaultShield Threat Intelligence <{self.smtp_user}>"
+        msg["Subject"] = f"🚨 [CYBERTRACE ALERT] {severity} Threat Detected: {threat_type} ({risk_score}/100)"
+        msg["From"] = f"CyberTrace Threat Intelligence <{self.smtp_user}>"
         msg["To"] = to_email
 
         # Plain text version
         plain_text = f"""
 ================================================================================
-VAULTSHIELD - AUTOMATED CYBERSECURITY THREAT ALERT
+CYBERTRACE - AUTOMATED CYBERSECURITY THREAT ALERT
 ================================================================================
 CRITICAL SECURITY WARNING: An email sent to your account has been classified
-as a {severity} threat ({risk_score}/100 Risk Score) by VaultShield AI.
+as a {severity} threat ({risk_score}/100 Risk Score) by CyberTrace AI.
 
 INCIDENT DETAILS:
 --------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ RECOMMENDED IMMEDIATE DEFENSIVE ACTIONS:
 
 --------------------------------------------------------------------------------
 Protect your organization: Inspect full forensics at http://localhost:5173
-VaultShield Platform - SIH 2026 AI Cybersecurity Defense
+CyberTrace Platform - SIH 2026 AI Cybersecurity Defense
 ================================================================================
 """
 
@@ -149,7 +149,7 @@ VaultShield Platform - SIH 2026 AI Cybersecurity Defense
     </div>
     <div class="content">
       <p>Hello,</p>
-      <p>VaultShield's AI Threat Detection platform scanned an incoming email in your mailbox and detected a <strong>{severity}</strong> threat requiring immediate attention.</p>
+      <p>CyberTrace's AI Threat Detection platform scanned an incoming email in your mailbox and detected a <strong>{severity}</strong> threat requiring immediate attention.</p>
       
       <div class="score-box">
         <table style="width: 100%; font-size: 13px;">
@@ -176,11 +176,11 @@ VaultShield Platform - SIH 2026 AI Cybersecurity Defense
       </div>
 
       <p style="margin-top:20px; text-align:center;">
-        <a href="http://localhost:5173" style="display:inline-block; padding:10px 20px; background:#7342E2; color:#ffffff; text-decoration:none; border-radius:8px; font-weight:bold; font-size:13px;">View Incident in VaultShield Dashboard &rarr;</a>
+        <a href="http://localhost:5173" style="display:inline-block; padding:10px 20px; background:#7342E2; color:#ffffff; text-decoration:none; border-radius:8px; font-weight:bold; font-size:13px;">View Incident in CyberTrace Dashboard &rarr;</a>
       </p>
     </div>
     <div class="footer">
-      VaultShield AI Threat Detection &bull; SIH 2026 &bull; Automated SOC Alert
+      CyberTrace AI Threat Detection &bull; SIH 2026 &bull; Automated SOC Alert
     </div>
   </div>
 </body>
@@ -228,7 +228,7 @@ VaultShield Platform - SIH 2026 AI Cybersecurity Defense
 
     def send_otp_email_sync(self, recipient_email: str, otp_code: str, purpose: str = "signup", user_name: str = "") -> bool:
         """
-        Send a branded VaultShield 6-digit OTP verification email for Sign Up or Password Reset.
+        Send a branded CyberTrace 6-digit OTP verification email for Sign Up or Password Reset.
         """
         if not self.smtp_user or not self.smtp_password:
             logger.warning("SMTP skipped: Missing SMTP_USER or SMTP_PASSWORD in environment.")
@@ -240,13 +240,13 @@ VaultShield Platform - SIH 2026 AI Cybersecurity Defense
         greeting_name = f" {user_name}" if user_name else ""
 
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"🔐 Your VaultShield Verification Code: {otp_code}"
-        msg["From"] = f"VaultShield Security <{self.smtp_user}>"
+        msg["Subject"] = f"🔐 Your CyberTrace Verification Code: {otp_code}"
+        msg["From"] = f"CyberTrace Security <{self.smtp_user}>"
         msg["To"] = recipient_email
 
         plain_text = f"""
 ================================================================================
-VAULTSHIELD - IDENTITY VERIFICATION
+CYBERTRACE - IDENTITY VERIFICATION
 ================================================================================
 Hello{greeting_name},
 
@@ -260,7 +260,7 @@ YOUR 6-DIGIT VERIFICATION CODE:
 This code will expire in 10 minutes.
 If you did not initiate this request, please disregard this email.
 
-VaultShield AI Cyber Defense Platform
+CyberTrace AI Cyber Defense Platform
 ================================================================================
 """
 
@@ -286,8 +286,8 @@ VaultShield AI Cyber Defense Platform
 <body>
   <div class="card">
     <div class="header">
-      <div class="badge">🛡️ VaultShield Security</div>
-      <div class="logo">VaultShield AI</div>
+      <div class="badge">🛡️ CyberTrace Security</div>
+      <div class="logo">CyberTrace AI</div>
       <div class="subtitle">{title}</div>
     </div>
     <div class="content">
@@ -304,7 +304,7 @@ VaultShield AI Cyber Defense Platform
       </p>
     </div>
     <div class="footer">
-      VaultShield &bull; SIH 2026 AI Threat Intelligence Platform &bull; Zero-Trust Verification
+      CyberTrace &bull; SIH 2026 AI Threat Intelligence Platform &bull; Zero-Trust Verification
     </div>
   </div>
 </body>

@@ -27,7 +27,7 @@ export const EarlyWarning: React.FC = () => {
                 Instant Early Warnings for High-Risk Inbound Emails
               </h2>
               <p className="font-body text-base text-[#192837]/80 leading-relaxed mb-6">
-                When an employee receives a malicious lure, every second counts. VaultShield injects immediate,
+                When an employee receives a malicious lure, every second counts. CyberTrace injects immediate,
                 context-aware warning banners directly onto suspicious messages before credentials are typed or funds are wired.
               </p>
             </ScrollReveal>
@@ -65,7 +65,7 @@ export const EarlyWarning: React.FC = () => {
           <div className="lg:col-span-6">
             <ScrollReveal delay={0.2} yOffset={40} scaleStart={0.93}>
               <Card
-                badge="VAULTSHIELD EARLY WARNING"
+                badge="CYBERTRACE EARLY WARNING"
                 title="High-Risk Threat Intercepted"
                 description="Risk Level: Critical • Finance Payroll Impersonation"
                 className="p-7 sm:p-9 text-left shadow-2xl"

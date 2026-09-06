@@ -19,6 +19,20 @@ from app.database import db
 logger = logging.getLogger("vaultshield.gmail")
 GMAIL_MESSAGES_URL = "https://gmail.googleapis.com/gmail/v1/users/me/messages"
 
+
+class GmailAuthExpiredError(Exception):
+    """Raised when Gmail returns 401 Unauthorized / Invalid Credentials."""
+    pass
+
+
+class GmailApiError(Exception):
+    """Raised when Gmail API returns a non-200 error other than 401."""
+    def __init__(self, status_code: int, detail: str):
+        self.status_code = status_code
+        self.detail = detail
+        super().__init__(f"Gmail API Error {status_code}: {detail}")
+
+
 class GmailService:
     async def fetch_messages_list(
         self,
@@ -27,6 +41,9 @@ class GmailService:
         folder: str = "all"
     ) -> List[Dict[str, Any]]:
         """Fetch list of message IDs from user's Gmail inbox, spam, or both."""
+        if not access_token:
+            raise GmailAuthExpiredError("No access token provided for Gmail API request.")
+
         headers = {"Authorization": f"Bearer {access_token}"}
 
         # Build Gmail query based on target folder
@@ -42,22 +59,35 @@ class GmailService:
             resp = await client.get(GMAIL_MESSAGES_URL, headers=headers, params=params)
             if resp.status_code == 200:
                 return resp.json().get("messages", [])
-            logger.error(f"Gmail fetch failed: {resp.status_code} - {resp.text}")
-            return []
+            elif resp.status_code == 401:
+                logger.warning(f"Gmail API returned 401 Unauthorized (Invalid Credentials) for messages list.")
+                raise GmailAuthExpiredError("Gmail access token is invalid or expired.")
+            else:
+                logger.error(f"Gmail fetch failed: HTTP {resp.status_code}")
+                raise GmailApiError(resp.status_code, resp.text[:200])
 
     async def get_message_detail(self, access_token: str, message_id: str) -> Optional[Dict[str, Any]]:
         """Fetch full email details from Gmail API."""
+        if not access_token:
+            raise GmailAuthExpiredError("No access token provided for Gmail API request.")
+
         headers = {"Authorization": f"Bearer {access_token}"}
         url = f"{GMAIL_MESSAGES_URL}/{message_id}?format=full"
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(url, headers=headers)
             if resp.status_code == 200:
                 return resp.json()
-            return None
+            elif resp.status_code == 401:
+                logger.warning(f"Gmail API returned 401 Unauthorized (Invalid Credentials) for message {message_id}.")
+                raise GmailAuthExpiredError("Gmail access token is invalid or expired.")
+            else:
+                logger.error(f"Gmail message detail fetch failed: HTTP {resp.status_code}")
+                raise GmailApiError(resp.status_code, resp.text[:200])
 
     def _extract_body_from_payload(self, payload: Dict[str, Any]) -> str:
         """Decode base64url encoded body from Gmail payload parts."""
         body = ""
+
         if "data" in payload.get("body", {}):
             encoded = payload["body"]["data"]
             try:

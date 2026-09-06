@@ -12,7 +12,7 @@ export const VideoEntrance: React.FC = () => {
       <ScrollExpand
         src={VIDEO_URL}
         mediaType="video"
-        title="VaultShield"
+        title="CyberTrace"
         scrollHint="Scroll to expand video"
         useWindowScroll={true}
         startWidth={48}

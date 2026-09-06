@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import {
   X, Mail, CheckCircle2, AlertTriangle, RefreshCw,
-  Sparkles, ShieldCheck, Radio, CheckSquare, Square
+  Sparkles, ShieldCheck, CheckSquare, Square
 } from 'lucide-react'
 import { gmailService, type GmailStatus, type MonitoringStatus, type GmailMessagePreview } from '../../services/gmail'
 import { useAuth } from '../../context/AuthContext'
@@ -27,7 +27,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [connecting, setConnecting] = useState(false)
   const [disconnecting, setDisconnecting] = useState(false)
   const [togglingMonitor, setTogglingMonitor] = useState(false)
-  const [selectedLimit, setSelectedLimit] = useState<number>(10)
+  const [selectedLimit, setSelectedLimit] = useState<number>(5)
   const [selectedFolder, setSelectedFolder] = useState<'all' | 'inbox' | 'spam'>('all')
   const [messages, setMessages] = useState<GmailMessagePreview[]>([])
   const [selectedMsgIds, setSelectedMsgIds] = useState<string[]>([])
@@ -35,8 +35,25 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [scanningSelected, setScanningSelected] = useState(false)
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
+  const handleLimitChange = (val: string | number) => {
+    if (val === '') {
+      setSelectedLimit(1)
+      return
+    }
+    const num = typeof val === 'number' ? val : parseInt(val, 10)
+    if (!isNaN(num)) {
+      const clamped = Math.min(20, Math.max(1, Math.floor(num)))
+      setSelectedLimit(clamped)
+    }
+  }
+
   const isConnected = gmailStatus?.is_connected ?? false
-  const isAutoMonitoring = monitoringStatus?.monitoring_active ?? gmailStatus?.monitoring_active ?? false
+  const serverMonitoringActive = monitoringStatus?.monitoring_active ?? gmailStatus?.monitoring_active ?? false
+  const [localMonitoringActive, setLocalMonitoringActive] = useState<boolean>(serverMonitoringActive)
+
+  useEffect(() => {
+    setLocalMonitoringActive(serverMonitoringActive)
+  }, [serverMonitoringActive])
 
   const loadGmailMessages = async () => {
     setFetchingMessages(true)
@@ -96,9 +113,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   }
 
   const handleToggleAutoMonitoring = async () => {
+    if (!isConnected || togglingMonitor) return
+    const nextState = !localMonitoringActive
+    setLocalMonitoringActive(nextState)
     setTogglingMonitor(true)
     setStatusMessage(null)
-    const nextState = !isAutoMonitoring
     try {
       if (nextState) {
         await gmailService.startMonitoring()
@@ -108,9 +127,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       onRefreshStatus()
       setStatusMessage({
         type: 'success',
-        text: `Automatic Gmail monitoring is now ${nextState ? 'ENABLED' : 'DISABLED'}.`,
+        text: `Automatic Gmail monitoring is now ${nextState ? 'ACTIVE' : 'DISABLED'}.`,
       })
     } catch (err: any) {
+      setLocalMonitoringActive(!nextState)
       console.error('Failed to toggle monitoring:', err)
       setStatusMessage({ type: 'error', text: 'Failed to update auto monitoring status.' })
     } finally {
@@ -257,19 +277,41 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 </button>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    onClick={handleToggleAutoMonitoring}
-                    disabled={togglingMonitor}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
-                      isAutoMonitoring
-                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                        : 'bg-[#FAF9F6] border border-[#192837]/15 text-[#192837] hover:bg-[#192837]/5'
-                    }`}
-                  >
-                    <Radio size={14} className={isAutoMonitoring ? 'animate-pulse' : ''} />
-                    <span>Auto Monitoring: {isAutoMonitoring ? 'ON' : 'OFF'}</span>
-                  </button>
+                  <div className="flex items-center gap-2 bg-[#FAF9F6] border border-[#192837]/10 px-3 py-1.5 rounded-xl shadow-xs">
+                    <span className="text-xs font-bold text-[#192837]/80">
+                      Auto Monitoring: {localMonitoringActive ? 'ON' : 'OFF'}
+                    </span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={localMonitoringActive}
+                      onClick={handleToggleAutoMonitoring}
+                      disabled={togglingMonitor}
+                      title={localMonitoringActive ? 'Click to pause automated monitoring' : 'Click to enable automated monitoring'}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#7342E2]/30 active:scale-95 ${
+                        localMonitoringActive
+                          ? 'bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] shadow-sm shadow-[#7342E2]/30'
+                          : 'bg-gray-300 hover:bg-gray-400'
+                      }`}
+                    >
+                      <span className="sr-only">Toggle auto monitoring</span>
+                      <span
+                        style={{
+                          transform: localMonitoringActive ? 'translateX(20px)' : 'translateX(0px)',
+                          transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                        }}
+                        className="pointer-events-none flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm"
+                      >
+                        {togglingMonitor ? (
+                          <RefreshCw size={9} className="animate-spin text-[#7342E2]" />
+                        ) : localMonitoringActive ? (
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#7342E2]" />
+                        ) : (
+                          <span className="h-1 w-1 rounded-full bg-gray-400" />
+                        )}
+                      </span>
+                    </button>
+                  </div>
 
                   <button
                     type="button"
@@ -299,15 +341,24 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 </p>
               </div>
 
-              {/* Limit Picker: 1, 3, 5, 10, 50 */}
-              <div className="flex items-center gap-1.5 bg-[#FAF9F6] p-1 rounded-xl border border-[#192837]/8">
-                <span className="text-[10px] font-bold text-[#192837]/60 px-1.5">Last:</span>
-                {[1, 3, 5, 10, 50].map(limit => (
+              {/* Limit Picker: 1–20 (Default: 5) */}
+              <div className="flex items-center gap-1.5 bg-[#FAF9F6] p-1.5 rounded-xl border border-[#192837]/8">
+                <input
+                  type="number"
+                  min={1}
+                  max={20}
+                  step={1}
+                  value={selectedLimit}
+                  onChange={(e) => handleLimitChange(e.target.value)}
+                  className="w-12 px-1.5 py-1 text-xs font-bold text-[#192837] bg-white border border-[#192837]/15 rounded-lg text-center outline-none focus:border-[#7342E2]"
+                  placeholder="5"
+                />
+                {[1, 5, 10, 15, 20].map(limit => (
                   <button
                     key={limit}
                     type="button"
-                    onClick={() => setSelectedLimit(limit)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    onClick={() => handleLimitChange(limit)}
+                    className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       selectedLimit === limit
                         ? 'bg-[#7342E2] text-white shadow-xs'
                         : 'text-[#192837]/70 hover:bg-white'

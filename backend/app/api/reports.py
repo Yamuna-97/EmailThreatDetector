@@ -51,7 +51,7 @@ async def generate_threat_report_pdf(
             "created_at": datetime.now()
         }
 
-        filename = f"VaultShield_Forensic_Report_{threat_id[:8]}.pdf"
+        filename = f"CyberTrace_Forensic_Report_{threat_id[:8]}.pdf"
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",

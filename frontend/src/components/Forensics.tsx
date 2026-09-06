@@ -76,7 +76,7 @@ export const Forensics: React.FC = () => {
               Empower Security Analysts with Forensic Intelligence
             </h2>
             <p className="font-body text-base text-[#192837]/75 leading-relaxed">
-              Move beyond superficial warnings. VaultShield equips cybersecurity investigators with granular forensic
+              Move beyond superficial warnings. CyberTrace equips cybersecurity investigators with granular forensic
               artifacts, automated header parsing, and verifiable chains of evidence.
             </p>
           </div>
