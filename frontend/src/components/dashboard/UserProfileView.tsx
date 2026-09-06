@@ -151,7 +151,6 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
 
   // Handle Disconnect Gmail
   const handleDisconnectGmail = async () => {
-    if (!window.confirm('Are you sure you want to disconnect your Gmail integration?')) return
     setDisconnectingGmail(true)
     setGmailMsg(null)
     try {
@@ -161,6 +160,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
       setTimeout(() => setGmailMsg(null), 4000)
     } catch (err: any) {
       setGmailMsg({ type: 'error', text: 'Failed to disconnect Gmail.' })
+      setTimeout(() => setGmailMsg(null), 4000)
     } finally {
       setDisconnectingGmail(false)
     }

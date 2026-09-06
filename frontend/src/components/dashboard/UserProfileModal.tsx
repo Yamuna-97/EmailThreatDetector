@@ -97,16 +97,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   }
 
   const handleDisconnectGmail = async () => {
-    if (!window.confirm('Are you sure you want to disconnect your Gmail integration?')) return
     setDisconnecting(true)
     setStatusMessage(null)
     try {
       await gmailService.disconnect()
       onRefreshStatus()
       setStatusMessage({ type: 'success', text: 'Gmail disconnected successfully.' })
+      setTimeout(() => setStatusMessage(null), 4000)
     } catch (err: any) {
       console.error('Failed to disconnect Gmail:', err)
       setStatusMessage({ type: 'error', text: 'Failed to disconnect Gmail.' })
+      setTimeout(() => setStatusMessage(null), 4000)
     } finally {
       setDisconnecting(false)
     }

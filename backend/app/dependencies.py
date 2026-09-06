@@ -3,6 +3,7 @@ import uuid
 from typing import Optional, Dict, Any
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from app.config import settings
 from app.database import db
 from app.schemas.auth import UserResponse
 
