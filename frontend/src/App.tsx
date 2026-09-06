@@ -33,22 +33,33 @@ const AppContent: React.FC = () => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [forceLanding, setForceLanding] = useState(false)
 
-  // Determine initial page from URL path or hash
-  const getInitialPage = (): PublicPage => {
+  // Determine initial page & auth state from URL path or hash
+  const parseCurrentUrl = () => {
     const path = window.location.pathname.toLowerCase()
     const hash = window.location.hash.toLowerCase()
-    if (path.includes('/privacy') || hash === '#privacy') return 'privacy'
-    if (path.includes('/terms') || hash === '#terms') return 'terms'
-    if (path.includes('/contact') || hash === '#contact') return 'contact'
-    return 'landing'
+
+    if (path.startsWith('/privacy') || hash === '#privacy') return { page: 'privacy' as PublicPage, auth: false, mode: 'signin' as const }
+    if (path.startsWith('/terms') || hash === '#terms') return { page: 'terms' as PublicPage, auth: false, mode: 'signin' as const }
+    if (path.startsWith('/contact') || hash === '#contact') return { page: 'contact' as PublicPage, auth: false, mode: 'signin' as const }
+    if (path.startsWith('/signup') || path.startsWith('/register')) return { page: 'landing' as PublicPage, auth: true, mode: 'signup' as const }
+    if (path.startsWith('/login') || path.startsWith('/signin')) return { page: 'landing' as PublicPage, auth: true, mode: 'signin' as const }
+    return { page: 'landing' as PublicPage, auth: false, mode: 'signin' as const }
   }
 
-  const [activePage, setActivePage] = useState<PublicPage>(getInitialPage)
+  const initialUrlState = parseCurrentUrl()
+  const [activePage, setActivePage] = useState<PublicPage>(initialUrlState.page)
 
-  // Listen to popstate and hashchange for direct browser navigation
+  // Listen to popstate and hashchange for direct browser navigation and back/forward buttons
   React.useEffect(() => {
     const handleNavChange = () => {
-      setActivePage(getInitialPage())
+      const current = parseCurrentUrl()
+      setActivePage(current.page)
+      if (current.auth) {
+        setAuthMode(current.mode)
+        setAuthOpen(true)
+      } else {
+        setAuthOpen(false)
+      }
     }
     window.addEventListener('popstate', handleNavChange)
     window.addEventListener('hashchange', handleNavChange)
@@ -58,32 +69,53 @@ const AppContent: React.FC = () => {
     }
   }, [])
 
-  const navigateTo = (page: PublicPage) => {
-    setActivePage(page)
-    if (page === 'landing') {
-      window.history.pushState(null, '', '/')
+  const navigateTo = (pathOrPage: string) => {
+    if (pathOrPage === 'privacy' || pathOrPage === '/privacy') {
+      setActivePage('privacy')
+      setAuthOpen(false)
+      window.history.pushState(null, '', '/privacy')
+    } else if (pathOrPage === 'terms' || pathOrPage === '/terms') {
+      setActivePage('terms')
+      setAuthOpen(false)
+      window.history.pushState(null, '', '/terms')
+    } else if (pathOrPage === 'contact' || pathOrPage === '/contact') {
+      setActivePage('contact')
+      setAuthOpen(false)
+      window.history.pushState(null, '', '/contact')
+    } else if (pathOrPage === 'signin' || pathOrPage === '/login' || pathOrPage === '/signin') {
+      setAuthMode('signin')
+      setAuthOpen(true)
+      setActivePage('landing')
+      window.history.pushState(null, '', '/login')
+    } else if (pathOrPage === 'signup' || pathOrPage === '/signup' || pathOrPage === '/register') {
+      setAuthMode('signup')
+      setAuthOpen(true)
+      setActivePage('landing')
+      window.history.pushState(null, '', '/signup')
     } else {
-      window.history.pushState(null, '', `/${page}`)
+      setActivePage('landing')
+      setAuthOpen(false)
+      window.history.pushState(null, '', '/')
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleOpenAuth = (mode: 'signin' | 'signup') => {
-    setAuthMode(mode)
-    setAuthOpen(true)
+    navigateTo(mode)
   }
 
   const handleCloseAuth = () => {
     setAuthOpen(false)
+    window.history.pushState(null, '', '/')
   }
 
-  // Public compliance pages are accessible without login
+  // 1. Public compliance pages (accessible without login)
   if (activePage === 'privacy') {
     return (
       <PrivacyPolicy
-        onBack={() => navigateTo('landing')}
-        onOpenTerms={() => navigateTo('terms')}
-        onOpenContact={() => navigateTo('contact')}
+        onBack={() => navigateTo('/')}
+        onOpenTerms={() => navigateTo('/terms')}
+        onOpenContact={() => navigateTo('/contact')}
       />
     )
   }
@@ -91,9 +123,9 @@ const AppContent: React.FC = () => {
   if (activePage === 'terms') {
     return (
       <TermsOfService
-        onBack={() => navigateTo('landing')}
-        onOpenPrivacy={() => navigateTo('privacy')}
-        onOpenContact={() => navigateTo('contact')}
+        onBack={() => navigateTo('/')}
+        onOpenPrivacy={() => navigateTo('/privacy')}
+        onOpenContact={() => navigateTo('/contact')}
       />
     )
   }
@@ -101,15 +133,15 @@ const AppContent: React.FC = () => {
   if (activePage === 'contact') {
     return (
       <ContactPage
-        onBack={() => navigateTo('landing')}
-        onOpenPrivacy={() => navigateTo('privacy')}
-        onOpenTerms={() => navigateTo('terms')}
+        onBack={() => navigateTo('/')}
+        onOpenPrivacy={() => navigateTo('/privacy')}
+        onOpenTerms={() => navigateTo('/terms')}
       />
     )
   }
 
-  // If user is authenticated and not explicitly viewing the public landing page:
-  if (isAuthenticated && !forceLanding) {
+  // 2. Authenticated Dashboard console
+  if (isAuthenticated && !forceLanding && !authOpen) {
     if (role === 'investigator' || role === 'admin') {
       return (
         <div>
