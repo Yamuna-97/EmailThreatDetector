@@ -468,7 +468,7 @@ async def gmail_oauth_callback(
             new_token_expiry=token_expiry
         )
 
-        redirect_target = f"{settings.FRONTEND_URL}/?token={jwt_token}&user_id={user_id}&email={user_email}&name={user_name}&role={role}&gmail_connected=true"
+        redirect_target = f"{settings.FRONTEND_URL}/?gmail_connected=true"
         return RedirectResponse(url=redirect_target)
 
     except Exception as e:

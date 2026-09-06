@@ -84,44 +84,48 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
         except Exception as e:
             logger.debug(f"Supabase token validation notice: {e}")
 
-    # 3. Fallback for Google OAuth tokens, test tokens or demo
-    if (
-        token.startswith("google_oauth_jwt_")
-        or token.startswith("jwt_google_session_")
-        or token.startswith("demo_google_")
-        or token.startswith("mock_token_")
-        or token == "demo_analyst_token"
-    ):
-        # Look in db.store["users"] for any user matching or return first stored active user
-        for uid, u in db.store["users"].items():
-            if uid in token or getattr(u, "_token", None) == token:
-                return u
+    # 3. Check for tokens containing a UUID / user ID
+    import re
+    uuid_match = re.search(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}", token)
+    if uuid_match:
+        matched_uuid = uuid_match.group(0)
+        # Check in-memory store
+        if matched_uuid in db.store["users"]:
+            return db.store["users"][matched_uuid]
 
-        # Generate deterministic valid UUID from admin email so PostgreSQL UUID type validation always succeeds
-        fallback_email = settings.ADMIN_EMAIL or "admin@cybertrace.local"
-        valid_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, fallback_email))
-
-        # Check if user profile already exists in Supabase
+        # Check Supabase profiles table
         admin_client = db.get_admin_client() or db.get_client()
         if admin_client:
             try:
-                p_res = admin_client.table("profiles").select("id, role, name").eq("email", fallback_email).limit(1).execute()
+                p_res = admin_client.table("profiles").select("*").eq("id", matched_uuid).execute()
                 if p_res.data and len(p_res.data) > 0:
-                    valid_uuid = p_res.data[0]["id"]
+                    row = p_res.data[0]
+                    user_model = UserResponse(
+                        id=row["id"],
+                        email=row.get("email", ""),
+                        name=row.get("name") or (row.get("email", "").split("@")[0].capitalize() if row.get("email") else "User"),
+                        role=row.get("role", "user")
+                    )
+                    db.store["users"][matched_uuid] = user_model
+                    return user_model
             except Exception as pe:
-                logger.debug(f"Profile lookup notice: {pe}")
+                logger.debug(f"Profile lookup by UUID notice: {pe}")
 
-        is_investigator = "investigator" in token or "admin" in token
-        display_name = fallback_email.split("@")[0].capitalize()
-        user_model = UserResponse(
-            id=valid_uuid,
-            email=fallback_email,
-            name=display_name,
-            role="investigator" if is_investigator else "user"
-        )
-        setattr(user_model, "_token", token)
-        db.store["users"][user_model.id] = user_model
-        return user_model
+            try:
+                g_res = admin_client.table("gmail_accounts").select("*").eq("user_id", matched_uuid).execute()
+                if g_res.data and len(g_res.data) > 0:
+                    row = g_res.data[0]
+                    email_addr = row.get("email_address", "")
+                    user_model = UserResponse(
+                        id=matched_uuid,
+                        email=email_addr,
+                        name=email_addr.split("@")[0].capitalize() if email_addr else "User",
+                        role="user"
+                    )
+                    db.store["users"][matched_uuid] = user_model
+                    return user_model
+            except Exception as ge:
+                logger.debug(f"Gmail account lookup by UUID notice: {ge}")
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
