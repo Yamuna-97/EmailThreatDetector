@@ -6,6 +6,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+def _parse_cors_origins(raw: str) -> List[str]:
+    """Parse a comma-separated CORS_ORIGINS env var into a list of stripped origins."""
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+
 class Settings(BaseSettings):
     # App
     PROJECT_NAME: str = "CyberTrace AI Threat Intelligence API"
@@ -14,16 +20,38 @@ class Settings(BaseSettings):
     PORT: int = int(os.getenv("PORT", 8000))
     HOST: str = os.getenv("HOST", "0.0.0.0")
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-        "http://localhost:8000",
-    ]
+
+    # CORS_ORIGINS: comma-separated list of allowed origins.
+    # In production (Render), set this env var to your Vercel frontend URL:
+    #   CORS_ORIGINS=https://your-app.vercel.app
+    # For local dev with multiple origins, separate by comma:
+    #   CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+    @property
+    def CORS_ORIGINS(self) -> List[str]:  # type: ignore[override]
+        raw = os.getenv("CORS_ORIGINS", "")
+        if raw.strip():
+            origins = _parse_cors_origins(raw)
+        else:
+            # Development fallback — never used on Render (CORS_ORIGINS must be set)
+            origins = []
+        # Always include FRONTEND_URL if set
+        if self.FRONTEND_URL and self.FRONTEND_URL not in origins:
+            origins.append(self.FRONTEND_URL)
+        # Always allow localhost for local development
+        dev_origins = [
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:3000",
+            "http://localhost:8000",
+        ]
+        for o in dev_origins:
+            if o not in origins:
+                origins.append(o)
+        return origins
 
     # Supabase
-    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "https://zgzxiytiaqtjzylckpbv.supabase.co")
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_PUBLISHABLE_KEY: str = os.getenv("SUPABASE_PUBLISHABLE_KEY", "")
     SUPABASE_SECRET_KEY: str = os.getenv("SUPABASE_SECRET_KEY", "")
     SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", os.getenv("SUPABASE_SECRET_KEY", ""))
@@ -66,6 +94,12 @@ class Settings(BaseSettings):
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", 587))
     SMTP_USER: str = os.getenv("SMTP_USER", "")
     SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+
+    # Admin / Investigator access control
+    # ADMIN_EMAIL: the primary admin account email (replaces hardcoded personal email)
+    ADMIN_EMAIL: str = os.getenv("ADMIN_EMAIL", "")
+    # ADMIN_INVESTIGATOR_EMAILS: comma-separated list of emails that get investigator role
+    ADMIN_INVESTIGATOR_EMAILS: str = os.getenv("ADMIN_INVESTIGATOR_EMAILS", "")
     ALERT_RECIPIENT_EMAIL: str = os.getenv("ALERT_RECIPIENT_EMAIL", "")
 
     # Threat Scoring Weights

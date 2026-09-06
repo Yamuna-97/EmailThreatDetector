@@ -61,7 +61,14 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
                     cached_user = db.store["users"].get(user_id)
                     role = cached_user.role if cached_user else meta.get("role", "user")
                 
-                if "investigator" in u.email.lower() or "admin" in u.email.lower() or u.email.lower() == "icecream090706@gmail.com":
+                if "investigator" in u.email.lower() or "admin" in u.email.lower():
+                    role = "investigator"
+                # Check env-var configured investigator emails
+                _investigator_emails = [
+                    e.strip().lower() for e in settings.ADMIN_INVESTIGATOR_EMAILS.split(",")
+                    if e.strip()
+                ]
+                if u.email and u.email.lower() in _investigator_emails:
                     role = "investigator"
 
                 user_model = UserResponse(
@@ -89,8 +96,8 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
             if uid in token or getattr(u, "_token", None) == token:
                 return u
 
-        # Generate deterministic valid UUID from email so PostgreSQL UUID type validation always succeeds
-        fallback_email = "yamunak972006@gmail.com"
+        # Generate deterministic valid UUID from admin email so PostgreSQL UUID type validation always succeeds
+        fallback_email = settings.ADMIN_EMAIL or "admin@cybertrace.local"
         valid_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, fallback_email))
 
         # Check if user profile already exists in Supabase
@@ -104,10 +111,11 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
                 logger.debug(f"Profile lookup notice: {pe}")
 
         is_investigator = "investigator" in token or "admin" in token
+        display_name = fallback_email.split("@")[0].capitalize()
         user_model = UserResponse(
             id=valid_uuid,
             email=fallback_email,
-            name="Yamuna",
+            name=display_name,
             role="investigator" if is_investigator else "user"
         )
         setattr(user_model, "_token", token)

@@ -70,9 +70,11 @@ app = FastAPI(
 )
 
 # Configure CORS Middleware for React Frontend
+# Production: CORS_ORIGINS env var must be set to the Vercel frontend URL.
+# Development: localhost origins are included automatically by settings.CORS_ORIGINS.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all local origins during development
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

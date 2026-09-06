@@ -596,18 +596,30 @@ class DualRAGService:
 
             for model_name in models_to_try:
                 endpoint = f"{GEMINI_API_URL}/{model_name}:generateContent?key={self.api_key}"
+
+                # Build generation config — disable thinking budget for flash models to prevent
+                # empty output errors ("model output must contain either output text or tool calls")
+                gen_config: Dict[str, Any] = {
+                    "temperature": 0.2,
+                    "maxOutputTokens": 2048,
+                }
+                # Gemini 2.5 flash may activate thinking by default, causing empty parts[].
+                # Explicitly disable thinking to guarantee text output.
+                is_flash_model = "flash" in model_name.lower()
+                if is_flash_model:
+                    gen_config["thinkingConfig"] = {"thinkingBudget": 0}
+
                 payload = {
+                    "system_instruction": {
+                        "parts": [{"text": system_instruction}]
+                    },
                     "contents": [
                         {
-                            "parts": [
-                                {"text": f"{system_instruction}\n\n{user_content}"}
-                            ]
+                            "role": "user",
+                            "parts": [{"text": user_content}]
                         }
                     ],
-                    "generationConfig": {
-                        "temperature": 0.2,
-                        "maxOutputTokens": 2048
-                    }
+                    "generationConfig": gen_config,
                 }
                 try:
                     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -615,17 +627,31 @@ class DualRAGService:
                         if resp.status_code == 200:
                             data = resp.json()
                             candidates = data.get("candidates", [])
-                            if candidates and "content" in candidates[0]:
-                                parts = candidates[0]["content"].get("parts", [])
-                                if parts:
-                                    text = parts[0].get("text", "").strip()
-                                    if len(text) > 40:
-                                        return text
+                            if not candidates:
+                                logger.warning(f"Model {model_name} returned no candidates. Prompt feedback: {data.get('promptFeedback')}")
+                                continue
+                            candidate = candidates[0]
+                            finish_reason = candidate.get("finishReason", "")
+                            # STOP or MAX_TOKENS are valid finish reasons; others mean blocked/empty
+                            if finish_reason not in ("STOP", "MAX_TOKENS", ""):
+                                logger.warning(f"Model {model_name} finished with reason '{finish_reason}'. Trying next model.")
+                                continue
+                            content = candidate.get("content", {})
+                            parts = content.get("parts", [])
+                            # Collect all text parts (thinking models may split parts)
+                            text = "".join(
+                                p.get("text", "") for p in parts if "text" in p
+                            ).strip()
+                            if len(text) > 40:
+                                logger.info(f"Model {model_name} responded successfully ({len(text)} chars).")
+                                return text
+                            else:
+                                logger.warning(f"Model {model_name} returned very short/empty text ({len(text)} chars). Trying next model.")
                         elif resp.status_code == 429:
                             logger.warning(f"Model {model_name} rate limited (429). Trying next fallback model...")
                             await asyncio.sleep(0.5)
                         else:
-                            logger.warning(f"Model {model_name} returned HTTP {resp.status_code}")
+                            logger.warning(f"Model {model_name} returned HTTP {resp.status_code}: {resp.text[:200]}")
                 except Exception as e:
                     logger.warning(f"Error querying model {model_name}: {e}")
 
