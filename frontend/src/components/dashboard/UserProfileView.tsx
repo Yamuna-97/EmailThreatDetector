@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import {
   User, Mail, KeyRound, ShieldCheck, RefreshCw,
   Camera, CheckCircle2, AlertTriangle,
-  Lock, ExternalLink, Unlink, Eye, EyeOff
+  Lock, ExternalLink, Unlink, Eye, EyeOff, Trash2
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { authService } from '../../services/auth'
@@ -45,9 +45,11 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
   const [changingPass, setChangingPass] = useState(false)
   const [passMsg, setPassMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  // Gmail Connection State
+  // Gmail & Monitoring State
   const [connectingGmail, setConnectingGmail] = useState(false)
   const [disconnectingGmail, setDisconnectingGmail] = useState(false)
+  const [deletingData, setDeletingData] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [togglingMonitor, setTogglingMonitor] = useState(false)
   const [gmailMsg, setGmailMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
@@ -163,6 +165,24 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
       setTimeout(() => setGmailMsg(null), 4000)
     } finally {
       setDisconnectingGmail(false)
+    }
+  }
+
+  // Handle Complete Data Deletion
+  const handleDeleteData = async () => {
+    setDeletingData(true)
+    setGmailMsg(null)
+    try {
+      const res = await gmailService.deleteStoredData()
+      onRefreshGmailStatus()
+      setShowDeleteConfirm(false)
+      setGmailMsg({ type: 'success', text: res.message || 'Stored threat data and Gmail connection deleted successfully.' })
+      setTimeout(() => setGmailMsg(null), 5000)
+    } catch (err: any) {
+      setGmailMsg({ type: 'error', text: 'Failed to delete stored security data.' })
+      setTimeout(() => setGmailMsg(null), 5000)
+    } finally {
+      setDeletingData(false)
     }
   }
 
@@ -519,6 +539,17 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
           </div>
         )}
 
+        {/* In-Product Google Limited Use Disclosure */}
+        <div className="p-4 rounded-xl bg-[#7342E2]/5 border border-[#7342E2]/15 text-xs text-[#192837]/80 flex items-start gap-3">
+          <ShieldCheck size={18} className="text-[#7342E2] mt-0.5 shrink-0" />
+          <div className="space-y-1">
+            <p className="font-bold text-[#192837]">Google API Services User Data Policy & Limited Use Disclosure</p>
+            <p className="leading-relaxed text-[11px] sm:text-xs">
+              By connecting Gmail, you authorize CyberTrace to access email metadata and message text in read-only mode (<code className="font-mono bg-white px-1 rounded">gmail.readonly</code>) strictly to perform automated security threat detection. CyberTrace adheres to the Google API Services User Data Policy, including Limited Use requirements. Your email data is never sold, never used for advertising, and never used to train generalized AI models.
+            </p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Connection Actions */}
           <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/10 space-y-4">
@@ -535,10 +566,10 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                   type="button"
                   onClick={handleDisconnectGmail}
                   disabled={disconnectingGmail}
-                  className="px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-2 disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-2 disabled:opacity-50"
                 >
                   {disconnectingGmail ? <RefreshCw size={14} className="animate-spin" /> : <Unlink size={14} />}
-                  <span>{disconnectingGmail ? 'Disconnecting...' : 'Disconnect Gmail Account'}</span>
+                  <span>{disconnectingGmail ? 'Disconnecting...' : 'Disconnect Account'}</span>
                 </button>
               ) : (
                 <button
@@ -636,6 +667,49 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Data Deletion & Privacy Control Section */}
+        <div className="p-5 rounded-2xl bg-red-50/50 border border-red-200/70 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-heading text-sm font-bold text-red-900 flex items-center gap-1.5">
+                <Trash2 size={16} className="text-red-600" />
+                Data Retention & Right to Erasure
+              </h3>
+              <p className="text-xs text-red-800/80 mt-1 leading-relaxed max-w-xl">
+                Permanently purge all your stored email scan history, threat intelligence logs, alert records, and Gmail OAuth credentials from our encrypted database.
+              </p>
+            </div>
+
+            {!showDeleteConfirm ? (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0"
+              >
+                Delete Stored Threat Data
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleDeleteData}
+                  disabled={deletingData}
+                  className="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                >
+                  {deletingData ? 'Deleting...' : 'Confirm Purge'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-3 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-[#192837] text-xs font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

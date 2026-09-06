@@ -1,7 +1,13 @@
 import React from 'react'
 import Logo from './Logo'
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenPrivacy?: () => void
+  onOpenTerms?: () => void
+  onOpenContact?: () => void
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenPrivacy, onOpenTerms, onOpenContact }) => {
   return (
     <footer className="bg-white border-t border-[#192837]/10 py-16 px-5 sm:px-8 text-left">
       <div className="max-w-[1280px] mx-auto">
@@ -64,19 +70,31 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2.5 text-xs text-[#192837]/80 font-medium">
               <li>
-                <a href="#privacy" className="hover:text-[#7342E2] transition-colors">
-                  Privacy Policy
-                </a>
+                <button
+                  type="button"
+                  onClick={onOpenPrivacy}
+                  className="hover:text-[#7342E2] transition-colors cursor-pointer text-left"
+                >
+                  Privacy Policy (Google Limited Use)
+                </button>
               </li>
               <li>
-                <a href="#terms" className="hover:text-[#7342E2] transition-colors">
+                <button
+                  type="button"
+                  onClick={onOpenTerms}
+                  className="hover:text-[#7342E2] transition-colors cursor-pointer text-left"
+                >
                   Terms of Service
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#contact" className="hover:text-[#7342E2] transition-colors">
+                <button
+                  type="button"
+                  onClick={onOpenContact}
+                  className="hover:text-[#7342E2] transition-colors cursor-pointer text-left"
+                >
                   Contact Support
-                </a>
+                </button>
               </li>
               <li>
                 <span className="text-xs text-[#192837]/50 block pt-1">
@@ -91,9 +109,15 @@ export const Footer: React.FC = () => {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#192837]/60">
           <p>© 2026 CyberTrace. All rights reserved. Enterprise Security Team.</p>
           <div className="flex items-center gap-6">
-            <a href="#privacy" className="hover:text-[#7342E2]">Privacy</a>
-            <a href="#terms" className="hover:text-[#7342E2]">Terms</a>
-            <a href="#contact" className="hover:text-[#7342E2]">Contact</a>
+            <button type="button" onClick={onOpenPrivacy} className="hover:text-[#7342E2] cursor-pointer">
+              Privacy
+            </button>
+            <button type="button" onClick={onOpenTerms} className="hover:text-[#7342E2] cursor-pointer">
+              Terms
+            </button>
+            <button type="button" onClick={onOpenContact} className="hover:text-[#7342E2] cursor-pointer">
+              Contact
+            </button>
           </div>
         </div>
       </div>

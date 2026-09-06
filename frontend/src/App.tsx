@@ -21,11 +21,52 @@ import UserDashboard from './components/dashboard/UserDashboard'
 import InvestigatorDashboard from './components/dashboard/InvestigatorDashboard'
 import FloatingRAGChatWidget from './components/dashboard/FloatingRAGChatWidget'
 
+import { PrivacyPolicy } from './components/pages/PrivacyPolicy'
+import { TermsOfService } from './components/pages/TermsOfService'
+import { ContactPage } from './components/pages/ContactPage'
+
+type PublicPage = 'landing' | 'privacy' | 'terms' | 'contact'
+
 const AppContent: React.FC = () => {
   const { isAuthenticated, role } = useAuth()
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [forceLanding, setForceLanding] = useState(false)
+
+  // Determine initial page from URL path or hash
+  const getInitialPage = (): PublicPage => {
+    const path = window.location.pathname.toLowerCase()
+    const hash = window.location.hash.toLowerCase()
+    if (path.includes('/privacy') || hash === '#privacy') return 'privacy'
+    if (path.includes('/terms') || hash === '#terms') return 'terms'
+    if (path.includes('/contact') || hash === '#contact') return 'contact'
+    return 'landing'
+  }
+
+  const [activePage, setActivePage] = useState<PublicPage>(getInitialPage)
+
+  // Listen to popstate and hashchange for direct browser navigation
+  React.useEffect(() => {
+    const handleNavChange = () => {
+      setActivePage(getInitialPage())
+    }
+    window.addEventListener('popstate', handleNavChange)
+    window.addEventListener('hashchange', handleNavChange)
+    return () => {
+      window.removeEventListener('popstate', handleNavChange)
+      window.removeEventListener('hashchange', handleNavChange)
+    }
+  }, [])
+
+  const navigateTo = (page: PublicPage) => {
+    setActivePage(page)
+    if (page === 'landing') {
+      window.history.pushState(null, '', '/')
+    } else {
+      window.history.pushState(null, '', `/${page}`)
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const handleOpenAuth = (mode: 'signin' | 'signup') => {
     setAuthMode(mode)
@@ -34,6 +75,37 @@ const AppContent: React.FC = () => {
 
   const handleCloseAuth = () => {
     setAuthOpen(false)
+  }
+
+  // Public compliance pages are accessible without login
+  if (activePage === 'privacy') {
+    return (
+      <PrivacyPolicy
+        onBack={() => navigateTo('landing')}
+        onOpenTerms={() => navigateTo('terms')}
+        onOpenContact={() => navigateTo('contact')}
+      />
+    )
+  }
+
+  if (activePage === 'terms') {
+    return (
+      <TermsOfService
+        onBack={() => navigateTo('landing')}
+        onOpenPrivacy={() => navigateTo('privacy')}
+        onOpenContact={() => navigateTo('contact')}
+      />
+    )
+  }
+
+  if (activePage === 'contact') {
+    return (
+      <ContactPage
+        onBack={() => navigateTo('landing')}
+        onOpenPrivacy={() => navigateTo('privacy')}
+        onOpenTerms={() => navigateTo('terms')}
+      />
+    )
   }
 
   // If user is authenticated and not explicitly viewing the public landing page:
@@ -144,7 +216,11 @@ const AppContent: React.FC = () => {
             <About />
 
             {/* 15. FOOTER */}
-            <Footer />
+            <Footer
+              onOpenPrivacy={() => navigateTo('privacy')}
+              onOpenTerms={() => navigateTo('terms')}
+              onOpenContact={() => navigateTo('contact')}
+            />
           </>
         )}
 

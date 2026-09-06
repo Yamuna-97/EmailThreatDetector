@@ -54,6 +54,12 @@ export const gmailService = {
     })
   },
 
+  async deleteStoredData(): Promise<{ message: string; success: boolean }> {
+    return request<{ message: string; success: boolean }>('/gmail/delete-data', {
+      method: 'POST',
+    })
+  },
+
   async toggleAutoScan(enabled: boolean): Promise<GmailStatus> {
     return request<GmailStatus>('/gmail/toggle-auto-scan', {
       method: 'POST',

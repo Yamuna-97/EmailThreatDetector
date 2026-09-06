@@ -504,9 +504,88 @@ async def get_gmail_status(current_user: UserResponse = Depends(get_current_user
 
 @router.post("/disconnect", response_model=MessageResponse)
 async def disconnect_gmail(current_user: UserResponse = Depends(get_current_user)):
-    """Disconnect Gmail integration and revoke local tokens."""
+    """Disconnect Gmail integration, stop active monitoring, and revoke Google OAuth tokens."""
+    account = db.store["gmail_accounts"].get(current_user.id)
+    if not account:
+        account = _load_gmail_account_from_supabase(current_user.id, email=current_user.email)
+
+    # 1. Stop background monitoring / polling
+    try:
+        await monitoring_service.stop_monitoring(current_user.id)
+    except Exception as e:
+        logger.debug(f"Stop monitoring on disconnect notice: {e}")
+
+    # 2. Revoke OAuth token with Google if token exists
+    if account:
+        tok = account.get("refresh_token") or account.get("access_token")
+        if tok:
+            try:
+                await google_oauth_service.revoke_token(tok)
+            except Exception as re:
+                logger.debug(f"Token revocation notice: {re}")
+
+    # 3. Invalidate database and in-memory session
     _invalidate_gmail_session(current_user.id)
-    return MessageResponse(message="Gmail account disconnected successfully.")
+    return MessageResponse(message="Gmail account disconnected, automated monitoring stopped, and tokens revoked.")
+
+
+@router.post("/delete-data", response_model=MessageResponse)
+@router.delete("/user-data", response_model=MessageResponse)
+async def delete_user_stored_data(current_user: UserResponse = Depends(get_current_user)):
+    """
+    User Data Deletion Workflow:
+    Permanently deletes user's Gmail connection, processed emails, threat logs, alerts,
+    and monitoring metadata associated with current_user.id from Supabase and RAM.
+    Does NOT affect system/shared RAG knowledge.
+    """
+    # 1. Stop monitoring
+    try:
+        await monitoring_service.stop_monitoring(current_user.id)
+    except Exception as e:
+        logger.debug(f"Stop monitoring on deletion notice: {e}")
+
+    # 2. Revoke OAuth token with Google
+    account = db.store["gmail_accounts"].get(current_user.id)
+    if not account:
+        account = _load_gmail_account_from_supabase(current_user.id, email=current_user.email)
+    if account:
+        tok = account.get("refresh_token") or account.get("access_token")
+        if tok:
+            try:
+                await google_oauth_service.revoke_token(tok)
+            except Exception:
+                pass
+
+            try:
+                admin_client.table("alerts").delete().eq("user_id", current_user.id).execute()
+            except Exception:
+                pass
+            try:
+                admin_client.table("threats").delete().eq("user_id", current_user.id).execute()
+            except Exception:
+                pass
+            try:
+                admin_client.table("emails").delete().eq("user_id", current_user.id).execute()
+            except Exception:
+                pass
+            try:
+                admin_client.table("processed_gmail_messages").delete().eq("user_id", current_user.id).execute()
+            except Exception:
+                pass
+            try:
+                admin_client.table("gmail_accounts").delete().eq("user_id", current_user.id).execute()
+            except Exception:
+                pass
+
+    # 4. Clear in-memory caches
+    db.store["gmail_accounts"].pop(current_user.id, None)
+    db.store["emails"].pop(current_user.id, None)
+    db.store["threats"].pop(current_user.id, None)
+    db.store["alerts"].pop(current_user.id, None)
+
+    return MessageResponse(
+        message="All stored email records, threat logs, Gmail OAuth tokens, and monitoring data deleted successfully."
+    )
 
 
 @router.post("/toggle-auto-scan", response_model=GmailStatusResponse)

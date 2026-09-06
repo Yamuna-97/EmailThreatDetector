@@ -88,10 +88,26 @@ class GoogleOAuthService:
                 return resp.json()
             return {}
 
-    async def get_user_email(self, access_token: str) -> str:
-        """Fetch Google profile email with access token."""
-        profile = await self.get_user_profile(access_token)
-        return profile.get("email", "")
+    async def revoke_token(self, token: str) -> bool:
+        """Revoke a token (access or refresh) with Google's OAuth 2.0 revocation endpoint."""
+        if not token:
+            return False
+        try:
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                resp = await client.post(
+                    "https://oauth2.googleapis.com/revoke",
+                    params={"token": token},
+                    headers={"Content-Type": "application/x-www-form-urlencoded"}
+                )
+                if resp.status_code == 200:
+                    logger.info("[OAuth] Successfully revoked token with Google authorization server.")
+                    return True
+                else:
+                    logger.warning(f"[OAuth] Google token revocation returned HTTP {resp.status_code}")
+                    return False
+        except Exception as e:
+            logger.warning(f"[OAuth] Failed to contact Google token revocation endpoint: {e}")
+            return False
 
 google_oauth_service = GoogleOAuthService()
 
