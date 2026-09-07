@@ -89,6 +89,7 @@ async def refresh_access_token(user_id: str, account: Dict[str, Any]) -> Optiona
                         .update({
                             "access_token": new_token,
                             "token_expiry": token_expiry,
+                            "is_connected": True,
                             "updated_at": datetime.now(timezone.utc).isoformat()
                         }) \
                         .eq("user_id", user_id) \
@@ -99,7 +100,28 @@ async def refresh_access_token(user_id: str, account: Dict[str, Any]) -> Optiona
             return new_token
         logger.warning(f"[monitor] Token refresh did not return access_token for user {user_id}")
     except Exception as e:
-        logger.warning(f"[monitor] Token refresh error for user {user_id}: {e}")
+        err_msg = str(e)
+        logger.warning(f"[monitor] Token refresh error for user {user_id}: {err_msg}")
+        # If refresh token is permanently invalid or revoked by Google (e.g. invalid_grant), stop polling loop
+        if "invalid_grant" in err_msg.lower() or "400" in err_msg or "expired" in err_msg.lower() or "revoked" in err_msg.lower():
+            logger.info(f"[monitor] Revoked or expired OAuth grant for user {user_id}. Marking disconnected and stopping polling.")
+            account["is_connected"] = False
+            account["monitoring_active"] = False
+            db.store["gmail_accounts"][user_id] = account
+            _cancel_polling_task(user_id)
+            admin_client = db.get_admin_client()
+            if admin_client:
+                try:
+                    admin_client.table("gmail_accounts") \
+                        .update({
+                            "is_connected": False,
+                            "monitoring_active": False,
+                            "updated_at": datetime.now(timezone.utc).isoformat()
+                        }) \
+                        .eq("user_id", user_id) \
+                        .execute()
+                except Exception as dbe:
+                    logger.debug(f"[monitor] Supabase mark disconnected notice: {dbe}")
     return None
 
 
@@ -597,13 +619,13 @@ async def _poll_recent_messages(user_id: str, account: Dict[str, Any]) -> None:
 
 
 async def _polling_loop(user_id: str, interval_seconds: int) -> None:
-    """Background polling loop for a single user. Runs until cancelled."""
+    """Background polling loop for a single user. Runs until cancelled or disconnected."""
     logger.info(f"[monitor] Polling loop started for user {user_id} (interval={interval_seconds}s)")
     while True:
         try:
             account = db.store["gmail_accounts"].get(user_id)
-            if not account or not account.get("monitoring_active"):
-                logger.info(f"[monitor] Polling loop stopping: monitoring_active=False for user {user_id}")
+            if not account or not account.get("monitoring_active") or not account.get("is_connected"):
+                logger.info(f"[monitor] Polling loop stopping: monitoring_active=False or is_connected=False for user {user_id}")
                 break
             await _poll_recent_messages(user_id, account)
         except asyncio.CancelledError:

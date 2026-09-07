@@ -1,6 +1,6 @@
 import logging
 import uuid
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.dependencies import require_investigator, get_current_user
@@ -15,6 +15,28 @@ from app.database import db
 
 logger = logging.getLogger("vaultshield.api.investigators")
 router = APIRouter(prefix="/investigator", tags=["Investigator Console"])
+
+
+def _safe_sort_key(obj: Any) -> float:
+    """Extract float timestamp for safe datetime sorting."""
+    val = getattr(obj, "created_at", None) if hasattr(obj, "created_at") else (obj.get("created_at") if isinstance(obj, dict) else obj)
+    if val is None:
+        return 0.0
+    if isinstance(val, (int, float)):
+        return float(val)
+    if isinstance(val, datetime):
+        if val.tzinfo is None:
+            return val.replace(tzinfo=timezone.utc).timestamp()
+        return val.timestamp()
+    if isinstance(val, str):
+        try:
+            dt = datetime.fromisoformat(val.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt.timestamp()
+        except Exception:
+            return 0.0
+    return 0.0
 
 @router.get("/dashboard")
 async def get_investigator_dashboard(investigator: UserResponse = Depends(require_investigator)):
@@ -88,7 +110,7 @@ async def get_investigator_dashboard(investigator: UserResponse = Depends(requir
     suspicious_ips = len(db.store["ip_intelligence"]) or len([t for t in threats_data if t.get("severity") in ["critical", "high"]])
 
     # Sort recent incidents
-    recent_threats = sorted(threats_data, key=lambda x: str(x.get("created_at", "")), reverse=True)[:10]
+    recent_threats = sorted(threats_data, key=_safe_sort_key, reverse=True)[:10]
 
     return {
         "total_users": max(len(users_data), 1),
@@ -160,7 +182,7 @@ async def list_all_investigator_threats(
                 continue
             threats_list.append(t)
 
-    return sorted(threats_list, key=lambda x: str(x.created_at), reverse=True)
+    return sorted(threats_list, key=_safe_sort_key, reverse=True)
 
 @router.get("/forensics/{threat_id}", response_model=ForensicInvestigationDetails)
 async def get_forensic_details(

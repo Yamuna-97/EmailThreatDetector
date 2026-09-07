@@ -3,6 +3,8 @@ import Logo from './Logo'
 import StaggeredMenu from './StaggeredMenu'
 import { ShieldCheck, LogOut, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { useNotifications } from '../context/NotificationContext'
+import NotificationsWithActions from './ui/notifications-with-actions'
 
 const navLinks = [
   { label: 'Detection', link: '#detection', ariaLabel: 'Go to Detection' },
@@ -26,6 +28,7 @@ export interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) => {
   const { isAuthenticated, role, logout } = useAuth()
+  const { notifications, removeNotification, archiveNotification } = useNotifications()
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-[#192837]/8 transition-all">
@@ -45,6 +48,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) =
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
+          {/* Notifications Dropdown */}
+          <NotificationsWithActions
+            items={notifications}
+            onDelete={removeNotification}
+            onArchive={archiveNotification}
+            placement="bottom"
+          />
+
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
               <button

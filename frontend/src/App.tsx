@@ -17,6 +17,7 @@ import About from './components/About'
 import Footer from './components/Footer'
 import AuthForm from './components/ui/auth-form'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { NotificationProvider } from './context/NotificationContext'
 import UserDashboard from './components/dashboard/UserDashboard'
 import InvestigatorDashboard from './components/dashboard/InvestigatorDashboard'
 import FloatingRAGChatWidget from './components/dashboard/FloatingRAGChatWidget'
@@ -266,7 +267,9 @@ const AppContent: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <AuthProvider>
-      <AppContent />
+      <NotificationProvider>
+        <AppContent />
+      </NotificationProvider>
     </AuthProvider>
   )
 }

@@ -14,9 +14,12 @@ import ThreatMapView from './ThreatMapView'
 import { InvestigatorRAGCopilot } from './InvestigatorRAGCopilot'
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar'
 import { CyberTraceLogoIcon } from '../CyberTraceLogo'
+import NotificationsWithActions from '../ui/notifications-with-actions'
+import { useNotifications } from '../../context/NotificationContext'
 
 export const InvestigatorDashboard: React.FC = () => {
   const { logout } = useAuth()
+  const { notifications, removeNotification, archiveNotification } = useNotifications()
   const [activeTab, setActiveTab] = useState<'dashboard' | 'threats' | 'map' | 'users' | 'copilot' | 'analytics' | 'reports'>('dashboard')
   const [copilotSelectedEmailId, setCopilotSelectedEmailId] = useState<string>('')
   const [stats, setStats] = useState<any>(null)
@@ -256,6 +259,14 @@ export const InvestigatorDashboard: React.FC = () => {
                   <span>Gmail: Disconnected</span>
                 </div>
               )}
+
+              {/* Real-time Notifications Popover */}
+              <NotificationsWithActions
+                items={notifications}
+                onDelete={removeNotification}
+                onArchive={archiveNotification}
+                placement="bottom"
+              />
 
               <button
                 type="button"

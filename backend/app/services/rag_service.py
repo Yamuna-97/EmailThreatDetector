@@ -92,8 +92,11 @@ class DualRAGService:
 
         if not force_reindex and cache_file.exists():
             try:
-                with open(cache_file, "rb") as f:
-                    cached_data = pickle.load(f)
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    with open(cache_file, "rb") as f:
+                        cached_data = pickle.load(f)
                 cached_chunks = cached_data.get("chunks", [])
                 if len(cached_chunks) > 0:
                     kb_dict["chunks"] = cached_chunks

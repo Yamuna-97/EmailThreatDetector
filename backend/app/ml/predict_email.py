@@ -56,7 +56,10 @@ def load_ml_model():
             logger.error(f"ML Feature config missing at path: {CONFIG_PATH}")
             return None, None
 
-        _MODEL = joblib.load(MODEL_PATH)
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            _MODEL = joblib.load(MODEL_PATH)
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             _FEATURE_CONFIG = json.load(f)
 

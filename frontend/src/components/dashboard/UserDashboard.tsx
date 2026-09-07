@@ -16,6 +16,8 @@ import { IncidentReportCard, buildUserTelemetry } from '@/components/ui/area-cha
 import { UserProfileView } from './UserProfileView'
 import { GmailScannerView } from './GmailScannerView'
 import { CyberTraceLogoIcon } from '../CyberTraceLogo'
+import NotificationsWithActions from '../ui/notifications-with-actions'
+import { useNotifications } from '../../context/NotificationContext'
 
 interface NavTabItem {
   id: 'dashboard' | 'gmail-scan' | 'emails' | 'ai-advisor' | 'alerts' | 'history' | 'profile'
@@ -26,6 +28,7 @@ interface NavTabItem {
 
 export const UserDashboard: React.FC = () => {
   const { user, logout } = useAuth()
+  const { notifications, removeNotification, archiveNotification } = useNotifications()
   const [activeTab, setActiveTab] = useState<'dashboard' | 'gmail-scan' | 'emails' | 'ai-advisor' | 'alerts' | 'history' | 'profile'>('dashboard')
 
   const [advisorSelectedEmailId, setAdvisorSelectedEmailId] = useState<string>('')
@@ -360,6 +363,14 @@ export const UserDashboard: React.FC = () => {
                   <span>Gmail: Disconnected</span>
                 </button>
               )}
+
+              {/* Live Notifications Bell Dropdown */}
+              <NotificationsWithActions
+                items={notifications}
+                onDelete={removeNotification}
+                onArchive={archiveNotification}
+                placement="bottom"
+              />
 
               <button
                 type="button"

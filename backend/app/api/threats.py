@@ -1,5 +1,6 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Any
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.dependencies import get_current_user
 from app.schemas.auth import UserResponse, MessageResponse
@@ -8,6 +9,31 @@ from app.database import db
 
 logger = logging.getLogger("vaultshield.api.threats")
 router = APIRouter(prefix="/threats", tags=["Threats & Alerts"])
+
+
+def _safe_sort_key(obj: Any) -> float:
+    """
+    Extract a normalized UNIX float timestamp from datetime or ISO string for sorting.
+    Prevents TypeError: can't compare offset-naive and offset-aware datetimes.
+    """
+    val = getattr(obj, "created_at", None) if hasattr(obj, "created_at") else (obj.get("created_at") if isinstance(obj, dict) else obj)
+    if val is None:
+        return 0.0
+    if isinstance(val, (int, float)):
+        return float(val)
+    if isinstance(val, datetime):
+        if val.tzinfo is None:
+            return val.replace(tzinfo=timezone.utc).timestamp()
+        return val.timestamp()
+    if isinstance(val, str):
+        try:
+            dt = datetime.fromisoformat(val.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt.timestamp()
+        except Exception:
+            return 0.0
+    return 0.0
 
 
 def _load_threats_from_supabase(user_id: str, is_investigator: bool) -> List[ThreatModel]:
@@ -105,8 +131,7 @@ async def list_threats(
                 continue
             threats.append(t)
 
-    # ✅ FIX: If nothing found in memory, fall back to Supabase
-    # (happens after backend restart when db.store was cleared)
+    # If nothing found in memory, fall back to Supabase
     if not threats:
         db_threats = _load_threats_from_supabase(current_user.id, is_investigator)
         for t in db_threats:
@@ -116,7 +141,7 @@ async def list_threats(
                 continue
             threats.append(t)
 
-    return sorted(threats, key=lambda x: x.created_at, reverse=True)
+    return sorted(threats, key=_safe_sort_key, reverse=True)
 
 
 @router.get("/{threat_id}", response_model=ThreatModel)
@@ -127,7 +152,7 @@ async def get_threat(
     """Retrieve single threat incident."""
     threat = db.store["threats"].get(threat_id)
 
-    # ✅ FIX: Try Supabase if not in memory
+    # Try Supabase if not in memory
     if not threat:
         admin_client = db.get_admin_client()
         if admin_client:
@@ -170,11 +195,11 @@ async def get_user_alerts(current_user: UserResponse = Depends(get_current_user)
         if is_investigator or a.user_id == current_user.id:
             alerts.append(a)
 
-    # ✅ FIX: Fall back to Supabase if store is empty
+    # Fall back to Supabase if store is empty
     if not alerts:
         alerts = _load_alerts_from_supabase(current_user.id, is_investigator)
 
-    return sorted(alerts, key=lambda x: x.created_at, reverse=True)
+    return sorted(alerts, key=_safe_sort_key, reverse=True)
 
 
 @router.post("/alerts/{alert_id}/read", response_model=MessageResponse)
@@ -187,7 +212,6 @@ async def mark_alert_read(
     if alert:
         alert.is_read = True
 
-    # ✅ FIX: Also persist the read status to Supabase
     admin_client = db.get_admin_client()
     if admin_client:
         try:
@@ -203,8 +227,8 @@ async def get_user_history(current_user: UserResponse = Depends(get_current_user
     """Retrieve personal threat and scan history."""
     threats = [t for t in db.store["threats"].values() if t.user_id == current_user.id]
 
-    # ✅ FIX: Fall back to Supabase if empty
+    # Fall back to Supabase if empty
     if not threats:
         threats = _load_threats_from_supabase(current_user.id, is_investigator=False)
 
-    return sorted(threats, key=lambda x: x.created_at, reverse=True)
+    return sorted(threats, key=_safe_sort_key, reverse=True)
