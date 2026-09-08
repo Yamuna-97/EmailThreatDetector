@@ -14,4 +14,7 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  optimizeDeps: {
+    exclude: ['maplibre-gl'],
+  },
 })
