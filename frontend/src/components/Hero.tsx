@@ -1,12 +1,12 @@
 import React from 'react'
 import { motion, type Variants } from 'framer-motion'
 import {
-  ArrowRight,
   Sparkles,
   ChevronDown,
   LogIn,
 } from 'lucide-react'
 import MaskedHeading from './MaskedHeading'
+import { InteractiveHoverButton } from '@/components/ui/interactive-hover-button'
 
 const VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260518_003132_8b7edcb6-c64d-4a52-a9ca-879942e122ad.mp4'
@@ -108,23 +108,18 @@ export const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
             variants={fadeUpVariant}
             className="flex flex-wrap items-center gap-4 mb-8"
           >
-            <button
-              type="button"
+            <InteractiveHoverButton
+              text="Start Now"
               onClick={() => onOpenAuth ? onOpenAuth('signup') : null}
-              className="inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-full text-sm font-bold text-white bg-[#7342E2] hover:brightness-110 active:scale-95 shadow-xl shadow-[#7342E2]/30 transition-all cursor-pointer"
-            >
-              <span>Start Now</span>
-              <ArrowRight size={16} />
-            </button>
+              className="w-40 py-3.5 text-sm font-bold bg-[#7342E2] text-white border-[#7342E2] shadow-xl shadow-[#7342E2]/30 hover:brightness-110"
+            />
 
-            <button
-              type="button"
+            <InteractiveHoverButton
+              text="Sign In"
+              icon={<LogIn size={15} className="text-[#7342E2]" />}
               onClick={() => onOpenAuth ? onOpenAuth('signin') : null}
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-sm font-bold text-[#192837] bg-white/90 hover:bg-white active:scale-95 border border-[#192837]/15 transition-all shadow-sm cursor-pointer backdrop-blur-md"
-            >
-              <LogIn size={15} className="text-[#7342E2]" />
-              <span>Sign In</span>
-            </button>
+              className="w-36 py-3.5 text-sm font-bold bg-white/90 text-[#192837] border-[#192837]/15 shadow-sm"
+            />
           </motion.div>
 
           {/* Live Engine Status Badge */}

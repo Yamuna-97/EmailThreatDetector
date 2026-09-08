@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import {
   ShieldAlert, Mail, Sparkles, RefreshCw, AlertTriangle,
-  Eye, Clock, Activity, LogOut, ChevronRight, Inbox, Search, CheckCircle, XCircle, X,
-  User
+  Eye, Clock, Activity, LogOut, Inbox, CheckCircle, XCircle, X,
+  User, Shield, Bell, ChevronRight
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { gmailService, type GmailStatus, type MonitoringStatus } from '../../services/gmail'
@@ -19,11 +19,28 @@ import { CyberTraceLogoIcon } from '../CyberTraceLogo'
 import NotificationsWithActions from '../ui/notifications-with-actions'
 import { useNotifications } from '../../context/NotificationContext'
 
+import { EmailsDataTable } from './EmailsDataTable'
+
 interface NavTabItem {
   id: 'dashboard' | 'gmail-scan' | 'emails' | 'ai-advisor' | 'alerts' | 'history' | 'profile'
   label: string
   icon: React.ComponentType<{ size?: number; className?: string }>
   count?: number
+}
+
+/* ── Severity helper ──────────────────────────────────────── */
+const sevClass = (s: string) => {
+  if (s === 'critical') return 'critical'
+  if (s === 'high') return 'high'
+  if (s === 'medium') return 'medium'
+  return 'low'
+}
+
+const sevColors = {
+  critical: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', dot: 'bg-rose-500' },
+  high: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', dot: 'bg-orange-500' },
+  medium: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-400' },
+  low: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500' },
 }
 
 export const UserDashboard: React.FC = () => {
@@ -43,11 +60,9 @@ export const UserDashboard: React.FC = () => {
   const [selectedEmail, setSelectedEmail] = useState<EmailItem | null>(null)
   const [syncingGmail, setSyncingGmail] = useState<boolean>(false)
   const [scanFolder, setScanFolder] = useState<'all' | 'inbox' | 'spam'>('all')
-  const [emailSearch, setEmailSearch] = useState<string>('')
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
   const monitoringPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // OAuth return banner state
   const [oauthBanner, setOauthBanner] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const oauthHandled = useRef(false)
 
@@ -77,7 +92,6 @@ export const UserDashboard: React.FC = () => {
           warnings_sent: (gRes as GmailStatus).warnings_sent ?? 0,
         })
       }
-      // Keep selected email updated with latest data if one is open
       setSelectedEmail(prev => {
         if (!prev) return null
         const fresh = eRes.find(e => e.id === prev.id)
@@ -91,7 +105,6 @@ export const UserDashboard: React.FC = () => {
   }
 
   useEffect(() => {
-    // Detect OAuth return params (?gmail_connected=true or ?error=...)
     if (!oauthHandled.current) {
       oauthHandled.current = true
       const params = new URLSearchParams(window.location.search)
@@ -99,9 +112,7 @@ export const UserDashboard: React.FC = () => {
       const oauthError = params.get('error')
 
       if (connected === 'true') {
-        const cleanUrl = window.location.pathname
-        window.history.replaceState({}, '', cleanUrl)
-
+        window.history.replaceState({}, '', window.location.pathname)
         setOauthBanner({ type: 'success', message: 'Gmail connected successfully! You can now scan your inbox or enable automatic monitoring.' })
         loadAllData().then(() => setActiveTab('dashboard'))
         setTimeout(() => setOauthBanner(null), 6000)
@@ -109,8 +120,7 @@ export const UserDashboard: React.FC = () => {
       }
 
       if (oauthError) {
-        const cleanUrl = window.location.pathname
-        window.history.replaceState({}, '', cleanUrl)
+        window.history.replaceState({}, '', window.location.pathname)
         const errorMessages: Record<string, string> = {
           oauth_cancelled: 'Gmail connection was cancelled.',
           token_exchange_failed: 'Gmail connection failed — token exchange error. Please try again.',
@@ -119,11 +129,9 @@ export const UserDashboard: React.FC = () => {
         setTimeout(() => setOauthBanner(null), 7000)
       }
     }
-
     loadAllData()
   }, [])
 
-  // Poll monitoring status silently every 60s while monitoring is active (non-disruptive background sync)
   useEffect(() => {
     if (monitoringPollRef.current) {
       clearInterval(monitoringPollRef.current)
@@ -131,7 +139,6 @@ export const UserDashboard: React.FC = () => {
     }
     if (monitoringStatus?.monitoring_active && gmailStatus?.is_connected) {
       monitoringPollRef.current = setInterval(() => {
-        // Run silent background update — no UI flickers, no modal closure, no scroll reset
         loadAllData(true)
       }, 60_000)
     }
@@ -176,7 +183,6 @@ export const UserDashboard: React.FC = () => {
     }
   }
 
-  // Consistent, verified metric calculations
   const totalScanned = emails.length
   const activeThreatsList = threats.filter(t => t.risk_score >= 25 || (t.severity && t.severity !== 'low'))
   const threatCount = activeThreatsList.length
@@ -184,27 +190,10 @@ export const UserDashboard: React.FC = () => {
   const safeCount = Math.max(0, totalScanned - threatCount)
   const unreadAlertsCount = alerts.filter(a => !a.is_read).length
 
-  // Live Dynamic Telemetry & Chart Metrics computed directly from user's analytics
   const userTelemetry = useMemo(
     () => buildUserTelemetry(emails, threats, alerts),
     [emails, threats, alerts]
   )
-
-  // Helper to sanitize raw divider ASCII strings from text bodies
-  const cleanSnippet = (text?: string) => {
-    if (!text) return '(empty preview)'
-    return text.replace(/-{3,}/g, '').replace(/\s+/g, ' ').trim()
-  }
-
-  const filteredEmails = emails.filter(e => {
-    if (!emailSearch) return true
-    const q = emailSearch.toLowerCase()
-    return (
-      e.subject.toLowerCase().includes(q) ||
-      e.sender.toLowerCase().includes(q) ||
-      (e.plain_text_body || '').toLowerCase().includes(q)
-    )
-  })
 
   const navTabs: NavTabItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
@@ -212,56 +201,60 @@ export const UserDashboard: React.FC = () => {
     { id: 'emails', label: 'My Emails', icon: Inbox, count: emails.length },
     { id: 'ai-advisor', label: 'AI Security Advisor', icon: Sparkles },
     { id: 'alerts', label: 'Threat Alerts', icon: AlertTriangle, count: unreadAlertsCount },
-    { id: 'history', label: 'History', icon: Clock },
-    { id: 'profile', label: 'Profile Settings', icon: User },
+    { id: 'history', label: 'Threat History', icon: Clock },
+    { id: 'profile', label: 'Profile & Settings', icon: User },
   ]
 
+  /* ── Render ──────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-[#192837] flex flex-col md:flex-row font-body selection:bg-[#7342E2]/20 selection:text-[#7342E2]">
-      {/* OAuth Banner Notification */}
+    <div className="min-h-screen bg-[#F2F3F8] text-[#192837] flex flex-col md:flex-row font-body">
+
+      {/* ── OAuth Banner ── */}
       {oauthBanner && (
-        <div
-          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold transition-all animate-fade-in border max-w-md w-11/12 ${
-            oauthBanner.type === 'success'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-              : 'bg-red-50 border-red-200 text-red-900'
-          }`}
-        >
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold animate-fade-in border max-w-md w-11/12 ${
+          oauthBanner.type === 'success'
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+            : 'bg-rose-50 border-rose-200 text-rose-900'
+        }`}>
           {oauthBanner.type === 'success'
             ? <CheckCircle size={18} className="text-emerald-600 shrink-0" />
-            : <XCircle size={18} className="text-red-600 shrink-0" />}
+            : <XCircle size={18} className="text-rose-600 shrink-0" />}
           <span className="flex-1">{oauthBanner.message}</span>
-          <button
-            type="button"
-            onClick={() => setOauthBanner(null)}
-            className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer p-1"
-          >
-            ✕
+          <button type="button" onClick={() => setOauthBanner(null)} className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer p-1">
+            <X size={14} />
           </button>
         </div>
       )}
 
-      {/* Left Collapsible Animated Sidebar */}
+      {/* ── Sidebar ── */}
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
-        <SidebarBody className="justify-between gap-6">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            {/* Logo / Brand Header */}
-            <div className="flex items-center gap-3 px-1 py-2 mb-4">
-              <CyberTraceLogoIcon size={36} className="shrink-0" />
+        <SidebarBody className="justify-between gap-4">
+          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden gap-1">
+
+            {/* Brand */}
+            <div className="flex items-center gap-3 px-1 py-2 mb-5">
+              <div className="shrink-0">
+                <CyberTraceLogoIcon size={34} className="shrink-0" />
+              </div>
               {sidebarOpen && (
-                <div className="truncate">
-                  <span className="font-heading text-base font-extrabold text-[#192837] tracking-tight block">
+                <div className="truncate animate-fade-in">
+                  <span className="font-heading text-sm font-extrabold text-[#192837] tracking-tight block leading-tight">
                     Cyber<span className="text-[#7342E2]">Trace</span>
                   </span>
-                  <span className="text-[10px] text-[#7342E2] font-bold block uppercase tracking-wider">
+                  <span className="text-[9px] text-[#7342E2] font-bold block uppercase tracking-widest mt-0.5">
                     User Portal
                   </span>
                 </div>
               )}
             </div>
 
-            {/* Sidebar Navigation Links */}
-            <div className="flex flex-col gap-1.5">
+            {/* Section label */}
+            {sidebarOpen && (
+              <span className="section-label px-3 mb-1">Navigation</span>
+            )}
+
+            {/* Nav Links */}
+            <div className="flex flex-col gap-0.5">
               {navTabs.map((tab) => {
                 const Icon = tab.icon
                 return (
@@ -269,7 +262,7 @@ export const UserDashboard: React.FC = () => {
                     key={tab.id}
                     link={{
                       label: tab.label,
-                      icon: <Icon size={18} />,
+                      icon: <Icon size={17} />,
                       active: activeTab === tab.id,
                       count: tab.count,
                       onClick: () => setActiveTab(tab.id as any),
@@ -279,92 +272,93 @@ export const UserDashboard: React.FC = () => {
               })}
             </div>
 
-            {/* Quick Manual Scan in Sidebar */}
-            <div className="mt-4 pt-3 border-t border-[#192837]/10">
+            {/* Quick Scan CTA */}
+            <div className="mt-4 pt-4 border-t border-[rgba(115,66,226,0.1)]">
               <SidebarLink
                 link={{
-                  label: "Manual Scan",
-                  icon: <Sparkles size={18} className="text-[#7342E2]" />,
+                  label: 'Manual Email Scan',
+                  icon: <Sparkles size={17} className="text-[#7342E2]" />,
                   onClick: () => setScanModalOpen(true),
                 }}
-                className="bg-[#7342E2]/10 hover:bg-[#7342E2]/20 text-[#7342E2] font-semibold"
+                className="bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#E0D9FF]"
               />
             </div>
           </div>
 
-          {/* User Profile & Sign Out at Bottom */}
-          <div className="border-t border-[#192837]/10 pt-3">
+          {/* User + Sign Out */}
+          <div className="border-t border-[rgba(115,66,226,0.1)] pt-3 flex flex-col gap-0.5">
             <SidebarLink
               link={{
-                label: user?.name || "Profile & Settings",
+                label: user?.name || 'Profile & Settings',
                 icon: user?.avatar_url ? (
-                  <img
-                    src={user.avatar_url}
-                    alt={user?.name || "User"}
-                    className="w-7 h-7 rounded-xl object-cover ring-2 ring-[#7342E2]/40 shrink-0"
-                  />
+                  <img src={user.avatar_url} alt={user?.name || 'User'} className="w-7 h-7 rounded-xl object-cover ring-2 ring-[#7342E2]/30" />
                 ) : (
-                  <div className="w-7 h-7 rounded-xl bg-[#7342E2] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs ring-2 ring-transparent hover:ring-[#7342E2]/30 transition-all">
-                    {user?.name ? user.name[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : "U"}
+                  <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#7342E2] to-[#9B70F6] text-white font-bold text-xs flex items-center justify-center shadow-sm">
+                    {user?.name ? user.name[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : 'U'}
                   </div>
                 ),
                 active: activeTab === 'profile',
                 onClick: () => setActiveTab('profile'),
               }}
-              className="cursor-pointer hover:bg-[#7342E2]/10"
             />
             <SidebarLink
               link={{
-                label: "Sign Out",
-                icon: <LogOut size={18} className="text-red-500" />,
+                label: 'Sign Out',
+                icon: <LogOut size={17} className="text-rose-500" />,
                 onClick: logout,
               }}
-              className="text-red-600 hover:bg-red-50 hover:text-red-700"
+              className="hover:bg-rose-50 hover:text-rose-700"
             />
           </div>
         </SidebarBody>
       </Sidebar>
 
-      {/* Main Content Area */}
+      {/* ── Main Content ── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
-        {/* Top Navbar Header with Live Red / Green Gmail Status Indicator */}
-        <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-[#192837]/10 shadow-xs">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
-              <span className="font-heading text-base font-extrabold text-[#192837]">
+
+        {/* Top Header */}
+        <header className="dash-header">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+            {/* Page title */}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="hidden sm:flex w-7 h-7 rounded-lg bg-[#F5F3FF] border border-[#E0D9FF] items-center justify-center shrink-0">
+                {(() => {
+                  const tab = navTabs.find(t => t.id === activeTab)
+                  const Icon = tab?.icon || Activity
+                  return <Icon size={14} className="text-[#7342E2]" />
+                })()}
+              </div>
+              <span className="font-heading text-sm font-bold text-[#192837] truncate">
                 {navTabs.find(t => t.id === activeTab)?.label || 'Dashboard'}
               </span>
-              <span className="text-[11px] text-[#192837]/50 hidden sm:inline">
-                &bull; AI Email Threat Intelligence
+              <span className="hidden sm:block text-xs text-[#192837]/40 font-medium">
+                · AI Email Threat Intelligence
               </span>
             </div>
 
-            {/* Actions & Gmail Live Red/Green Indicator */}
-            <div className="flex items-center gap-3 shrink-0">
-              {/* Global Gmail Connection Status Light */}
+            {/* Right actions */}
+            <div className="flex items-center gap-2 shrink-0">
+
+              {/* Gmail Status pill */}
               {gmailStatus?.is_connected ? (
-                <div
-                  title={`Gmail Authorized: ${gmailStatus?.email_address || user?.email}`}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs cursor-default"
-                >
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm animate-pulse shrink-0" />
-                  <span className="truncate max-w-[120px] sm:max-w-[200px]">
-                    Gmail: {gmailStatus?.email_address || 'Connected'}
-                  </span>
+                <div title={`Gmail: ${gmailStatus?.email_address}`} className="status-pill connected hidden sm:flex">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="truncate max-w-[150px]">{gmailStatus?.email_address || 'Connected'}</span>
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={() => setActiveTab('profile')}
-                  title="Gmail is disconnected. Click to connect in Profile & Settings"
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                  title="Gmail is disconnected — click to connect"
+                  className="status-pill disconnected hover:opacity-80 transition-opacity cursor-pointer"
                 >
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shrink-0" />
-                  <span>Gmail: Disconnected</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  <span className="hidden sm:block">Gmail: Disconnected</span>
+                  <span className="sm:hidden">Disconnected</span>
                 </button>
               )}
 
-              {/* Live Notifications Bell Dropdown */}
+              {/* Notifications */}
               <NotificationsWithActions
                 items={notifications}
                 onDelete={removeNotification}
@@ -372,695 +366,598 @@ export const UserDashboard: React.FC = () => {
                 placement="bottom"
               />
 
+              {/* Manual Scan */}
               <button
                 type="button"
                 onClick={() => setScanModalOpen(true)}
-                className="px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] hover:brightness-110 active:scale-95 shadow-md shadow-[#7342E2]/20 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#7342E2] text-white text-xs font-bold hover:bg-[#6032C4] transition-all shadow-sm cursor-pointer"
               >
-                <Sparkles size={14} />
-                <span>Manual Scan</span>
+                <Sparkles size={13} />
+                <span className="hidden sm:block">Scan Email</span>
               </button>
 
+              {/* Refresh */}
+              <button
+                type="button"
+                onClick={() => loadAllData()}
+                disabled={loading}
+                title="Refresh data"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#192837]/50 hover:text-[#7342E2] hover:bg-[#F5F3FF] border border-[rgba(115,66,226,0.12)] transition-all cursor-pointer"
+              >
+                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              </button>
+
+              {/* Sign Out */}
               <button
                 type="button"
                 onClick={logout}
                 title="Sign Out"
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-[#192837]/60 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-all cursor-pointer shrink-0"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#192837]/50 hover:text-rose-600 hover:bg-rose-50 border border-[rgba(115,66,226,0.12)] hover:border-rose-200 transition-all cursor-pointer"
               >
-                <LogOut size={16} />
+                <LogOut size={14} />
               </button>
             </div>
           </div>
         </header>
 
-        {/* Main Body */}
+        {/* ── Main Body ── */}
         <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
 
-        {/* Compact Strip Header for Inner Tabs */}
-        {activeTab !== 'dashboard' && activeTab !== 'profile' && activeTab !== 'gmail-scan' && (
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#192837]/10 shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold text-[#192837]">
-                {activeTab === 'emails' && `Mailbox Overview (${emails.length} Analyzed Emails)`}
-                {activeTab === 'alerts' && `Security Alert Logs (${alerts.length} Total Alerts)`}
-                {activeTab === 'history' && `Threat Audit History (${threats.length} Recorded Items)`}
-                {activeTab === 'ai-advisor' && `AI Cybersecurity Assistant & RAG Copilot`}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="px-2.5 py-1 rounded-lg bg-[#FAF9F6] border border-[#192837]/10 text-[#192837]/70 font-semibold">
-                Threats: <b className="text-orange-600 font-bold">{threatCount}</b>
-              </span>
-              <span className="px-2.5 py-1 rounded-lg bg-[#FAF9F6] border border-[#192837]/10 text-[#192837]/70 font-semibold">
-                Safe: <b className="text-emerald-600 font-bold">{safeCount}</b>
-              </span>
-              <button
-                type="button"
-                onClick={() => setActiveTab('dashboard')}
-                className="text-xs font-bold text-[#7342E2] hover:underline cursor-pointer ml-1"
-              >
-                ← Back to Dashboard
-              </button>
-            </div>
-          </div>
-        )}
+          {/* ══ TAB: DASHBOARD ══ */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6 animate-fade-in">
 
-
-        {/* TAB 1: MAIN DASHBOARD VIEW */}
-        {activeTab === 'dashboard' && (
-          <>
-            {/* Active Scanning Indicator with Cancel Option */}
-            {syncingGmail && (
-              <div className="p-4 rounded-3xl bg-gradient-to-r from-[#FAF8FF] via-white to-[#F5F3FF] border border-[#7342E2]/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md animate-fade-in">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-2xl bg-[#7342E2]/10 border border-[#7342E2]/25 text-[#7342E2] flex items-center justify-center shrink-0">
-                    <RefreshCw size={18} className="animate-spin" />
+              {/* Active Scan Indicator */}
+              {syncingGmail && (
+                <div className="dash-card p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#F5F3FF] border border-[#E0D9FF] text-[#7342E2] flex items-center justify-center shrink-0">
+                      <RefreshCw size={17} className="animate-spin" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-sm text-[#192837] block">Scanning Gmail Inbox ({scanFolder})…</span>
+                      <span className="text-xs text-[#192837]/55 font-medium">Extracting headers, evaluating SPF/DKIM & classifying threats</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="font-heading font-extrabold text-xs sm:text-sm text-[#192837] block">
-                      Scanning Gmail Inbox ({scanFolder})...
-                    </span>
-                    <span className="text-[11px] text-[#192837]/60 font-medium">
-                      Extracting headers, evaluating SPF/DKIM authentication & classifying threats.
-                    </span>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCancelScan}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer shrink-0"
+                  >
+                    <X size={13} />
+                    Cancel Scan
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleCancelScan}
-                  className="px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5"
-                >
-                  <X size={14} />
-                  <span>Cancel Scan</span>
-                </button>
-              </div>
-            )}
+              )}
 
-            {/* Top Defense Overview Banner */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#192837]/10 shadow-xs flex flex-col justify-between space-y-6">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#7342E2]/10 text-[#7342E2]">
-                    Real-Time SOC Defense Active
-                  </span>
+              {/* Defense Overview Banner */}
+              <div className="dash-card p-6 sm:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#F5F3FF] text-[#7342E2] border border-[#E0D9FF]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#7342E2] animate-pulse" />
+                        Real-Time SOC Defense Active
+                      </span>
+                    </div>
+                    <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#192837] tracking-tight">
+                      Defense Overview
+                    </h1>
+                    <p className="text-sm text-[#192837]/60 mt-1 font-medium">
+                      AI-powered NLP analysis, DKIM/SPF domain validation & heuristic threat triage running continuously.
+                    </p>
+                  </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setActiveTab('gmail-scan')}
-                      className="px-3.5 py-1.5 rounded-xl bg-[#7342E2]/10 hover:bg-[#7342E2]/20 text-[#7342E2] text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F5F3FF] hover:bg-[#EDE9FE] text-[#7342E2] border border-[#E0D9FF] text-xs font-bold transition-all cursor-pointer"
                     >
-                      <Mail size={14} />
-                      <span>Open Gmail Scanner</span>
+                      <Mail size={13} />
+                      Open Gmail Scanner
                     </button>
                     <button
                       type="button"
                       onClick={() => loadAllData()}
                       disabled={loading}
-                      title="Refresh threat intelligence"
-                      className="p-2 rounded-xl bg-[#FAF9F6] border border-[#192837]/10 text-[#192837]/70 hover:text-[#7342E2] hover:bg-white transition-all cursor-pointer"
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-[#192837]/50 hover:text-[#7342E2] hover:bg-[#F5F3FF] border border-[rgba(115,66,226,0.12)] transition-all cursor-pointer"
                     >
-                      <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+                      <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
                     </button>
                   </div>
                 </div>
 
-                <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#192837] tracking-tight mt-3">
-                  Defense Overview
-                </h1>
-                <p className="text-xs sm:text-sm text-[#192837]/70 mt-1 font-medium leading-relaxed">
-                  AI-powered NLP analysis, DKIM/SPF domain validation & heuristic threat triage running continuously.
-                </p>
-              </div>
-
-              {/* Key Metrics Widgets */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-[#192837]/8">
-                <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
-                  <span className="text-[10px] font-bold text-[#192837]/60 uppercase tracking-wider block">Total Scanned</span>
-                  <span className="text-2xl sm:text-3xl font-extrabold font-heading text-[#192837] mt-0.5 block">{totalScanned}</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
-                  <span className="text-[10px] font-bold text-orange-700 uppercase tracking-wider block">Active Threats</span>
-                  <span className="text-2xl sm:text-3xl font-extrabold font-heading text-orange-600 mt-0.5 block">{threatCount}</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
-                  <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider block">Critical</span>
-                  <span className="text-2xl sm:text-3xl font-extrabold font-heading text-red-600 mt-0.5 block">{criticalCount}</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/6">
-                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Clean & Safe</span>
-                  <span className="text-2xl sm:text-3xl font-extrabold font-heading text-emerald-600 mt-0.5 block">{safeCount}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Incident & Threat Intelligence Analysis Section (Dynamic User Analytics) */}
-            <div className="w-full">
-              <IncidentReportCard
-                title="Threat Intelligence & Email Ingestion Telemetry"
-                chartSeries={userTelemetry.chartSeries}
-                metrics={userTelemetry.metrics}
-              />
-            </div>
-
-            {/* Bottom Grid: Recent Threats + Security Alerts */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Recent Threat Detections Feed */}
-              <div className="lg:col-span-2 p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-xs space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <ShieldAlert size={20} className="text-[#7342E2]" />
-                    <h2 className="font-heading text-base font-bold text-[#192837]">
-                      Recent Threat Detections
-                    </h2>
+                {/* Metric Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-[rgba(115,66,226,0.08)]">
+                  <div className="metric-card metric-total">
+                    <span className="section-label block mb-2">Total Scanned</span>
+                    <span className="font-heading text-3xl font-extrabold text-[#192837] block animate-count-up">{totalScanned}</span>
+                    <span className="text-xs text-[#192837]/40 font-medium mt-1 block">emails analyzed</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('emails')}
-                    className="text-xs font-bold text-[#7342E2] hover:underline cursor-pointer"
-                  >
-                    View All Emails ({emails.length}) →
-                  </button>
+                  <div className="metric-card metric-threat">
+                    <span className="section-label block mb-2" style={{ color: '#C2410C' }}>Active Threats</span>
+                    <span className="font-heading text-3xl font-extrabold text-orange-600 block animate-count-up">{threatCount}</span>
+                    <span className="text-xs text-orange-500/70 font-medium mt-1 block">requires attention</span>
+                  </div>
+                  <div className="metric-card metric-critical">
+                    <span className="section-label block mb-2" style={{ color: '#BE123C' }}>Critical</span>
+                    <span className="font-heading text-3xl font-extrabold text-rose-600 block animate-count-up">{criticalCount}</span>
+                    <span className="text-xs text-rose-400/70 font-medium mt-1 block">high-risk score ≥75</span>
+                  </div>
+                  <div className="metric-card metric-safe">
+                    <span className="section-label block mb-2" style={{ color: '#15803D' }}>Clean & Safe</span>
+                    <span className="font-heading text-3xl font-extrabold text-emerald-600 block animate-count-up">{safeCount}</span>
+                    <span className="text-xs text-emerald-500/70 font-medium mt-1 block">no threats found</span>
+                  </div>
                 </div>
+              </div>
 
-                <div className="space-y-3">
-                  {threats.length > 0 ? threats.slice(0, 5).map(t => {
-                    const sevColor =
-                      t.severity === 'critical' ? 'bg-red-50 text-red-700 border-red-200' :
-                      t.severity === 'high' ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                      t.severity === 'medium' ? 'bg-amber-50 text-amber-800 border-amber-200' :
-                      'bg-emerald-50 text-emerald-800 border-emerald-200'
+              {/* Analytics Chart */}
+              <div className="dash-card overflow-hidden">
+                <IncidentReportCard
+                  title="Threat Intelligence & Email Ingestion Telemetry"
+                  chartSeries={userTelemetry.chartSeries}
+                  metrics={userTelemetry.metrics}
+                />
+              </div>
 
-                    const formattedTime = new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              {/* Bottom Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                    return (
-                      <div
-                        key={t.id}
-                        onClick={() => setSelectedThreatId(t.id)}
-                        className="p-4 rounded-2xl bg-[#FAF9F6] hover:bg-white border border-[#192837]/8 hover:border-[#7342E2]/40 hover:shadow-md transition-all cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
-                      >
-                        <div className="space-y-1.5 flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${sevColor}`}>
-                              {t.severity}
-                            </span>
-                            <span className="font-heading text-sm font-bold text-[#192837] truncate">
-                              {t.threat_type}
-                            </span>
-                            {t.is_demo && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900">
-                                DEMO
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-[#192837]/80 line-clamp-1 font-medium">
-                            {t.summary}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                          <div className="text-right">
-                            <span className="text-sm font-extrabold text-[#7342E2] block">
-                              {t.risk_score}/100
-                            </span>
-                            <span className="text-[10px] text-[#192837]/50 font-medium whitespace-nowrap block">
-                              {formattedTime}
-                            </span>
-                          </div>
-                          <Eye size={16} className="text-[#192837]/40" />
-                        </div>
+                {/* Recent Threat Feed */}
+                <div className="lg:col-span-2 dash-card p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-[#F5F3FF] border border-[#E0D9FF] flex items-center justify-center">
+                        <ShieldAlert size={16} className="text-[#7342E2]" />
                       </div>
-                    )
-                  }) : (
-                    <div className="py-12 text-center text-xs text-[#192837]/50 space-y-2">
-                      <p>No active threats detected yet.</p>
-                      {gmailStatus?.is_connected && (
-                        <button
-                          type="button"
-                          onClick={() => setActiveTab('gmail-scan')}
-                          className="text-xs font-bold text-[#7342E2] hover:underline cursor-pointer"
+                      <div>
+                        <h2 className="font-heading text-sm font-bold text-[#192837]">Recent Threat Detections</h2>
+                        <span className="text-xs text-[#192837]/45 font-medium">Latest flagged emails</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('emails')}
+                      className="flex items-center gap-1 text-xs font-bold text-[#7342E2] hover:underline cursor-pointer"
+                    >
+                      View all ({emails.length}) <ChevronRight size={13} />
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {threats.length > 0 ? threats.slice(0, 5).map(t => {
+                      const sc = sevClass(t.severity)
+                      return (
+                        <div
+                          key={t.id}
+                          onClick={() => setSelectedThreatId(t.id)}
+                          className={`threat-row ${sc} stagger-item`}
                         >
-                          Open Gmail Scanner now →
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Live Security Alerts */}
-              <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-xs space-y-4 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle size={19} className="text-orange-500" />
-                      <h2 className="font-heading text-base font-bold text-[#192837]">
-                        Security Alerts
-                      </h2>
-                    </div>
-                    <span className="text-xs font-bold text-[#192837]/60">
-                      {unreadAlertsCount} unread
-                    </span>
-                  </div>
-
-                  <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
-                    {alerts.length > 0 ? alerts.map(a => (
-                      <div
-                        key={a.id}
-                        className={`p-3.5 rounded-2xl border transition-all ${
-                          a.is_read
-                            ? 'bg-[#FAF9F6] border-[#192837]/6 opacity-60'
-                            : 'bg-red-50/60 border-red-200 shadow-xs'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="font-bold text-xs text-[#192837] block leading-tight">
-                            {a.title}
-                          </span>
-                          {!a.is_read && (
-                            <button
-                              type="button"
-                              onClick={() => handleMarkAlert(a.id)}
-                              className="text-[10px] font-bold text-[#7342E2] hover:underline cursor-pointer shrink-0"
-                            >
-                              Mark Read
-                            </button>
-                          )}
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="space-y-1 flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className={`sev-badge ${sc}`}>{t.severity}</span>
+                                <span className="font-heading text-sm font-bold text-[#192837] truncate">{t.threat_type}</span>
+                                {t.is_demo && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">DEMO</span>}
+                              </div>
+                              <p className="text-xs text-[#192837]/70 line-clamp-1 font-medium">{t.summary}</p>
+                            </div>
+                            <div className="flex items-center gap-2.5 shrink-0 self-center">
+                              <div className="text-right">
+                                <span className="text-sm font-extrabold text-[#7342E2] block">{t.risk_score}<span className="text-xs font-medium text-[#192837]/40">/100</span></span>
+                                <span className="text-[10px] text-[#192837]/40 block">
+                                  {new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              <Eye size={15} className="text-[#192837]/30" />
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-[11px] text-[#192837]/75 mt-1 leading-normal line-clamp-2">
-                          {a.message}
-                        </p>
-                      </div>
-                    )) : (
-                      <div className="py-12 text-center text-xs text-[#192837]/50">
-                        All clean! No active inbox security alerts.
+                      )
+                    }) : (
+                      <div className="py-12 text-center space-y-3">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto">
+                          <Shield size={22} className="text-emerald-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-[#192837]">No active threats detected</p>
+                          <p className="text-xs text-[#192837]/45 mt-0.5">Your inbox looks clean!</p>
+                        </div>
+                        {gmailStatus?.is_connected && (
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('gmail-scan')}
+                            className="text-xs font-bold text-[#7342E2] hover:underline cursor-pointer"
+                          >
+                            Open Gmail Scanner →
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-[#192837]/8">
-                  <button
-                    type="button"
-                    onClick={() => setScanModalOpen(true)}
-                    className="w-full py-2.5 rounded-xl bg-[#FAF9F6] hover:bg-[#7342E2]/10 border border-[#192837]/10 text-xs font-bold text-[#7342E2] transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    <Sparkles size={14} />
-                    <span>Launch Manual Scanner</span>
-                  </button>
+                {/* Security Alerts Panel */}
+                <div className="dash-card p-6 flex flex-col">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center">
+                        <Bell size={15} className="text-orange-600" />
+                      </div>
+                      <div>
+                        <h2 className="font-heading text-sm font-bold text-[#192837]">Security Alerts</h2>
+                        {unreadAlertsCount > 0 && (
+                          <span className="text-[10px] font-bold text-orange-600">{unreadAlertsCount} unread</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 flex-1 max-h-[320px] overflow-y-auto pr-1">
+                    {alerts.length > 0 ? alerts.slice(0, 8).map(a => {
+                      const sc = sevClass(a.severity)
+                      const sev = sevColors[sc]
+                      return (
+                        <div
+                          key={a.id}
+                          className={`p-3 rounded-2xl border transition-all ${
+                            a.is_read
+                              ? 'bg-[#FAFAFA] border-[rgba(25,40,55,0.06)] opacity-70'
+                              : `${sev.bg} ${sev.border} shadow-xs`
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2 flex-1 min-w-0">
+                              <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${sev.dot}`} />
+                              <span className="font-bold text-xs text-[#192837] leading-tight line-clamp-1">{a.title}</span>
+                            </div>
+                            {!a.is_read && (
+                              <button
+                                type="button"
+                                onClick={() => handleMarkAlert(a.id)}
+                                className="text-[10px] font-bold text-[#7342E2] hover:underline cursor-pointer shrink-0"
+                              >
+                                Read
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#192837]/65 mt-1 leading-snug line-clamp-2 pl-3.5">{a.message}</p>
+                        </div>
+                      )
+                    }) : (
+                      <div className="py-10 text-center space-y-2">
+                        <CheckCircle size={24} className="text-emerald-500 mx-auto" />
+                        <p className="text-xs text-[#192837]/45 font-medium">All clear — no active alerts</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-4 border-t border-[rgba(115,66,226,0.08)] mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setScanModalOpen(true)}
+                      className="w-full py-2.5 rounded-xl bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#E0D9FF] text-xs font-bold text-[#7342E2] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Sparkles size={13} />
+                      Launch Manual Scanner
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </>
-        )}
+          )}
 
-        {/* TAB 2: MY EMAILS VIEW */}
-        {activeTab === 'emails' && (
-          <div className="space-y-6">
-            <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-xs space-y-6">
-              {/* Header Controls Bar */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#192837]/8">
+          {/* ══ TAB: MY EMAILS ══ */}
+          {activeTab === 'emails' && (
+            <div className="space-y-5 animate-fade-in">
+              {/* Page header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h2 className="font-heading text-xl font-extrabold text-[#192837]">
-                    Mailbox Intelligence ({emails.length})
-                  </h2>
-                  <p className="text-xs text-[#192837]/70 mt-0.5 font-medium">
-                    Filter and inspect scanned emails analyzed by CyberTrace threat engine
-                  </p>
+                  <h1 className="font-heading text-2xl font-extrabold text-[#192837]">Mailbox Intelligence</h1>
+                  <p className="text-sm text-[#192837]/55 mt-0.5">{emails.length} emails analyzed by CyberTrace threat engine</p>
                 </div>
-
-                {/* Scan Options Toolbar */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex items-center rounded-xl bg-[#FAF9F6] border border-[#192837]/10 p-1 text-[11px] font-bold">
-                    {[
-                      { id: 'all', label: 'All' },
-                      { id: 'inbox', label: 'Inbox' },
-                      { id: 'spam', label: 'Spam' },
-                    ].map(f => (
-                      <button
-                        key={f.id}
-                        type="button"
-                        onClick={() => setScanFolder(f.id as any)}
-                        className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                          scanFolder === f.id
-                            ? 'bg-[#192837] text-white shadow-xs'
-                            : 'text-[#192837]/65 hover:text-[#192837]'
-                        }`}
-                      >
-                        {f.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <span className="text-xs font-bold text-[#192837]/60">Scan:</span>
-                  {[1, 5, 10, 25].map(cnt => (
-                    <button
-                      key={cnt}
-                      type="button"
-                      disabled={syncingGmail}
-                      onClick={() => handleScanGmailWithOptions(cnt, scanFolder)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#7342E2]/10 hover:bg-[#7342E2] hover:text-white text-[#7342E2] border border-[#7342E2]/20 transition-all cursor-pointer"
-                    >
-                      {cnt}
-                    </button>
-                  ))}
-
-                  <button
-                    type="button"
-                    onClick={() => setScanModalOpen(true)}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#7342E2] text-white hover:brightness-110 transition-all cursor-pointer flex items-center gap-1"
-                  >
-                    <Sparkles size={13} />
-                    <span>Paste Raw</span>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setActiveTab('dashboard')} className="text-xs font-bold text-[#7342E2] hover:underline cursor-pointer">
+                    ← Dashboard
                   </button>
                 </div>
               </div>
 
-              {/* Search Bar */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={emailSearch}
-                  onChange={(e) => setEmailSearch(e.target.value)}
-                  placeholder="Search by subject, sender email, or body text snippet..."
-                  className="w-full text-xs sm:text-sm px-4 py-2.5 pl-10 rounded-2xl bg-[#FAF9F6] border border-[#192837]/15 focus:outline-none focus:bg-white focus:border-[#7342E2] transition-all"
+              <div className="dash-card p-6 space-y-5">
+                {/* Toolbar */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[rgba(115,66,226,0.08)]">
+                  <div className="flex items-center gap-2">
+                    {/* Folder filter */}
+                    <div className="flex items-center rounded-xl bg-[#F8F9FC] border border-[rgba(115,66,226,0.12)] p-1 text-[11px] font-bold">
+                      {(['all', 'inbox', 'spam'] as const).map(f => (
+                        <button
+                          key={f}
+                          type="button"
+                          onClick={() => setScanFolder(f)}
+                          className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer capitalize ${
+                            scanFolder === f
+                              ? 'bg-[#7342E2] text-white shadow-sm'
+                              : 'text-[#192837]/55 hover:text-[#192837]'
+                          }`}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Scan count buttons */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-bold text-[#192837]/50">Quick scan:</span>
+                    {[1, 5, 10, 25].map(cnt => (
+                      <button
+                        key={cnt}
+                        type="button"
+                        disabled={syncingGmail}
+                        onClick={() => handleScanGmailWithOptions(cnt, scanFolder)}
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#F5F3FF] hover:bg-[#7342E2] hover:text-white text-[#7342E2] border border-[#E0D9FF] transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {cnt} emails
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setScanModalOpen(true)}
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#7342E2] text-white hover:bg-[#6032C4] transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Sparkles size={12} />
+                      Paste Raw Email
+                    </button>
+                  </div>
+                </div>
+
+                {/* Table */}
+                <EmailsDataTable
+                  emails={emails}
+                  threats={threats}
+                  onSelectEmail={(e) => setSelectedEmail(e)}
+                  selectedEmailId={selectedEmail?.id}
                 />
-                <Search size={17} className="absolute left-3.5 top-3 text-[#192837]/40" />
               </div>
 
-              {/* Email Items List */}
-              <div className="space-y-3">
-                {filteredEmails.length > 0 ? filteredEmails.map(e => {
-                  const matchingThreat = threats.find(t => t.email_id === e.id)
-                  const cleanBodySnippet = cleanSnippet(e.plain_text_body || e.snippet)
+              {/* Email Detail Card */}
+              {selectedEmail && (
+                <div className="dash-card p-6 space-y-4 animate-slide-in-up">
+                  <div className="flex items-center justify-between pb-3 border-b border-[rgba(115,66,226,0.08)]">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-[#F5F3FF] border border-[#E0D9FF] flex items-center justify-center">
+                        <Mail size={15} className="text-[#7342E2]" />
+                      </div>
+                      <h3 className="font-heading text-sm font-bold text-[#192837]">Email Content Inspector</h3>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setAdvisorSelectedEmailId(selectedEmail.id); setActiveTab('ai-advisor') }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#7342E2] to-[#9B70F6] text-white text-xs font-bold hover:brightness-110 transition-all shadow-sm cursor-pointer"
+                      >
+                        <Sparkles size={12} />
+                        Ask AI Advisor
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedEmail(null)}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-[#192837]/40 hover:text-[#192837] hover:bg-[#F5F5F5] transition-all cursor-pointer"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  </div>
 
+                  <div className="space-y-3 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {[
+                        { label: 'Subject', value: selectedEmail.subject },
+                        { label: 'From', value: selectedEmail.sender },
+                        { label: 'Source IP', value: selectedEmail.headers?.source_ip || '—', highlight: true },
+                      ].map(({ label, value, highlight }) => (
+                        <div key={label} className="p-3 rounded-xl bg-[#F8F9FC] border border-[rgba(115,66,226,0.08)]">
+                          <span className="section-label block mb-1">{label}</span>
+                          <span className={`font-semibold ${highlight ? 'text-[#7342E2] font-bold' : 'text-[#192837]'} truncate block`}>{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <span className="section-label block mb-1.5">Email Body</span>
+                      <pre className="p-4 rounded-2xl bg-[#F8F9FC] border border-[rgba(115,66,226,0.08)] font-mono text-xs whitespace-pre-wrap max-h-56 overflow-y-auto leading-relaxed text-[#192837]">
+                        {selectedEmail.plain_text_body || '(No body text)'}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ TAB: AI ADVISOR ══ */}
+          {activeTab === 'ai-advisor' && (
+            <div className="animate-fade-in">
+              <UserRAGAssistant
+                emails={emails}
+                selectedEmailId={advisorSelectedEmailId}
+              />
+            </div>
+          )}
+
+          {/* ══ TAB: ALERTS ══ */}
+          {activeTab === 'alerts' && (
+            <div className="space-y-5 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="font-heading text-2xl font-extrabold text-[#192837]">Security Alert History</h1>
+                  <p className="text-sm text-[#192837]/55 mt-0.5">{alerts.length} total alerts · {unreadAlertsCount} unread</p>
+                </div>
+              </div>
+
+              <div className="dash-card p-6 space-y-3">
+                {alerts.length > 0 ? alerts.map(a => {
+                  const sc = sevClass(a.severity)
+                  const sev = sevColors[sc]
                   return (
                     <div
-                      key={e.id}
-                      onClick={() => setSelectedEmail(e)}
-                      className={`p-4.5 rounded-2xl border transition-all cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
-                        selectedEmail?.id === e.id
-                          ? 'bg-[#7342E2]/5 border-[#7342E2] shadow-sm'
-                          : 'bg-[#FAF9F6] hover:bg-white border-[#192837]/8 hover:border-[#7342E2]/30 hover:shadow-xs'
+                      key={a.id}
+                      className={`p-4 rounded-2xl border flex items-start justify-between gap-4 transition-all stagger-item ${
+                        a.is_read
+                          ? 'bg-[#FAFAFA] border-[rgba(25,40,55,0.06)] opacity-70'
+                          : `${sev.bg} ${sev.border} shadow-xs`
                       }`}
                     >
-                      <div className="space-y-1.5 flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {matchingThreat ? (
-                            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
-                              matchingThreat.severity === 'critical' ? 'bg-red-50 text-red-700 border-red-200' :
-                              matchingThreat.severity === 'high' ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                              matchingThreat.severity === 'medium' ? 'bg-amber-50 text-amber-800 border-amber-200' :
-                              'bg-emerald-50 text-emerald-800 border-emerald-200'
-                            }`}>
-                              {matchingThreat.severity} — {matchingThreat.threat_type}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">
-                              Verified Clean
-                            </span>
-                          )}
-
-                          <span className="font-heading text-sm font-bold text-[#192837] truncate">
-                            {e.subject}
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${sev.dot}`} />
+                        <div className="space-y-0.5 min-w-0">
+                          <span className="font-bold text-sm text-[#192837] block">{a.title}</span>
+                          <p className="text-xs text-[#192837]/70 leading-relaxed">{a.message}</p>
+                          <span className="text-[10px] text-[#192837]/35 block font-medium pt-1">
+                            {new Date(a.created_at).toLocaleString()}
                           </span>
                         </div>
-
-                        <div className="flex items-center gap-3 text-xs text-[#192837]/75 font-medium flex-wrap">
-                          <span>From: <b className="text-[#192837] font-semibold">{e.sender}</b></span>
-                          {e.headers?.spf && (
-                            <span className="text-[10px] uppercase font-bold text-[#7342E2] bg-[#7342E2]/10 px-1.5 py-0.5 rounded">
-                              SPF: {e.headers.spf}
-                            </span>
-                          )}
-                        </div>
-
-                        <p className="text-xs text-[#192837]/70 line-clamp-1 font-normal">
-                          {cleanBodySnippet}
-                        </p>
                       </div>
-
-                      <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                        <span className="text-[11px] text-[#192837]/50 font-medium whitespace-nowrap">
-                          {new Date(e.date).toLocaleDateString()}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={(ev) => {
-                            ev.stopPropagation()
-                            setAdvisorSelectedEmailId(e.id)
-                            setActiveTab('ai-advisor')
-                          }}
-                          className="px-2.5 py-1 rounded-xl bg-cyan-50 border border-cyan-200 text-xs font-bold text-cyan-700 hover:bg-cyan-600 hover:text-white transition-all cursor-pointer shadow-xs flex items-center gap-1"
-                        >
-                          <Sparkles size={13} />
-                          AI Explain
-                        </button>
-                        {matchingThreat && (
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <span className={`sev-badge ${sc}`}>{a.severity}</span>
+                        {!a.is_read && (
                           <button
                             type="button"
-                            onClick={(ev) => {
-                              ev.stopPropagation()
-                              setSelectedThreatId(matchingThreat.id)
-                            }}
-                            className="px-3 py-1 rounded-xl bg-white border border-[#192837]/15 text-xs font-bold text-[#7342E2] hover:bg-[#7342E2] hover:text-white transition-all cursor-pointer shadow-xs"
+                            onClick={() => handleMarkAlert(a.id)}
+                            className="text-[10px] font-bold text-[#7342E2] hover:underline cursor-pointer"
                           >
-                            Forensics
+                            Mark Read
                           </button>
                         )}
-                        <ChevronRight size={16} className="text-[#192837]/30" />
                       </div>
                     </div>
                   )
                 }) : (
-                  <div className="py-16 text-center text-xs text-[#192837]/50 space-y-3">
-                    <Inbox size={34} className="mx-auto text-[#192837]/30" />
-                    <p className="text-sm font-medium">No emails ingested yet.</p>
-                    <p>Select a scan range button above (e.g. 5) to scan Gmail!</p>
+                  <div className="py-16 text-center space-y-3">
+                    <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto">
+                      <Shield size={26} className="text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[#192837]">No security alerts yet</p>
+                      <p className="text-xs text-[#192837]/45 mt-0.5">Alerts will appear when threats are detected</p>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
+          )}
 
-            {/* Email Detail Drawer Modal/Panel */}
-            {selectedEmail && (
-              <div className="p-6 rounded-3xl bg-white border border-[#7342E2]/30 shadow-lg space-y-4 animate-fade-in">
-                <div className="flex items-center justify-between pb-3 border-b border-[#192837]/10">
-                  <div className="flex items-center gap-2">
-                    <Mail size={18} className="text-[#7342E2]" />
-                    <h3 className="font-heading text-base font-bold text-[#192837]">
-                      Email Content Inspector
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAdvisorSelectedEmailId(selectedEmail.id)
-                        setActiveTab('ai-advisor')
-                      }}
-                      className="px-3 py-1 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-xs font-bold flex items-center gap-1.5 hover:from-cyan-500 hover:to-blue-500 transition-all shadow-xs cursor-pointer"
-                    >
-                      <Sparkles size={13} />
-                      Ask AI Advisor
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedEmail(null)}
-                      className="text-xs font-bold text-[#192837]/50 hover:text-[#192837] cursor-pointer"
-                    >
-                      Close Preview ✕
-                    </button>
-                  </div>
-                </div>
+          {/* ══ TAB: HISTORY ══ */}
+          {activeTab === 'history' && (
+            <div className="space-y-5 animate-fade-in">
+              <div>
+                <h1 className="font-heading text-2xl font-extrabold text-[#192837]">Threat Audit History</h1>
+                <p className="text-sm text-[#192837]/55 mt-0.5">{threats.length} recorded threat incidents</p>
+              </div>
 
-                <div className="space-y-3.5 text-xs">
-                  <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8 space-y-2">
-                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                      <span className="font-bold text-[#192837]/60">Subject:</span>
-                      <span className="font-semibold text-[#192837]">{selectedEmail.subject}</span>
+              <div className="dash-card p-6">
+                <div className="divide-y divide-[rgba(115,66,226,0.08)]">
+                  {threats.length > 0 ? threats.map((t, idx) => {
+                    const sc = sevClass(t.severity)
+                    return (
+                      <div key={t.id} className={`py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${idx === 0 ? '' : ''}`} style={{ animationDelay: `${idx * 40}ms` }}>
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${sevColors[sc].dot}`} />
+                          <div className="space-y-0.5 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-sm text-[#192837]">{t.threat_type}</span>
+                              <span className={`sev-badge ${sc}`}>{t.severity}</span>
+                              {t.is_demo && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">DEMO</span>}
+                            </div>
+                            <p className="text-xs text-[#192837]/65 font-medium line-clamp-1">{t.summary}</p>
+                            <span className="text-[10px] text-[#192837]/35 block font-medium">
+                              Recorded: {new Date(t.created_at).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                          <div className="text-right">
+                            <span className="font-heading text-base font-extrabold text-[#7342E2]">{t.risk_score}<span className="text-xs font-medium text-[#192837]/35">/100</span></span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedThreatId(t.id)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F5F3FF] border border-[#E0D9FF] text-xs font-bold text-[#7342E2] hover:bg-[#7342E2] hover:text-white transition-all cursor-pointer"
+                          >
+                            <Eye size={12} />
+                            Forensics
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  }) : (
+                    <div className="py-16 text-center space-y-3">
+                      <div className="w-14 h-14 rounded-2xl bg-[#F5F3FF] border border-[#E0D9FF] flex items-center justify-center mx-auto">
+                        <Clock size={26} className="text-[#7342E2]" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-[#192837]">No threat history yet</p>
+                        <p className="text-xs text-[#192837]/45 mt-0.5">Scan your inbox to begin threat detection</p>
+                      </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                      <span className="font-bold text-[#192837]/60">From:</span>
-                      <span className="text-[#192837] font-medium">{selectedEmail.sender}</span>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                      <span className="font-bold text-[#192837]/60">Source IP:</span>
-                      <span className="text-[#7342E2] font-bold">{selectedEmail.headers?.source_ip || '185.220.101.5'}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="font-bold text-[#192837]/70 block mb-1">Body Text Content:</span>
-                    <pre className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/10 font-mono text-xs whitespace-pre-wrap max-h-64 overflow-y-auto leading-relaxed text-[#192837]">
-                      {selectedEmail.plain_text_body || '(No body text)'}
-                    </pre>
-                  </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* TAB 3: AI SECURITY ADVISOR (USER RAG) */}
-        {activeTab === 'ai-advisor' && (
-          <div className="space-y-4">
-            <UserRAGAssistant
-              emails={emails}
-              selectedEmailId={advisorSelectedEmailId}
+          {/* ══ TAB: GMAIL SCANNER ══ */}
+          {activeTab === 'gmail-scan' && (
+            <GmailScannerView
+              gmailStatus={gmailStatus}
+              monitoringStatus={monitoringStatus}
+              threats={threats}
+              onRefreshAllData={loadAllData}
+              onNavigateToProfile={() => setActiveTab('profile')}
+              onNavigateToEmails={() => setActiveTab('emails')}
+              onViewThreatReport={(tId) => setSelectedThreatId(tId)}
             />
-          </div>
-        )}
+          )}
 
-        {/* TAB 4: THREAT ALERTS VIEW */}
-        {activeTab === 'alerts' && (
-          <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#192837]/8">
-              <h2 className="font-heading text-lg font-extrabold text-[#192837]">
-                Security Alert History ({alerts.length})
-              </h2>
-              <span className="text-xs font-semibold text-[#192837]/60">
-                {unreadAlertsCount} unread
-              </span>
-            </div>
+          {/* ══ TAB: PROFILE ══ */}
+          {activeTab === 'profile' && (
+            <UserProfileView
+              gmailStatus={gmailStatus}
+              monitoringStatus={monitoringStatus}
+              onRefreshGmailStatus={loadAllData}
+            />
+          )}
+        </main>
 
-            <div className="space-y-3">
-              {alerts.length > 0 ? alerts.map(a => (
-                <div
-                  key={a.id}
-                  className={`p-4 rounded-2xl border flex items-start justify-between gap-4 transition-all ${
-                    a.is_read ? 'bg-[#FAF9F6] border-[#192837]/8 opacity-75' : 'bg-red-50/50 border-red-200 shadow-xs'
-                  }`}
-                >
-                  <div className="space-y-1">
-                    <span className="font-bold text-sm text-[#192837] block">{a.title}</span>
-                    <p className="text-xs text-[#192837]/80 leading-relaxed">{a.message}</p>
-                    <span className="text-[10px] text-[#192837]/40 block pt-1 font-medium">
-                      {new Date(a.created_at).toLocaleString()}
-                    </span>
-                  </div>
+        {/* Manual Scan Modal */}
+        <ManualScanModal
+          isOpen={scanModalOpen}
+          onClose={() => setScanModalOpen(false)}
+          onScanCompleted={() => { loadAllData() }}
+        />
 
-                  <div className="flex flex-col items-end gap-2 shrink-0">
-                    <span className="text-xs font-bold uppercase text-red-600 bg-red-100/60 px-2.5 py-1 rounded-lg">
-                      {a.severity}
-                    </span>
-                    {!a.is_read && (
-                      <button
-                        type="button"
-                        onClick={() => handleMarkAlert(a.id)}
-                        className="text-xs font-bold text-[#7342E2] hover:underline cursor-pointer"
-                      >
-                        Mark Read
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )) : (
-                <div className="py-12 text-center text-xs text-[#192837]/50">
-                  No security alerts generated yet.
-                </div>
-              )}
+        {/* Forensics Modal */}
+        <ForensicsModal
+          threatId={selectedThreatId}
+          onClose={() => setSelectedThreatId(null)}
+          onStatusUpdated={loadAllData}
+        />
+
+        {/* Gmail Scanning Loader */}
+        {syncingGmail && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md">
+            <div className="relative w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl border border-[rgba(115,66,226,0.2)] flex flex-col items-center text-center">
+              <CoreSpinLoader customStates={[
+                'Connecting Inbox…',
+                'Fetching Emails…',
+                'Extracting Headers…',
+                'Checking IP Reputation…',
+                'Running AI Analysis…',
+                'Generating Analytics…'
+              ]} />
             </div>
           </div>
         )}
-
-        {/* TAB 4: AUDIT HISTORY VIEW */}
-        {activeTab === 'history' && (
-          <div className="p-6 rounded-3xl bg-white border border-[#192837]/10 shadow-xs space-y-4">
-            <h2 className="font-heading text-lg font-extrabold text-[#192837] pb-3 border-b border-[#192837]/8">
-              Threat Audit History ({threats.length})
-            </h2>
-
-            <div className="divide-y divide-[#192837]/6">
-              {threats.length > 0 ? threats.map(t => (
-                <div key={t.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-[#192837]">{t.threat_type}</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-700 uppercase">
-                        {t.severity}
-                      </span>
-                    </div>
-                    <p className="text-xs text-[#192837]/75 font-medium">{t.summary}</p>
-                    <span className="text-[10px] text-[#192837]/40 block font-medium">
-                      Recorded: {new Date(t.created_at).toLocaleString()}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                    <span className="text-sm font-extrabold text-[#7342E2]">{t.risk_score}/100</span>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedThreatId(t.id)}
-                      className="px-3 py-1 rounded-xl bg-[#FAF9F6] border border-[#192837]/10 text-xs font-bold text-[#7342E2] hover:bg-[#7342E2] hover:text-white transition-all cursor-pointer"
-                    >
-                      View Report
-                    </button>
-                  </div>
-                </div>
-              )) : (
-                <div className="py-12 text-center text-xs text-[#192837]/50">
-                  No threat audit history records found.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 5: GMAIL SCANNER & INBOX INGESTION (DEDICATED FULL PAGE) */}
-        {activeTab === 'gmail-scan' && (
-          <GmailScannerView
-            gmailStatus={gmailStatus}
-            monitoringStatus={monitoringStatus}
-            threats={threats}
-            onRefreshAllData={loadAllData}
-            onNavigateToProfile={() => setActiveTab('profile')}
-            onNavigateToEmails={() => setActiveTab('emails')}
-            onViewThreatReport={(tId) => setSelectedThreatId(tId)}
-          />
-        )}
-
-        {/* TAB 6: USER PROFILE & ACCOUNT SETTINGS (DEDICATED FULL PAGE) */}
-        {activeTab === 'profile' && (
-          <UserProfileView
-            gmailStatus={gmailStatus}
-            monitoringStatus={monitoringStatus}
-            onRefreshGmailStatus={loadAllData}
-          />
-        )}
-      </main>
-
-      {/* Manual Threat Scanner Modal */}
-      <ManualScanModal
-        isOpen={scanModalOpen}
-        onClose={() => setScanModalOpen(false)}
-        onScanCompleted={() => {
-          loadAllData()
-        }}
-      />
-
-      {/* Forensic Deep Dive Modal */}
-      <ForensicsModal
-        threatId={selectedThreatId}
-        onClose={() => setSelectedThreatId(null)}
-        onStatusUpdated={loadAllData}
-      />
-
-      {/* Syncing / Inbox Scan Loading Modal Popup */}
-      {syncingGmail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="relative w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl border border-[#192837]/10 flex flex-col items-center text-center">
-            <CoreSpinLoader customStates={[
-              'Connecting Inbox...',
-              'Fetching Emails...',
-              'Extracting Headers...',
-              'Checking IP Rep...',
-              'Evaluating AI...',
-              'Generating Analytics...'
-            ]} />
-          </div>
-        </div>
-      )}
       </div>
     </div>
   )

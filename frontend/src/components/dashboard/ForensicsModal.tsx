@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { threatService } from '../../services/threats'
 import { InvestigatorRAGCopilot } from './InvestigatorRAGCopilot'
+import { InteractiveHoverButton } from '../ui/interactive-hover-button'
 
 interface ForensicsModalProps {
   threatId: string | null
@@ -111,15 +112,13 @@ export const ForensicsModal: React.FC<ForensicsModalProps> = ({ threatId, onClos
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
+            <InteractiveHoverButton
               onClick={handleDownloadPdf}
               disabled={downloading}
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#7342E2] hover:brightness-110 active:scale-95 shadow-sm transition-all cursor-pointer"
-            >
-              <Download size={14} />
-              <span>{downloading ? 'Generating PDF...' : 'Export PDF Report'}</span>
-            </button>
+              text={downloading ? 'Generating PDF...' : 'Export PDF Report'}
+              icon={<Download size={14} className="text-white" />}
+              className="hidden sm:inline-flex px-4 py-2 text-xs font-bold text-white bg-[#7342E2] border-[#7342E2] shadow-sm"
+            />
 
             <button
               type="button"

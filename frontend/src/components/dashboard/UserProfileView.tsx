@@ -7,6 +7,19 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import { authService } from '../../services/auth'
 import { gmailService, type GmailStatus, type MonitoringStatus } from '../../services/gmail'
+import { InteractiveHoverButton } from '../ui/interactive-hover-button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 interface UserProfileViewProps {
   gmailStatus: GmailStatus | null
@@ -49,7 +62,6 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
   const [connectingGmail, setConnectingGmail] = useState(false)
   const [disconnectingGmail, setDisconnectingGmail] = useState(false)
   const [deletingData, setDeletingData] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [togglingMonitor, setTogglingMonitor] = useState(false)
   const [gmailMsg, setGmailMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
@@ -175,7 +187,6 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
     try {
       const res = await gmailService.deleteStoredData()
       onRefreshGmailStatus()
-      setShowDeleteConfirm(false)
       setGmailMsg({ type: 'success', text: res.message || 'Stored threat data and Gmail connection deleted successfully.' })
       setTimeout(() => setGmailMsg(null), 5000)
     } catch (err: any) {
@@ -400,14 +411,13 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
               </div>
             </div>
 
-            <button
+            <InteractiveHoverButton
               type="submit"
               disabled={savingProfile}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] hover:brightness-110 text-white font-bold text-xs sm:text-sm shadow-md shadow-[#7342E2]/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              {savingProfile ? <RefreshCw size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
-              <span>{savingProfile ? 'Saving Changes...' : 'Save Profile Changes'}</span>
-            </button>
+              text={savingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
+              icon={savingProfile ? <RefreshCw size={16} className="animate-spin" /> : <ShieldCheck size={16} className="text-white" />}
+              className="w-full py-2.5 rounded-xl bg-[#7342E2] text-white font-bold text-xs sm:text-sm shadow-md shadow-[#7342E2]/20 border-[#7342E2]"
+            />
           </form>
         </div>
 
@@ -488,14 +498,13 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
             </div>
 
             <div className="pt-2">
-              <button
+              <InteractiveHoverButton
                 type="submit"
                 disabled={changingPass}
-                className="w-full py-2.5 rounded-xl bg-[#192837] hover:bg-black text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {changingPass ? <RefreshCw size={16} className="animate-spin" /> : <Lock size={16} />}
-                <span>{changingPass ? 'Updating Credentials...' : 'Update Password'}</span>
-              </button>
+                text={changingPass ? 'Updating Credentials...' : 'Update Password'}
+                icon={changingPass ? <RefreshCw size={16} className="animate-spin" /> : <Lock size={16} className="text-white" />}
+                className="w-full py-2.5 rounded-xl bg-[#192837] text-white font-bold text-xs sm:text-sm shadow-md border-[#192837]"
+              />
             </div>
           </form>
         </div>
@@ -562,25 +571,46 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
               {isGmailConnected ? (
-                <button
-                  type="button"
-                  onClick={handleDisconnectGmail}
-                  disabled={disconnectingGmail}
-                  className="px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-2 disabled:opacity-50"
-                >
-                  {disconnectingGmail ? <RefreshCw size={14} className="animate-spin" /> : <Unlink size={14} />}
-                  <span>{disconnectingGmail ? 'Disconnecting...' : 'Disconnect Account'}</span>
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <div>
+                      <InteractiveHoverButton
+                        disabled={disconnectingGmail}
+                        text={disconnectingGmail ? 'Disconnecting...' : 'Disconnect Account'}
+                        icon={disconnectingGmail ? <RefreshCw size={14} className="animate-spin" /> : <Unlink size={14} className="text-amber-800" />}
+                        className="px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 border-amber-200 text-xs font-bold shadow-xs"
+                      />
+                    </div>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogMedia className="bg-amber-50 text-amber-600 border-amber-200">
+                        <Unlink size={24} />
+                      </AlertDialogMedia>
+                      <AlertDialogTitle>Disconnect Google Workspace / Gmail?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will immediately revoke active Google OAuth 2.0 access, pause the 60-second automated inbox threat monitoring, and stop real-time alerts. You can reconnect your Gmail account at any time.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Keep Connected</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDisconnectGmail}
+                        className="bg-amber-600 hover:bg-amber-700 text-white"
+                      >
+                        Disconnect Account
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               ) : (
-                <button
-                  type="button"
+                <InteractiveHoverButton
                   onClick={handleConnectGmail}
                   disabled={connectingGmail}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] hover:brightness-110 text-white text-xs font-bold transition-all shadow-md shadow-[#7342E2]/20 cursor-pointer flex items-center gap-2 disabled:opacity-50"
-                >
-                  {connectingGmail ? <RefreshCw size={14} className="animate-spin" /> : <ExternalLink size={14} />}
-                  <span>{connectingGmail ? 'Redirecting to Google...' : 'Connect Gmail Account'}</span>
-                </button>
+                  text={connectingGmail ? 'Redirecting to Google...' : 'Connect Gmail Account'}
+                  icon={connectingGmail ? <RefreshCw size={14} className="animate-spin" /> : <ExternalLink size={14} className="text-white" />}
+                  className="px-5 py-2.5 rounded-xl bg-[#7342E2] text-white text-xs font-bold shadow-md shadow-[#7342E2]/20 border-[#7342E2]"
+                />
               )}
             </div>
           </div>
@@ -683,33 +713,37 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
               </p>
             </div>
 
-            {!showDeleteConfirm ? (
-              <button
-                type="button"
-                onClick={() => setShowDeleteConfirm(true)}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0"
-              >
-                Delete Stored Threat Data
-              </button>
-            ) : (
-              <div className="flex items-center gap-2 shrink-0">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
                 <button
                   type="button"
-                  onClick={handleDeleteData}
                   disabled={deletingData}
-                  className="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0 disabled:opacity-50"
                 >
-                  {deletingData ? 'Deleting...' : 'Confirm Purge'}
+                  {deletingData ? 'Deleting...' : 'Delete Stored Threat Data'}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="px-3 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-[#192837] text-xs font-semibold cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogMedia className="bg-red-50 text-red-600 border-red-200">
+                    <Trash2 size={24} />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently purge all your scanned email history, threat triage telemetry, and encrypted Gmail tokens from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteData}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Confirm Permanent Deletion
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>

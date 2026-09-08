@@ -186,20 +186,14 @@ async def get_threat(
     return threat
 
 
+from app.services.alert_service import alert_service
+
+
 @router.get("/user/alerts", response_model=List[AlertModel])
 async def get_user_alerts(current_user: UserResponse = Depends(get_current_user)):
-    """Retrieve real-time security alerts for current user."""
+    """Retrieve real-time persistent security alerts for current user from Supabase."""
     is_investigator = current_user.role in ["investigator", "admin"]
-    alerts = []
-    for a in db.store["alerts"].values():
-        if is_investigator or a.user_id == current_user.id:
-            alerts.append(a)
-
-    # Fall back to Supabase if store is empty
-    if not alerts:
-        alerts = _load_alerts_from_supabase(current_user.id, is_investigator)
-
-    return sorted(alerts, key=_safe_sort_key, reverse=True)
+    return alert_service.get_alerts(current_user.id, is_investigator)
 
 
 @router.post("/alerts/{alert_id}/read", response_model=MessageResponse)
@@ -207,19 +201,27 @@ async def mark_alert_read(
     alert_id: str,
     current_user: UserResponse = Depends(get_current_user)
 ):
-    """Mark an alert as read."""
-    alert = db.store["alerts"].get(alert_id)
-    if alert:
-        alert.is_read = True
+    """Mark an alert as read in Supabase."""
+    success = alert_service.mark_read(alert_id, current_user.id)
+    return MessageResponse(message="Alert marked as read", success=success)
 
-    admin_client = db.get_admin_client()
-    if admin_client:
-        try:
-            admin_client.table("alerts").update({"is_read": True}).eq("id", alert_id).execute()
-        except Exception as e:
-            logger.debug(f"Could not update alert read status in Supabase: {e}")
 
-    return MessageResponse(message="Alert marked as read")
+@router.delete("/alerts/{alert_id}", response_model=MessageResponse)
+async def delete_alert(
+    alert_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Delete an alert from Supabase."""
+    success = alert_service.delete_alert(alert_id, current_user.id)
+    return MessageResponse(message="Alert deleted successfully", success=success)
+
+
+@router.delete("/alerts", response_model=MessageResponse)
+@router.post("/alerts/clear", response_model=MessageResponse)
+async def clear_user_alerts(current_user: UserResponse = Depends(get_current_user)):
+    """Clear all alerts for the current user from Supabase."""
+    success = alert_service.clear_all(current_user.id)
+    return MessageResponse(message="All alerts cleared successfully", success=success)
 
 
 @router.get("/user/history", response_model=List[ThreatModel])

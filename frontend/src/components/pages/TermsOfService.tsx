@@ -1,6 +1,7 @@
 import React from 'react'
 import { FileText, ArrowLeft, AlertCircle, Mail } from 'lucide-react'
 import Logo from '../Logo'
+import { InteractiveHoverButton } from '../ui/interactive-hover-button'
 
 interface TermsPageProps {
   onBack: () => void
@@ -15,13 +16,12 @@ export const TermsOfService: React.FC<TermsPageProps> = ({ onBack, onOpenPrivacy
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#192837]/10 px-5 sm:px-8 py-4">
         <div className="max-w-[1100px] mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button
+            <InteractiveHoverButton
               onClick={onBack}
-              className="p-2 rounded-xl bg-[#F2F2EE] hover:bg-[#e6e6e0] transition-all text-[#192837] cursor-pointer flex items-center gap-1.5 text-xs font-bold"
-            >
-              <ArrowLeft size={16} />
-              <span>Back to Home</span>
-            </button>
+              text="Back to Home"
+              icon={<ArrowLeft size={16} className="text-[#7342E2]" />}
+              className="py-1.5 px-3 text-xs font-bold bg-[#F2F2EE] border-[#192837]/10"
+            />
             <div className="flex items-center gap-2 border-l border-[#192837]/15 pl-3">
               <Logo size={28} />
               <span className="font-heading font-extrabold text-base tracking-tight text-[#192837]">

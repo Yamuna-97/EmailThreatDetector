@@ -5,6 +5,19 @@ import {
 } from 'lucide-react'
 import { gmailService, type GmailStatus, type MonitoringStatus, type GmailMessagePreview } from '../../services/gmail'
 import { useAuth } from '../../context/AuthContext'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Unlink } from 'lucide-react'
 
 interface UserProfileModalProps {
   isOpen: boolean
@@ -314,14 +327,37 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     </button>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleDisconnectGmail}
-                    disabled={disconnecting}
-                    className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-semibold transition-all cursor-pointer"
-                  >
-                    {disconnecting ? 'Disconnecting...' : 'Disconnect Account'}
-                  </button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        type="button"
+                        disabled={disconnecting}
+                        className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {disconnecting ? 'Disconnecting...' : 'Disconnect Account'}
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogMedia className="bg-amber-50 text-amber-600 border-amber-200">
+                          <Unlink size={24} />
+                        </AlertDialogMedia>
+                        <AlertDialogTitle>Disconnect Google Workspace / Gmail?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will immediately revoke your active Google OAuth session, stop automated inbox monitoring, and pause real-time alerts. You can reconnect your Gmail account at any time.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Keep Connected</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDisconnectGmail}
+                          className="bg-amber-600 hover:bg-amber-700 text-white"
+                        >
+                          Disconnect Account
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </>
               )}
             </div>

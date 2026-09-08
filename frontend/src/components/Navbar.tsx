@@ -3,8 +3,7 @@ import Logo from './Logo'
 import StaggeredMenu from './StaggeredMenu'
 import { ShieldCheck, LogOut, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { useNotifications } from '../context/NotificationContext'
-import NotificationsWithActions from './ui/notifications-with-actions'
+import { InteractiveHoverButton } from './ui/interactive-hover-button'
 
 const navLinks = [
   { label: 'Detection', link: '#detection', ariaLabel: 'Go to Detection' },
@@ -28,7 +27,6 @@ export interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) => {
   const { isAuthenticated, role, logout } = useAuth()
-  const { notifications, removeNotification, archiveNotification } = useNotifications()
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-[#192837]/8 transition-all">
@@ -48,24 +46,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) =
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
-          {/* Notifications Dropdown */}
-          <NotificationsWithActions
-            items={notifications}
-            onDelete={removeNotification}
-            onArchive={archiveNotification}
-            placement="bottom"
-          />
-
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <button
-                type="button"
+              <InteractiveHoverButton
                 onClick={onGoToDashboard}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] hover:brightness-110 active:scale-95 transition-all shadow-sm shadow-[#7342E2]/25 cursor-pointer"
-              >
-                <LayoutDashboard size={14} />
-                <span>{role === 'investigator' || role === 'admin' ? 'SOC Investigator Console' : 'My Dashboard'}</span>
-              </button>
+                text={role === 'investigator' || role === 'admin' ? 'SOC Console' : 'Dashboard'}
+                icon={<LayoutDashboard size={14} className="text-[#7342E2]" />}
+                className="py-1.5 px-4 text-xs font-bold"
+              />
 
               <button
                 type="button"
@@ -78,22 +66,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) =
             </div>
           ) : (
             <>
-              <button
-                type="button"
+              <InteractiveHoverButton
                 onClick={() => onOpenAuth ? onOpenAuth('signin') : null}
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-[#192837] bg-[#F2F2EE] hover:bg-[#e7e7e2] active:scale-95 transition-all shadow-sm cursor-pointer"
-              >
-                <ShieldCheck size={14} className="text-[#7342E2]" />
-                <span>Sign In</span>
-              </button>
+                text="Sign In"
+                icon={<ShieldCheck size={14} className="text-[#7342E2]" />}
+                className="hidden sm:inline-flex py-2 px-4 text-xs font-bold bg-[#F2F2EE]/80 text-[#192837] border-[#192837]/10"
+              />
 
-              <button
-                type="button"
+              <InteractiveHoverButton
                 onClick={() => onOpenAuth ? onOpenAuth('signup') : null}
-                className="hidden sm:inline-flex px-5 py-2 rounded-full text-xs font-semibold text-white bg-[#7342E2] hover:brightness-110 active:scale-95 transition-all shadow-sm shadow-[#7342E2]/20 cursor-pointer"
-              >
-                Get Started
-              </button>
+                text="Get Started"
+                className="hidden sm:inline-flex py-2 px-5 text-xs font-bold bg-[#7342E2] text-white border-[#7342E2]"
+              />
             </>
           )}
 

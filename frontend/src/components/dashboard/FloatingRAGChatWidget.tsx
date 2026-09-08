@@ -298,22 +298,33 @@ export const FloatingRAGChatWidget: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Floating Corner Toggle Pill Button (Bottom Left) */}
+      {/* Premium Floating Trigger */}
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.04, y: -2 }}
+        whileTap={{ scale: 0.96 }}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="group flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-[#7342E2] to-[#8B5CF6] text-white shadow-xl shadow-[#7342E2]/25 hover:shadow-2xl hover:shadow-[#7342E2]/35 border border-white/20 transition-all cursor-pointer"
+        className="group relative flex items-center gap-2.5 px-5 py-3 rounded-full cursor-pointer"
+        style={{
+          background: 'linear-gradient(135deg, #7342E2, #9B70F6)',
+          boxShadow: '0 8px 32px rgba(115, 66, 226, 0.35), 0 2px 8px rgba(115, 66, 226, 0.2)',
+          border: '1px solid rgba(255,255,255,0.25)',
+        }}
       >
-        <div className="relative">
-          {isOpen ? <X size={20} /> : <Bot size={20} />}
+        {/* Animated ring when closed */}
+        {!isOpen && (
+          <span className="absolute -inset-0.5 rounded-full border-2 border-[#7342E2]/40 animate-ping pointer-events-none" style={{ animationDuration: '2s' }} />
+        )}
+
+        <div className="relative z-10">
+          {isOpen ? <X size={18} className="text-white" /> : <Bot size={18} className="text-white" />}
           {!isOpen && (
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-white animate-pulse" />
           )}
         </div>
-        <span className="font-heading font-extrabold text-xs sm:text-sm tracking-wide">
-          {isOpen ? "Close Assistant" : "AI Security Copilot"}
+
+        <span className="font-heading font-extrabold text-xs sm:text-sm tracking-wide text-white relative z-10">
+          {isOpen ? 'Close Assistant' : 'AI Security Copilot'}
         </span>
       </motion.button>
     </div>

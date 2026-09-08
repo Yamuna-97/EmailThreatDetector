@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Lock,
 } from 'lucide-react'
+import { InteractiveHoverButton } from './ui/interactive-hover-button'
 
 export const EarlyWarning: React.FC = () => {
   const [actionTaken, setActionTaken] = useState<string | null>(null)
@@ -97,32 +98,26 @@ export const EarlyWarning: React.FC = () => {
                     Select Immediate Defensive Action
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    <button
-                      type="button"
+                    <InteractiveHoverButton
+                      text="Block Sender"
+                      icon={<ShieldBan size={14} className="text-white" />}
                       onClick={() => setActionTaken('blocked')}
-                      className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 active:scale-95 transition-all cursor-pointer shadow-xs"
-                    >
-                      <ShieldBan size={14} />
-                      <span>Block Sender</span>
-                    </button>
+                      className="w-full py-2.5 px-3 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 border-rose-600 shadow-xs"
+                    />
 
-                    <button
-                      type="button"
+                    <InteractiveHoverButton
+                      text="Report Threat"
+                      icon={<Flag size={14} className="text-[#7342E2]" />}
                       onClick={() => setActionTaken('reported')}
-                      className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold text-[#192837] bg-white border border-[#192837]/15 hover:bg-[#FAF9F6] active:scale-95 transition-all cursor-pointer shadow-xs"
-                    >
-                      <Flag size={14} className="text-[#7342E2]" />
-                      <span>Report Threat</span>
-                    </button>
+                      className="w-full py-2.5 px-3 text-xs font-bold text-[#192837] bg-white border-[#192837]/15 shadow-xs"
+                    />
 
-                    <button
-                      type="button"
+                    <InteractiveHoverButton
+                      text="Warn User"
+                      icon={<AlertTriangle size={14} className="text-amber-600" />}
                       onClick={() => setActionTaken('warned')}
-                      className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 active:scale-95 transition-all cursor-pointer border border-amber-300 shadow-xs"
-                    >
-                      <AlertTriangle size={14} />
-                      <span>Warn User</span>
-                    </button>
+                      className="w-full py-2.5 px-3 text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border-amber-300 shadow-xs"
+                    />
                   </div>
 
                   {actionTaken && (

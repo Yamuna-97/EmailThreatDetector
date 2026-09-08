@@ -359,6 +359,21 @@ async def update_investigation_status(
         "timestamp": datetime.now().isoformat()
     }
 
+    # Persist notification in Supabase alerts table for target user & SOC console
+    try:
+        from app.services.alert_service import alert_service
+        target_user_id = threat.user_id if threat else investigator.id
+        status_label = payload.status.replace("_", " ").title()
+        alert_service.create_alert(
+            user_id=target_user_id,
+            threat_id=threat_id,
+            title=f"✅ Investigation {status_label}",
+            message=payload.notes or f"Threat incident #{threat_id[:6]} marked as {payload.status.upper()} by SOC investigator {investigator.name}.",
+            severity="low" if payload.status in ["resolved", "false_positive"] else "high"
+        )
+    except Exception as ale:
+        logger.debug(f"Alert creation notice on status update: {ale}")
+
     return MessageResponse(message=f"Incident status successfully updated to {payload.status}.")
 
 @router.get("/users")

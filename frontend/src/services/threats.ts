@@ -122,6 +122,18 @@ export const threatService = {
     })
   },
 
+  async deleteAlert(alertId: string): Promise<any> {
+    return request(`/threats/alerts/${alertId}`, {
+      method: 'DELETE',
+    })
+  },
+
+  async clearAllAlerts(): Promise<any> {
+    return request('/threats/alerts/clear', {
+      method: 'POST',
+    })
+  },
+
   // Investigator Endpoints
   async getInvestigatorDashboard(): Promise<any> {
     return request('/investigator/dashboard')

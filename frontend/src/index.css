@@ -6,6 +6,38 @@
   --color-text: #192837;
   --color-accent: #7342E2;
   --color-login-bg: #F2F2EE;
+
+  /* Dashboard surfaces */
+  --dash-bg: #F2F3F8;
+  --dash-surface: #FFFFFF;
+  --dash-surface-2: #F8F9FC;
+  --dash-border: rgba(115, 66, 226, 0.12);
+  --dash-border-subtle: rgba(25, 40, 55, 0.08);
+
+  /* Severity palette */
+  --sev-critical-bg: #FFF1F2;
+  --sev-critical-border: #FECDD3;
+  --sev-critical-text: #BE123C;
+  --sev-critical-dot: #F43F5E;
+  --sev-high-bg: #FFF7ED;
+  --sev-high-border: #FED7AA;
+  --sev-high-text: #C2410C;
+  --sev-high-dot: #F97316;
+  --sev-medium-bg: #FEFCE8;
+  --sev-medium-border: #FDE68A;
+  --sev-medium-text: #B45309;
+  --sev-medium-dot: #F59E0B;
+  --sev-low-bg: #F0FDF4;
+  --sev-low-border: #BBF7D0;
+  --sev-low-text: #15803D;
+  --sev-low-dot: #22C55E;
+
+  /* Brand */
+  --brand: #7342E2;
+  --brand-soft: #F5F3FF;
+  --brand-border: #E0D9FF;
+  --brand-hover: #6032C4;
+  --brand-glow: rgba(115, 66, 226, 0.18);
 }
 
 * {
@@ -39,32 +71,186 @@ body {
   font-family: var(--font-body);
 }
 
-/* Custom subtle scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+/* =========================================
+   SCROLLBARS
+   ========================================= */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgba(25, 40, 55, 0.03); border-radius: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(115, 66, 226, 0.2); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(115, 66, 226, 0.45); }
 
-::-webkit-scrollbar-track {
-  background: rgba(25, 40, 55, 0.03);
-  border-radius: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(25, 40, 55, 0.18);
-  border-radius: 8px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(115, 66, 226, 0.4);
-}
-
+/* =========================================
+   ANIMATIONS
+   ========================================= */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes radarPing {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+@keyframes spinRing {
+  to { transform: rotate(360deg); }
 }
 
 .animate-fade-in {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+.animate-slide-in-up {
+  animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-radar {
+  animation: radarPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
 
+/* =========================================
+   DASHBOARD CARD SYSTEM
+   ========================================= */
+
+/* Glass card with violet border */
+.dash-card {
+  background: var(--dash-surface);
+  border: 1px solid var(--dash-border);
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(115, 66, 226, 0.06), 0 1px 2px rgba(25, 40, 55, 0.04);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.dash-card:hover {
+  box-shadow: 0 4px 16px rgba(115, 66, 226, 0.1), 0 2px 6px rgba(25, 40, 55, 0.06);
+  border-color: rgba(115, 66, 226, 0.22);
+}
+
+/* Metric card with gradient left bar */
+.metric-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--dash-surface);
+  border: 1px solid var(--dash-border);
+  border-radius: 16px;
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.metric-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 16px 0 0 16px;
+}
+.metric-card:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(115,66,226,0.1); }
+.metric-card.metric-total::before    { background: linear-gradient(180deg, #7342E2, #9B70F6); }
+.metric-card.metric-threat::before   { background: linear-gradient(180deg, #F97316, #FBBF24); }
+.metric-card.metric-critical::before { background: linear-gradient(180deg, #F43F5E, #FB7185); }
+.metric-card.metric-safe::before     { background: linear-gradient(180deg, #22C55E, #4ADE80); }
+.metric-card.metric-users::before    { background: linear-gradient(180deg, #6366F1, #818CF8); }
+.metric-card.metric-suspicious::before { background: linear-gradient(180deg, #F59E0B, #FCD34D); }
+
+/* =========================================
+   SEVERITY BADGES
+   ========================================= */
+.sev-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 2px 8px; border-radius: 6px; border: 1px solid;
+}
+.sev-badge.critical { background: var(--sev-critical-bg); border-color: var(--sev-critical-border); color: var(--sev-critical-text); }
+.sev-badge.high     { background: var(--sev-high-bg);     border-color: var(--sev-high-border);     color: var(--sev-high-text); }
+.sev-badge.medium   { background: var(--sev-medium-bg);   border-color: var(--sev-medium-border);   color: var(--sev-medium-text); }
+.sev-badge.low      { background: var(--sev-low-bg);      border-color: var(--sev-low-border);      color: var(--sev-low-text); }
+
+/* =========================================
+   THREAT ROW
+   ========================================= */
+.threat-row {
+  position: relative;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #FAFAFA;
+  border: 1px solid var(--dash-border-subtle);
+  transition: all 0.18s ease;
+  cursor: pointer;
+}
+.threat-row::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 8px; bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.threat-row:hover {
+  background: #FFFFFF;
+  border-color: rgba(115, 66, 226, 0.25);
+  box-shadow: 0 4px 12px rgba(115, 66, 226, 0.08);
+}
+.threat-row:hover::before { opacity: 1; }
+.threat-row.critical::before { background: var(--sev-critical-dot); }
+.threat-row.high::before     { background: var(--sev-high-dot); }
+.threat-row.medium::before   { background: var(--sev-medium-dot); }
+.threat-row.low::before      { background: var(--sev-low-dot); }
+
+/* =========================================
+   HEADER & STATUS
+   ========================================= */
+.dash-header {
+  position: sticky; top: 0; z-index: 30;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--dash-border);
+  box-shadow: 0 1px 0 rgba(115, 66, 226, 0.06);
+}
+
+.status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; border: 1px solid;
+}
+.status-pill.connected    { background: #F0FDF4; border-color: #BBF7D0; color: #15803D; }
+.status-pill.disconnected { background: #FFF1F2; border-color: #FECDD3; color: #BE123C; }
+
+/* =========================================
+   PROGRESS BAR
+   ========================================= */
+.progress-bar { height: 6px; border-radius: 999px; background: #EDE9FE; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 999px; transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* =========================================
+   STAGGERED ENTRANCE
+   ========================================= */
+.stagger-item {
+  opacity: 0;
+  animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 50ms; }
+.stagger-item:nth-child(3) { animation-delay: 100ms; }
+.stagger-item:nth-child(4) { animation-delay: 150ms; }
+.stagger-item:nth-child(5) { animation-delay: 200ms; }
+.stagger-item:nth-child(6) { animation-delay: 250ms; }
+.stagger-item:nth-child(7) { animation-delay: 300ms; }
+.stagger-item:nth-child(8) { animation-delay: 350ms; }
+
+/* =========================================
+   SIDEBAR PREMIUM STYLES
+   ========================================= */
+.sidebar-nav-active {
+  background: linear-gradient(135deg, rgba(115,66,226,0.12), rgba(115,66,226,0.06));
+  border-left: 3px solid #7342E2;
+  color: #7342E2;
+}
+.sidebar-brand-glow {
+  filter: drop-shadow(0 0 8px rgba(115,66,226,0.4));
+}

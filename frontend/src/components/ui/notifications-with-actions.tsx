@@ -27,29 +27,8 @@ export interface NotificationsWithActionsProps {
   onItemClick?: (item: NotificationItem) => void
 }
 
-const defaultNotifications: NotificationItem[] = [
-  {
-    id: "1",
-    title: "Welcome 🎉",
-    description: "Thanks for checking out the notifications component!",
-    time: "just now",
-  },
-  {
-    id: "2",
-    title: "System Update",
-    description: "We’ve rolled out a new feature for you.",
-    time: "1h ago",
-  },
-  {
-    id: "3",
-    title: "Reminder",
-    description: "Don’t forget to finish your profile setup.",
-    time: "3h ago",
-  },
-]
-
 export default function NotificationsWithActions({
-  items = defaultNotifications,
+  items = [],
   placement = "bottom",
   onDelete,
   onArchive,

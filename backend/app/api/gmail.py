@@ -457,6 +457,17 @@ async def gmail_oauth_callback(
         # Persist to Supabase
         _persist_gmail_account_to_supabase(user_id, account)
 
+        try:
+            from app.services.alert_service import alert_service
+            alert_service.create_alert(
+                user_id=user_id,
+                title="🟢 Google Account Connected",
+                message=f"Mailbox {user_email} connected successfully with automated 60s threat detection enabled.",
+                severity="low"
+            )
+        except Exception as ale:
+            logger.debug(f"Alert creation notice on OAuth callback: {ale}")
+
         log_gmail_auth_debug(
             stage="OAUTH_CALLBACK_COMPLETED",
             user_id=user_id,
@@ -529,6 +540,18 @@ async def disconnect_gmail(current_user: UserResponse = Depends(get_current_user
 
     # 3. Invalidate database and in-memory session
     _invalidate_gmail_session(current_user.id)
+
+    try:
+        from app.services.alert_service import alert_service
+        alert_service.create_alert(
+            user_id=current_user.id,
+            title="🔴 Google Account Disconnected",
+            message="Google OAuth session terminated and real-time mailbox monitoring paused.",
+            severity="medium"
+        )
+    except Exception as ale:
+        logger.debug(f"Alert creation notice on disconnect: {ale}")
+
     return MessageResponse(message="Gmail account disconnected, automated monitoring stopped, and tokens revoked.")
 
 

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { X, Sparkles, RefreshCw } from 'lucide-react'
 import { threatService } from '../../services/threats'
 import { CoreSpinLoader } from '../ui/core-spin-loader'
+import { InteractiveHoverButton } from '../ui/interactive-hover-button'
 
 interface ManualScanModalProps {
   isOpen: boolean
@@ -215,28 +216,13 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
               </div>
             )}
 
-            <button
+            <InteractiveHoverButton
               type="submit"
               disabled={scanning}
-              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#7342E2]/25 hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {scanning ? (
-                <>
-                  <RefreshCw size={16} className="animate-spin" />
-                  <span>
-                    {scanStep === 1 ? 'Extracting MIME Headers & URLs...' :
-                     scanStep === 2 ? 'Consulting IPQualityScore & GeoLocation...' :
-                     scanStep === 3 ? 'Executing Gemini AI Threat Reasoning...' :
-                     'Computing Final Risk Score...'}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Sparkles size={16} />
-                  <span>Analyze Threat Pipeline</span>
-                </>
-              )}
-            </button>
+              text={scanning ? (scanStep === 1 ? 'Extracting MIME Headers...' : scanStep === 2 ? 'Consulting IPQS & Geo...' : scanStep === 3 ? 'Gemini AI Reasoning...' : 'Computing Risk Score...') : 'Analyze Threat Pipeline'}
+              icon={scanning ? <RefreshCw size={16} className="animate-spin" /> : <Sparkles size={16} className="text-white" />}
+              className="w-full py-3.5 px-6 rounded-2xl bg-[#7342E2] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#7342E2]/25 border-[#7342E2]"
+            />
           </form>
 
           {/* Results Display */}

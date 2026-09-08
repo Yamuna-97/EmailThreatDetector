@@ -122,6 +122,16 @@ async def refresh_access_token(user_id: str, account: Dict[str, Any]) -> Optiona
                         .execute()
                 except Exception as dbe:
                     logger.debug(f"[monitor] Supabase mark disconnected notice: {dbe}")
+            try:
+                from app.services.alert_service import alert_service
+                alert_service.create_alert(
+                    user_id=user_id,
+                    title="🔴 Google Account Disconnected",
+                    message="Google OAuth authorization token expired or was revoked. Please reconnect in settings to resume automated 60s detection.",
+                    severity="high"
+                )
+            except Exception as ale:
+                logger.debug(f"Alert creation notice: {ale}")
     return None
 
 
@@ -321,6 +331,28 @@ async def _process_single_message(
                 _increment_account_counter(user_id, "warnings_sent")
 
         mark_message_done(message_id, user_id, threat_severity, warning_sent)
+
+        # Persist notification into Supabase alerts table
+        try:
+            from app.services.alert_service import alert_service
+            if threat_severity in dangerous_severities or final_risk_score >= 65:
+                alert_service.create_alert(
+                    user_id=user_id,
+                    threat_id=threat.id if threat else None,
+                    title=f"🚨 High Threat Detected: {threat.threat_type if threat else 'Suspicious Email'}",
+                    message=f"Urgent threat flagged from {sender}. Risk Score: {final_risk_score}/100. Subject: {subject}",
+                    severity=threat_severity or "critical"
+                )
+            else:
+                alert_service.create_alert(
+                    user_id=user_id,
+                    threat_id=threat.id if threat else None,
+                    title=f"📥 New Email Analyzed: {subject[:40]}",
+                    message=f"Incoming email from {sender} analyzed via automated detection (Risk: {final_risk_score}/100).",
+                    severity="low"
+                )
+        except Exception as ale:
+            logger.debug(f"[monitor] Alert creation notice: {ale}")
 
         # Update last_event_time in account
         _update_account_field(user_id, "last_event_time", datetime.now(timezone.utc).isoformat())
