@@ -186,18 +186,18 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in font-body">
-      <div className="bg-[#0A0A0A] rounded-2xl border border-[#2A2A2A] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden text-[#F5F5F5]">
+      <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[var(--border-primary)] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden text-[var(--color-text-primary)]">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#2A2A2A] flex items-center justify-between bg-[#111111] shrink-0">
+        <div className="px-6 py-5 border-b border-[var(--border-primary)] flex items-center justify-between bg-[var(--surface-card)] shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E50914] to-[#8B0000] text-white flex items-center justify-center font-heading font-black text-lg shadow-md shadow-[#E50914]/25">
               {user?.name ? user.name[0].toUpperCase() : 'U'}
             </div>
             <div>
-              <h2 className="font-heading text-lg font-black text-[#F5F5F5] leading-tight">
+              <h2 className="font-heading text-lg font-black text-[var(--color-text-primary)] leading-tight">
                 {user?.name || 'User Profile'}
               </h2>
-              <p className="text-xs text-[#737373]">
+              <p className="text-xs text-[var(--color-text-muted)]">
                 {user?.email} &bull; <span className="capitalize font-mono font-semibold text-[#FF1E2D]">{user?.role || 'User'}</span>
               </p>
             </div>
@@ -205,7 +205,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-[#181818] hover:bg-[#222222] text-[#737373] hover:text-[#F5F5F5] flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-lg bg-[var(--surface-raised)] hover:bg-[var(--surface-interactive)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] flex items-center justify-center transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>

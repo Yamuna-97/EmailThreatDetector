@@ -39,7 +39,7 @@ export const EarlyWarning: React.FC = () => {
                   badge="HEADER INJECTION"
                   title="Real-Time Header Injections"
                   description="Clear visual indicators warn users with color-coded severity badges without disrupting normal email workflows."
-                  className="p-4 bg-[#111111] border-[#2A2A2A]"
+                  className="p-4"
                 >
                   <div className="flex items-center gap-2 text-xs font-semibold text-[#FF1E2D] mt-1">
                     <BellRing size={15} /> Active Gmail / Outlook add-in hook
@@ -52,7 +52,7 @@ export const EarlyWarning: React.FC = () => {
                   badge="CLICK SANDBOXING"
                   title="Automated Click Interception"
                   description="Dangerous links are neutralized and wrapped in sandboxed URL inspection gateways to prevent drive-by downloads."
-                  className="p-4 bg-[#111111] border-[#2A2A2A]"
+                  className="p-4"
                 >
                   <div className="flex items-center gap-2 text-xs font-semibold text-[#FF1E2D] mt-1">
                     <Lock size={15} /> Zero-day link shielding active
@@ -69,16 +69,16 @@ export const EarlyWarning: React.FC = () => {
                 badge="CYBERTRACE EARLY WARNING"
                 title="High-Risk Threat Intercepted"
                 description="Risk Level: Critical • Finance Payroll Impersonation"
-                className="p-7 sm:p-9 text-left bg-[#111111] border-[#2A2A2A] shadow-2xl"
+                className="p-7 sm:p-9 text-left shadow-2xl"
               >
                 {/* Threat Details */}
                 <div className="space-y-3 mb-6 mt-3">
-                  <div className="p-3.5 rounded-2xl bg-[#181818] border border-[#2A2A2A]">
-                    <div className="text-[11px] font-bold text-[#737373] uppercase tracking-wide mb-1">
+                  <div className="p-3.5 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)]">
+                    <div className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wide mb-1">
                       Reason for Detection
                     </div>
-                    <p className="text-xs text-[#A3A3A3] font-medium leading-relaxed">
-                      This email is pretending to be <strong className="text-[#F5F5F5]">Finance Payroll</strong>. The sender domain was registered 2 hours ago and IP traces to a known bulletproof proxy.
+                    <p className="text-xs text-[var(--color-text-muted)] font-medium leading-relaxed">
+                      This email is pretending to be <strong className="text-[var(--color-text-primary)]">Finance Payroll</strong>. The sender domain was registered 2 hours ago and IP traces to a known bulletproof proxy.
                     </p>
                   </div>
 
@@ -86,7 +86,7 @@ export const EarlyWarning: React.FC = () => {
                     <div className="flex items-center gap-1.5 text-xs font-bold text-[#FF1E2D] mb-1">
                       <AlertTriangle size={14} /> Recommended Action
                     </div>
-                    <p className="text-xs text-[#F5F5F5] leading-relaxed font-medium">
+                    <p className="text-xs text-[var(--color-text-primary)] leading-relaxed font-medium">
                       Do not click any embedded links or provide bank credentials. Report and quarantine immediately.
                     </p>
                   </div>

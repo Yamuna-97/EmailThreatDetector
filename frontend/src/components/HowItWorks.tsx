@@ -56,10 +56,10 @@ export const HowItWorks: React.FC = () => {
                   badge={`STEP ${s.step}`}
                   title={s.title}
                   description={s.desc}
-                  className="p-5 text-left flex flex-col justify-between bg-[#111111] border-[#2A2A2A] hover:border-[#FF1E2D]/40"
+                  className="p-5 text-left flex flex-col justify-between hover:border-[#FF1E2D]/40"
                 >
-                  <div className="pt-3 border-t border-[#2A2A2A] flex justify-end">
-                    <div className="p-2 rounded-xl bg-[#181818] border border-[#2A2A2A] text-[#FF1E2D]">
+                  <div className="pt-3 border-t border-[var(--border-primary)] flex justify-end">
+                    <div className="p-2 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-primary)] text-[#FF1E2D]">
                       <Icon size={18} />
                     </div>
                   </div>

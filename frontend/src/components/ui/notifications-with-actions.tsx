@@ -63,7 +63,7 @@ export default function NotificationsWithActions({
         <button 
           type="button"
           aria-label="View notifications"
-          className="relative inline-flex items-center justify-center rounded-full p-2 text-[#F5F5F5] hover:bg-[#181818] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#FF1E2D]/40"
+          className="relative inline-flex items-center justify-center rounded-full p-2 text-[var(--color-text-primary)] hover:bg-[var(--surface-raised)] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#FF1E2D]/40"
         >
           <Bell className="h-5 w-5" />
           {notifications.length > 0 && (
@@ -77,13 +77,13 @@ export default function NotificationsWithActions({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-84 sm:w-96 p-0 rounded-2xl shadow-2xl border border-[#2A2A2A] bg-[#0A0A0A] overflow-hidden z-50 text-[#F5F5F5]"
+        className="w-84 sm:w-96 p-0 rounded-2xl shadow-2xl border border-[var(--border-primary)] bg-[var(--bg-secondary)] overflow-hidden z-50 text-[var(--color-text-primary)]"
         align="end"
         side={placement}
       >
-        <div className="px-4 py-3 bg-[#111111] border-b border-[#2A2A2A] flex items-center justify-between">
+        <div className="px-4 py-3 bg-[var(--surface-card)] border-b border-[var(--border-primary)] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-heading text-xs font-black text-[#F5F5F5] uppercase tracking-wider">
+            <span className="font-heading text-xs font-black text-[var(--color-text-primary)] uppercase tracking-wider">
               Alerts & Notifications
             </span>
             <span className="px-2 py-0.5 rounded-full bg-[#FF1E2D]/15 text-[#FF1E2D] border border-[#FF1E2D]/30 text-[10px] font-mono font-bold">
@@ -94,27 +94,27 @@ export default function NotificationsWithActions({
             <button
               type="button"
               onClick={() => setNotifications([])}
-              className="text-[11px] font-mono text-[#FF1E2D] hover:text-white transition-colors cursor-pointer"
+              className="text-[11px] font-mono text-[#FF1E2D] hover:underline transition-colors cursor-pointer"
             >
               Clear all
             </button>
           )}
         </div>
-        <Card className="max-h-88 overflow-y-auto rounded-none border-none shadow-none bg-[#0A0A0A]">
+        <Card className="max-h-88 overflow-y-auto rounded-none border-none shadow-none bg-[var(--bg-secondary)]">
           {notifications.length === 0 ? (
-            <div className="p-8 text-sm text-[#737373] text-center flex flex-col items-center justify-center gap-2">
-              <Bell className="h-8 w-8 text-[#444444]" />
-              <p className="font-semibold text-xs text-[#F5F5F5]">No new alerts</p>
-              <p className="text-[11px] text-[#737373]">Threat detection pipeline is actively monitoring</p>
+            <div className="p-8 text-sm text-[var(--color-text-muted)] text-center flex flex-col items-center justify-center gap-2">
+              <Bell className="h-8 w-8 text-[var(--color-text-muted)] opacity-50" />
+              <p className="font-semibold text-xs text-[var(--color-text-primary)]">No new alerts</p>
+              <p className="text-[11px] text-[var(--color-text-muted)]">Threat detection pipeline is actively monitoring</p>
             </div>
           ) : (
-            <ul className="divide-y divide-[#1F1F1F]">
+            <ul className="divide-y divide-[var(--border-primary)]">
               {notifications.map((item) => {
                 const isActive = activeId === item.id
                 return (
                   <li
                     key={item.id}
-                    className="flex items-center justify-between p-3.5 hover:bg-[#181818] transition-colors cursor-pointer"
+                    className="flex items-center justify-between p-3.5 hover:bg-[var(--surface-raised)] transition-colors cursor-pointer"
                     onClick={() => onItemClick && onItemClick(item)}
                   >
                     {/* Left text with animation */}
@@ -124,14 +124,14 @@ export default function NotificationsWithActions({
                       className="flex-1 min-w-0 pr-2"
                     >
                       <div className="flex justify-between items-center mb-1">
-                        <span className="font-semibold text-xs text-[#F5F5F5] truncate">
+                        <span className="font-semibold text-xs text-[var(--color-text-primary)] truncate">
                           {item.title}
                         </span>
-                        <span className="text-[10px] font-mono text-[#737373] shrink-0 ml-2 font-medium">
+                        <span className="text-[10px] font-mono text-[var(--color-text-muted)] shrink-0 ml-2 font-medium">
                           {item.time}
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#A3A3A3] line-clamp-2 leading-relaxed font-body">
+                      <p className="text-[11px] text-[var(--color-text-muted)] line-clamp-2 leading-relaxed font-body">
                         {item.description}
                       </p>
                     </motion.div>

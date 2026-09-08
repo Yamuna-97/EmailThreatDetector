@@ -18,6 +18,7 @@ import { GmailScannerView } from './GmailScannerView'
 import { CyberTraceLogoIcon } from '../CyberTraceLogo'
 import NotificationsWithActions from '../ui/notifications-with-actions'
 import { useNotifications } from '../../context/NotificationContext'
+import { ThemeToggle } from '../ui/ThemeToggle'
 
 import { EmailsDataTable } from './EmailsDataTable'
 
@@ -207,7 +208,7 @@ export const UserDashboard: React.FC = () => {
 
   /* ── Render ──────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-[#050505] text-[#F5F5F5] flex flex-col md:flex-row font-body">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--color-text-primary)] flex flex-col md:flex-row font-body">
 
       {/* ── OAuth Banner ── */}
       {oauthBanner && (
@@ -228,7 +229,7 @@ export const UserDashboard: React.FC = () => {
 
       {/* ── Sidebar ── */}
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
-        <SidebarBody className="justify-between gap-4 bg-[#0A0A0A] border-r border-[#2A2A2A]">
+        <SidebarBody className="justify-between gap-4">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden gap-1">
 
             {/* Brand */}
@@ -238,7 +239,7 @@ export const UserDashboard: React.FC = () => {
               </div>
               {sidebarOpen && (
                 <div className="truncate animate-fade-in">
-                  <span className="font-heading text-sm font-extrabold text-[#F5F5F5] tracking-tight block leading-tight">
+                  <span className="font-heading text-sm font-extrabold text-[var(--color-text-primary)] tracking-tight block leading-tight">
                     Cyber<span className="text-[#FF1E2D]">Trace</span>
                   </span>
                   <span className="text-[9px] text-[#FF1E2D] font-bold block uppercase tracking-widest mt-0.5">
@@ -250,7 +251,7 @@ export const UserDashboard: React.FC = () => {
 
             {/* Section label */}
             {sidebarOpen && (
-              <span className="section-label px-3 mb-1 text-[#737373] text-[10px] font-bold uppercase tracking-wider">Navigation</span>
+              <span className="section-label px-3 mb-1 text-[var(--color-text-muted)] text-[10px] font-bold uppercase tracking-wider">Navigation</span>
             )}
 
             {/* Nav Links */}
@@ -273,20 +274,20 @@ export const UserDashboard: React.FC = () => {
             </div>
 
             {/* Quick Scan CTA */}
-            <div className="mt-4 pt-4 border-t border-[#2A2A2A]">
+            <div className="mt-4 pt-4 border-t border-[var(--border-primary)]">
               <SidebarLink
                 link={{
                   label: 'Manual Email Scan',
                   icon: <Sparkles size={17} className="text-[#FF1E2D]" />,
                   onClick: () => setScanModalOpen(true),
                 }}
-                className="bg-[#181818] hover:bg-[#222222] border border-[#2A2A2A] text-[#F5F5F5]"
+                className="bg-[var(--surface-raised)] hover:bg-[var(--surface-interactive)] border border-[var(--border-primary)] text-[var(--color-text-primary)]"
               />
             </div>
           </div>
 
           {/* User + Sign Out */}
-          <div className="border-t border-[#2A2A2A] pt-3 flex flex-col gap-0.5">
+          <div className="border-t border-[var(--border-primary)] pt-3 flex flex-col gap-0.5">
             <SidebarLink
               link={{
                 label: user?.name || 'Profile & Settings',
@@ -317,21 +318,21 @@ export const UserDashboard: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
 
         {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-[#2A2A2A]">
+        <header className="sticky top-0 z-30 bg-[var(--bg-secondary-90)] backdrop-blur-md border-b border-[var(--border-primary)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
             {/* Page title */}
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="hidden sm:flex w-7 h-7 rounded-lg bg-[#181818] border border-[#2A2A2A] items-center justify-center shrink-0">
+              <div className="hidden sm:flex w-7 h-7 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-primary)] items-center justify-center shrink-0">
                 {(() => {
                   const tab = navTabs.find(t => t.id === activeTab)
                   const Icon = tab?.icon || Activity
                   return <Icon size={14} className="text-[#FF1E2D]" />
                 })()}
               </div>
-              <span className="font-heading text-sm font-bold text-[#F5F5F5] truncate">
+              <span className="font-heading text-sm font-bold text-[var(--color-text-primary)] truncate">
                 {navTabs.find(t => t.id === activeTab)?.label || 'Dashboard'}
               </span>
-              <span className="hidden sm:block text-xs text-[#737373] font-medium">
+              <span className="hidden sm:block text-xs text-[var(--color-text-muted)] font-medium">
                 · AI Email Threat Intelligence
               </span>
             </div>
@@ -341,7 +342,7 @@ export const UserDashboard: React.FC = () => {
 
               {/* Gmail Status pill */}
               {gmailStatus?.is_connected ? (
-                <div title={`Gmail: ${gmailStatus?.email_address}`} className="px-3 py-1 rounded-full text-xs font-semibold bg-[#181818] border border-[#2A2A2A] text-[#F5F5F5] items-center gap-2 hidden sm:flex">
+                <div title={`Gmail: ${gmailStatus?.email_address}`} className="px-3 py-1 rounded-full text-xs font-semibold bg-[var(--surface-raised)] border border-[var(--border-primary)] text-[var(--color-text-primary)] items-center gap-2 hidden sm:flex">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="truncate max-w-[150px]">{gmailStatus?.email_address || 'Connected'}</span>
                 </div>
@@ -376,13 +377,16 @@ export const UserDashboard: React.FC = () => {
                 <span className="hidden sm:block">Scan Email</span>
               </button>
 
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Refresh */}
               <button
                 type="button"
                 onClick={() => loadAllData()}
                 disabled={loading}
                 title="Refresh data"
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#A3A3A3] hover:text-[#FF1E2D] hover:bg-[#181818] border border-[#2A2A2A] transition-all cursor-pointer"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-muted)] hover:text-[#FF1E2D] hover:bg-[var(--surface-raised)] border border-[var(--border-primary)] transition-all cursor-pointer"
               >
                 <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
               </button>
@@ -392,7 +396,7 @@ export const UserDashboard: React.FC = () => {
                 type="button"
                 onClick={logout}
                 title="Sign Out"
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#A3A3A3] hover:text-[#FF1E2D] hover:bg-[#FF1E2D]/10 border border-[#2A2A2A] hover:border-[#FF1E2D]/30 transition-all cursor-pointer"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--color-text-muted)] hover:text-[#FF1E2D] hover:bg-[#FF1E2D]/10 border border-[var(--border-primary)] hover:border-[#FF1E2D]/30 transition-all cursor-pointer"
               >
                 <LogOut size={14} />
               </button>

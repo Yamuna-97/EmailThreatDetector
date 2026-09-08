@@ -96,7 +96,7 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
         initial={{ opacity: 0, scale: 0.96, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 15 }}
-        className="relative w-full max-w-4xl bg-[#0A0A0A] rounded-2xl shadow-2xl border border-[#2A2A2A] overflow-hidden text-[#F5F5F5]"
+        className="relative w-full max-w-4xl bg-[var(--bg-secondary)] rounded-2xl shadow-2xl border border-[var(--border-primary)] overflow-hidden text-[var(--color-text-primary)]"
       >
         {/* Loading Overlay */}
         {scanning && (
@@ -113,16 +113,16 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
         )}
         
         {/* Header */}
-        <div className="p-6 border-b border-[#2A2A2A] flex items-center justify-between bg-[#111111]">
+        <div className="p-6 border-b border-[var(--border-primary)] flex items-center justify-between bg-[var(--surface-card)]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E50914] to-[#8B0000] flex items-center justify-center text-white shadow-md shadow-[#E50914]/25">
               <Sparkles size={20} />
             </div>
             <div>
-              <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-[#F5F5F5]">
+              <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-[var(--color-text-primary)]">
                 AI Threat Ingestion & Sandbox
               </h2>
-              <p className="text-xs text-[#737373] font-body">
+              <p className="text-xs text-[var(--color-text-muted)] font-body">
                 Paste raw email payload or select a synthetic adversary test scenario
               </p>
             </div>
@@ -130,7 +130,7 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-[#737373] hover:text-[#F5F5F5] hover:bg-[#181818] transition-all cursor-pointer"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--surface-raised)] transition-all cursor-pointer"
           >
             <X size={20} />
           </button>

@@ -258,24 +258,22 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       ref={cardRef}
-      className={`magic-bento-card magic-bento-card--border-glow particle-container ${className}`.trim()}
+      className={`magic-bento-card magic-bento-card--border-glow particle-container bg-[var(--surface-card)] border border-[var(--border-primary)] text-[var(--color-text-primary)] ${className}`.trim()}
       style={{
-        backgroundColor: '#111111',
-        borderColor: '#2A2A2A',
         '--glow-color': glowColor,
         ...style,
       } as React.CSSProperties}
       {...rest}
     >
       {(badge || title) && (
-        <div className="magic-bento-card__header mb-3">
+        <div className="magic-bento-card__header mb-3 flex items-center justify-between">
           {badge && <div className="magic-bento-card__label">{badge}</div>}
           <div className="w-2.5 h-2.5 rounded-full bg-[#E50914] shadow-[0_0_8px_rgba(229,9,20,0.6)] shrink-0" />
         </div>
       )}
 
-      {title && <h3 className="magic-bento-card__title">{title}</h3>}
-      {description && <p className="magic-bento-card__description mb-4">{description}</p>}
+      {title && <h3 className="magic-bento-card__title font-heading font-extrabold text-lg sm:text-xl text-[var(--color-text-primary)] mb-1.5">{title}</h3>}
+      {description && <p className="magic-bento-card__description font-body text-xs sm:text-sm text-[var(--color-text-muted)] mb-4 leading-relaxed">{description}</p>}
 
       {children && <div className="relative z-10 w-full mt-auto">{children}</div>}
     </div>

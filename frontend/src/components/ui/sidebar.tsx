@@ -89,9 +89,9 @@ export const DesktopSidebar = ({
   return (
     <motion.div
       className={cn(
-        "h-screen sticky top-0 px-3 py-5 hidden md:flex md:flex-col flex-shrink-0 z-30",
-        "bg-[#0A0A0A] border-r border-[#2A2A2A]",
-        "shadow-[1px_0_16px_rgba(0,0,0,0.8)]",
+        "h-screen sticky top-0 px-3 py-5 hidden md:flex md:flex-col flex-shrink-0 z-30 transition-colors",
+        "bg-[var(--bg-secondary)] border-r border-[var(--border-primary)]",
+        "shadow-[1px_0_16px_rgba(0,0,0,0.15)]",
         className
       )}
       animate={{
@@ -117,15 +117,15 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-14 px-4 flex flex-row md:hidden items-center justify-between w-full z-40",
-          "bg-[#0A0A0A] border-b border-[#2A2A2A]"
+          "h-14 px-4 flex flex-row md:hidden items-center justify-between w-full z-40 transition-colors",
+          "bg-[var(--bg-secondary)] border-b border-[var(--border-primary)]"
         )}
         {...props}
       >
         <div className="flex justify-end z-20 w-full">
           <button
             type="button"
-            className="p-2 rounded-xl hover:bg-[#181818] text-[#A3A3A3] hover:text-[#FF1E2D] transition-all cursor-pointer"
+            className="p-2 rounded-xl hover:bg-[var(--surface-raised)] text-[var(--color-text-secondary)] hover:text-[#FF1E2D] transition-all cursor-pointer"
             onClick={() => setOpen(!open)}
           >
             <Menu className="h-5 w-5" />
@@ -139,13 +139,13 @@ export const MobileSidebar = ({
               exit={{ x: "-100%", opacity: 0 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               className={cn(
-                "fixed h-full w-full inset-0 bg-[#0A0A0A] p-6 z-[100] flex flex-col justify-between overflow-y-auto",
-                "border-r border-[#2A2A2A]",
+                "fixed h-full w-full inset-0 bg-[var(--bg-secondary)] p-6 z-[100] flex flex-col justify-between overflow-y-auto",
+                "border-r border-[var(--border-primary)]",
                 className
               )}
             >
               <div
-                className="absolute right-5 top-5 z-50 text-[#A3A3A3] cursor-pointer p-2 rounded-xl hover:bg-[#181818] hover:text-[#FF1E2D] transition-all"
+                className="absolute right-5 top-5 z-50 text-[var(--color-text-secondary)] cursor-pointer p-2 rounded-xl hover:bg-[var(--surface-raised)] hover:text-[#FF1E2D] transition-all"
                 onClick={() => setOpen(!open)}
               >
                 <X className="h-5 w-5" />
@@ -177,7 +177,7 @@ export const SidebarLink = ({
           "shrink-0 flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-150",
           link.active
             ? "bg-[#E50914] text-white shadow-[0_2px_10px_rgba(229,9,20,0.4)]"
-            : "text-[#A3A3A3] group-hover/sidebar:text-[#F5F5F5] group-hover/sidebar:bg-[#181818]"
+            : "text-[var(--color-text-muted)] group-hover/sidebar:text-[var(--color-text-primary)] group-hover/sidebar:bg-[var(--surface-raised)]"
         )}
       >
         {link.icon}
@@ -196,8 +196,8 @@ export const SidebarLink = ({
           className={cn(
             "text-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors duration-150",
             link.active
-              ? "text-[#F5F5F5] font-bold"
-              : "text-[#A3A3A3] font-medium group-hover/sidebar:text-[#F5F5F5]"
+              ? "text-[var(--color-text-primary)] font-bold"
+              : "text-[var(--color-text-secondary)] font-medium group-hover/sidebar:text-[var(--color-text-primary)]"
           )}
         >
           {link.label}
@@ -205,10 +205,10 @@ export const SidebarLink = ({
         {link.count !== undefined && link.count > 0 && (
           <span
             className={cn(
-              "text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ml-2 shrink-0",
+              "text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ml-2 shrink-0 transition-colors",
               link.active
                 ? "bg-[#E50914] text-white"
-                : "bg-[#181818] text-[#A3A3A3] border border-[#2A2A2A]"
+                : "bg-[var(--surface-raised)] text-[var(--color-text-secondary)] border border-[var(--border-primary)]"
             )}
           >
             {link.count}
@@ -221,8 +221,8 @@ export const SidebarLink = ({
   const baseClasses = cn(
     "flex items-center gap-2.5 group/sidebar py-1.5 px-2 rounded-xl transition-all duration-150 cursor-pointer w-full text-left",
     link.active
-      ? "bg-[#1F1F1F] border-l-2 border-[#E50914]"
-      : "hover:bg-[#181818]",
+      ? "bg-[var(--surface-interactive)] border-l-2 border-[#E50914]"
+      : "hover:bg-[var(--surface-raised)]",
     className
   );
 

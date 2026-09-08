@@ -38,7 +38,7 @@ const AlertDialogContent = React.forwardRef<
     <AlertDialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border border-[#2A2A2A] bg-[#0A0A0A] p-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-2xl text-[#F5F5F5]",
+        "fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-2xl text-[var(--color-text-primary)]",
         size === "sm" ? "max-w-sm p-5" : "max-w-lg",
         className
       )}
@@ -99,7 +99,7 @@ const AlertDialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Title
     ref={ref}
-    className={cn("text-lg sm:text-xl font-bold font-heading text-[#F5F5F5]", className)}
+    className={cn("text-lg sm:text-xl font-bold font-heading text-[var(--color-text-primary)]", className)}
     {...props}
   />
 ))
@@ -111,7 +111,7 @@ const AlertDialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Description
     ref={ref}
-    className={cn("text-xs sm:text-sm text-[#A3A3A3] leading-relaxed font-body", className)}
+    className={cn("text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed font-body", className)}
     {...props}
   />
 ))
@@ -140,7 +140,7 @@ const AlertDialogCancel = React.forwardRef<
   <AlertDialogPrimitive.Cancel
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center rounded-xl border border-[#2A2A2A] bg-[#181818] px-5 py-2.5 text-xs sm:text-sm font-bold text-[#F5F5F5] shadow-xs hover:bg-[#222222] active:scale-95 transition-all cursor-pointer mt-2 sm:mt-0",
+      "inline-flex items-center justify-center rounded-xl border border-[var(--border-primary)] bg-[var(--surface-raised)] px-5 py-2.5 text-xs sm:text-sm font-bold text-[var(--color-text-primary)] shadow-xs hover:bg-[var(--surface-interactive)] active:scale-95 transition-all cursor-pointer mt-2 sm:mt-0",
       className
     )}
     {...props}

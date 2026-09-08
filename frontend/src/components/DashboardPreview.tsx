@@ -53,14 +53,14 @@ export const DashboardPreview: React.FC = () => {
                   badge={st.badge}
                   title={st.value}
                   description={st.label}
-                  className="p-6 text-left bg-[#111111] border-[#2A2A2A] hover:border-[#FF1E2D]/40"
+                  className="p-6 text-left hover:border-[#FF1E2D]/40"
                 >
-                  <div className="pt-3 border-t border-[#2A2A2A] flex items-center justify-between">
+                  <div className="pt-3 border-t border-[var(--border-primary)] flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
                       <TrendingUp size={13} />
                       <span>{st.change}</span>
                     </div>
-                    <div className="p-2 rounded-xl bg-[#181818] border border-[#2A2A2A] text-[#FF1E2D]">
+                    <div className="p-2 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-primary)] text-[#FF1E2D]">
                       <Icon size={16} />
                     </div>
                   </div>
@@ -76,7 +76,7 @@ export const DashboardPreview: React.FC = () => {
             badge="SOC LIVE STREAM"
             title="Active Threat Feed Stream"
             description="FastAPI Async Webhook Listener • Connected to Gmail API • Sub-50ms Response"
-            className="p-6 sm:p-8 text-left bg-[#111111] border-[#2A2A2A] shadow-2xl"
+            className="p-6 sm:p-8 text-left shadow-2xl"
           >
             {/* Grid Layout for Live Table & Risk Distribution */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-4">

@@ -85,13 +85,13 @@ export const GeoIntelligence: React.FC = () => {
                   badge={item.badge}
                   title={item.title}
                   description={item.details}
-                  className="p-7 text-left bg-[#111111] border-[#2A2A2A] hover:border-[#FF1E2D]/40"
+                  className="p-7 text-left hover:border-[#FF1E2D]/40"
                 >
-                  <div className="pt-4 border-t border-[#2A2A2A] flex items-center justify-between">
-                    <div className="font-mono text-sm font-bold text-[#F5F5F5] truncate">
+                  <div className="pt-4 border-t border-[var(--border-primary)] flex items-center justify-between">
+                    <div className="font-mono text-sm font-bold text-[var(--color-text-primary)] truncate">
                       {item.value}
                     </div>
-                    <div className="p-2 rounded-xl bg-[#181818] border border-[#2A2A2A] text-[#FF1E2D] shrink-0">
+                    <div className="p-2 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-primary)] text-[#FF1E2D] shrink-0">
                       <Icon size={18} />
                     </div>
                   </div>

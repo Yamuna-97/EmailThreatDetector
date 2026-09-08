@@ -141,10 +141,10 @@ export const RiskScore: React.FC = () => {
             badge={`${current.level.toUpperCase()} SEVERITY`}
             title={`Overall Risk Score: ${current.score}/100`}
             description={`Threat Class: ${current.category} • Model Confidence: ${current.confidence}`}
-            className="max-w-4xl mx-auto p-7 sm:p-10 text-left bg-[#111111] border-[#2A2A2A] shadow-2xl"
+            className="max-w-4xl mx-auto p-7 sm:p-10 text-left shadow-2xl"
           >
             {/* Progress Bar */}
-            <div className="w-full bg-[#181818] h-3 rounded-full overflow-hidden border border-[#2A2A2A] mb-8 mt-4">
+            <div className="w-full bg-[var(--surface-raised)] h-3 rounded-full overflow-hidden border border-[var(--border-primary)] mb-8 mt-4">
               <div
                 className={`h-full ${current.barColor} transition-all duration-500 rounded-full shadow-sm`}
                 style={{ width: `${current.score}%` }}
@@ -153,42 +153,42 @@ export const RiskScore: React.FC = () => {
 
             {/* Email Subject & Sender Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              <div className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A]">
-                <span className="text-[11px] font-bold text-[#737373] uppercase tracking-wide block mb-1">
+              <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)]">
+                <span className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wide block mb-1">
                   Analyzed Subject Line
                 </span>
-                <p className="text-xs sm:text-sm font-bold text-[#F5F5F5]">{current.subject}</p>
+                <p className="text-xs sm:text-sm font-bold text-[var(--color-text-primary)]">{current.subject}</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A]">
-                <span className="text-[11px] font-bold text-[#737373] uppercase tracking-wide block mb-1">
+              <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)]">
+                <span className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wide block mb-1">
                   Sender & Infrastructure
                 </span>
-                <p className="text-xs font-mono font-semibold text-[#F5F5F5] truncate">{current.sender}</p>
-                <p className="text-[11px] text-[#A3A3A3] font-mono mt-0.5">{current.ip}</p>
+                <p className="text-xs font-mono font-semibold text-[var(--color-text-primary)] truncate">{current.sender}</p>
+                <p className="text-[11px] text-[var(--color-text-muted)] font-mono mt-0.5">{current.ip}</p>
               </div>
             </div>
 
             {/* Reason for Classification */}
-            <div className="p-5 rounded-2xl bg-[#181818] border border-[#2A2A2A] mb-6">
-              <div className="flex items-center gap-2 text-xs font-bold text-[#F5F5F5] mb-2 uppercase tracking-wide">
+            <div className="p-5 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)] mb-6">
+              <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-text-primary)] mb-2 uppercase tracking-wide">
                 <Info size={15} className="text-[#FF1E2D]" />
                 Reason for Classification
               </div>
-              <p className="text-xs sm:text-sm text-[#A3A3A3] leading-relaxed font-body">
+              <p className="text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed font-body">
                 {current.reason}
               </p>
             </div>
 
             {/* Detected Indicators Grid */}
-            <div className="pt-4 border-t border-[#2A2A2A]">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#737373] mb-3">
+            <div className="pt-4 border-t border-[var(--border-primary)]">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
                 <Layers size={14} /> Detected Forensic Indicators
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {current.indicators.map((ind) => (
                   <div
                     key={ind}
-                    className="flex items-center gap-2 text-xs font-medium text-[#F5F5F5] bg-[#181818] p-2.5 rounded-xl border border-[#2A2A2A]"
+                    className="flex items-center gap-2 text-xs font-medium text-[var(--color-text-primary)] bg-[var(--surface-raised)] p-2.5 rounded-xl border border-[var(--border-primary)]"
                   >
                     <CheckCircle size={14} className="text-[#FF1E2D] shrink-0" />
                     <span>{ind}</span>

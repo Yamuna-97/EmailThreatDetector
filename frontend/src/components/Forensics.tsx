@@ -92,10 +92,10 @@ export const Forensics: React.FC = () => {
                   badge={item.badge}
                   title={item.title}
                   description={item.desc}
-                  className="p-6 text-left bg-[#111111] border-[#2A2A2A] hover:border-[#FF1E2D]/40"
+                  className="p-6 text-left hover:border-[#FF1E2D]/40"
                 >
-                  <div className="pt-3 border-t border-[#2A2A2A] flex justify-end">
-                    <div className="p-2 rounded-xl bg-[#181818] border border-[#2A2A2A] text-[#FF1E2D]">
+                  <div className="pt-3 border-t border-[var(--border-primary)] flex justify-end">
+                    <div className="p-2 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-primary)] text-[#FF1E2D]">
                       <Icon size={18} />
                     </div>
                   </div>
@@ -111,28 +111,28 @@ export const Forensics: React.FC = () => {
             badge="FORENSIC AUDIT"
             title="Sample Investigation Timeline"
             description="Case #VS-2026-0881 • Target: finance@enterprise.com • Automated Forensics Complete"
-            className="p-7 sm:p-9 text-left bg-[#111111] border-[#2A2A2A] shadow-2xl"
+            className="p-7 sm:p-9 text-left shadow-2xl"
           >
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-              <div className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A]">
+              <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)]">
                 <div className="text-[11px] font-mono text-[#FF1E2D] font-semibold mb-1">08:14:02 UTC</div>
-                <div className="text-xs font-bold text-[#F5F5F5] mb-1">Origin Transit</div>
-                <p className="text-[11px] text-[#A3A3A3]">SMTP packet dispatched via anonymized VPS relay 185.220.101.44.</p>
+                <div className="text-xs font-bold text-[var(--color-text-primary)] mb-1">Origin Transit</div>
+                <p className="text-[11px] text-[var(--color-text-muted)]">SMTP packet dispatched via anonymized VPS relay 185.220.101.44.</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A]">
+              <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)]">
                 <div className="text-[11px] font-mono text-[#FF1E2D] font-semibold mb-1">08:14:03 UTC</div>
-                <div className="text-xs font-bold text-[#F5F5F5] mb-1">Header Parsing</div>
-                <p className="text-[11px] text-[#A3A3A3]">SPF softfail detected; domain dkim signature mismatch flag raised.</p>
+                <div className="text-xs font-bold text-[var(--color-text-primary)] mb-1">Header Parsing</div>
+                <p className="text-[11px] text-[var(--color-text-muted)]">SPF softfail detected; domain dkim signature mismatch flag raised.</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A]">
+              <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)]">
                 <div className="text-[11px] font-mono text-[#FF1E2D] font-semibold mb-1">08:14:04 UTC</div>
-                <div className="text-xs font-bold text-[#F5F5F5] mb-1">AI & Threat Correlation</div>
-                <p className="text-[11px] text-[#A3A3A3]">Gemini identifies wire fraud intent; IPQualityScore confirms fraud score 98.</p>
+                <div className="text-xs font-bold text-[var(--color-text-primary)] mb-1">AI & Threat Correlation</div>
+                <p className="text-[11px] text-[var(--color-text-muted)]">Gemini identifies wire fraud intent; IPQualityScore confirms fraud score 98.</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A]">
+              <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)]">
                 <div className="text-[11px] font-mono text-emerald-400 font-semibold mb-1">08:14:05 UTC</div>
-                <div className="text-xs font-bold text-[#F5F5F5] mb-1">Evidence Quarantined</div>
-                <p className="text-[11px] text-[#A3A3A3]">Automated warning banner injected; IOC forensic dossier exported.</p>
+                <div className="text-xs font-bold text-[var(--color-text-primary)] mb-1">Evidence Quarantined</div>
+                <p className="text-[11px] text-[var(--color-text-muted)]">Automated warning banner injected; IOC forensic dossier exported.</p>
               </div>
             </div>
           </Card>

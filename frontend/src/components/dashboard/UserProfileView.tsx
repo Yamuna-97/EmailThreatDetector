@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext'
 import { authService } from '../../services/auth'
 import { gmailService, type GmailStatus, type MonitoringStatus } from '../../services/gmail'
 import { InteractiveHoverButton } from '../ui/interactive-hover-button'
+import { ThemeToggle } from '../ui/ThemeToggle'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -277,8 +278,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
           </div>
         </div>
 
-        {/* Global Status Pill in Profile Header */}
+        {/* Global Status & Theme Controls in Profile Header */}
         <div className="flex items-center gap-3">
+          <ThemeToggle variant="dropdown" showLabel={true} />
           <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-mono font-bold ${
             isGmailConnected
               ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-400'
@@ -507,7 +509,20 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
         </div>
       </div>
 
-      {/* SECTION 3: CENTRALIZED GMAIL CONNECTION & OAUTH MANAGEMENT */}
+      {/* SECTION 3: INTERFACE THEME & APPEARANCE */}
+      <div className="bg-[#0A0A0A] rounded-2xl p-6 sm:p-8 border border-[#2A2A2A] shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="font-heading text-lg font-bold text-[#F5F5F5]">Interface Theme Preference</h2>
+            <p className="text-xs text-[#737373] mt-0.5">
+              Choose your preferred visual mode. CyberTrace Red signature accents remain consistent across all themes.
+            </p>
+          </div>
+          <ThemeToggle variant="segmented" />
+        </div>
+      </div>
+
+      {/* SECTION 4: CENTRALIZED GMAIL CONNECTION & OAUTH MANAGEMENT */}
       <div className="bg-[#0A0A0A] rounded-2xl p-6 sm:p-8 border border-[#2A2A2A] shadow-xl space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2A2A2A]">
           <div className="flex items-center gap-3">

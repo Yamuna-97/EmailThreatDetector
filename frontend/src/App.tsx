@@ -16,6 +16,7 @@ import TechStack from './components/TechStack'
 import About from './components/About'
 import Footer from './components/Footer'
 import AuthForm from './components/ui/auth-form'
+import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { NotificationProvider } from './context/NotificationContext'
 import UserDashboard from './components/dashboard/UserDashboard'
@@ -168,10 +169,10 @@ const AppContent: React.FC = () => {
       sparkCount={10}
       duration={450}
       easing="ease-out"
-      className="min-h-screen bg-[#050505]"
+      className="min-h-screen bg-[var(--bg-primary)]"
     >
       <div
-        className="relative w-full min-h-screen flex flex-col bg-[#050505] text-[#F5F5F5] selection:bg-[#E50914]/25 selection:text-[#FF1E2D]"
+        className="relative w-full min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--color-text-primary)] selection:bg-[#E50914]/25 selection:text-[#FF1E2D]"
         style={{
           fontFamily: 'var(--font-body)',
           color: 'var(--color-text-primary)',
@@ -266,11 +267,13 @@ const AppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <NotificationProvider>
-        <AppContent />
-      </NotificationProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

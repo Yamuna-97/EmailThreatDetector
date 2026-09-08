@@ -51,18 +51,18 @@ export const About: React.FC = () => {
             const Icon = pillar.icon
             return (
               <ScrollReveal key={pillar.title} delay={0.08 * idx} yOffset={25}>
-                <div className="p-6 rounded-3xl bg-[#111111] border border-[#2A2A2A] hover:border-[#E50914] transition-all hover:shadow-lg hover:shadow-[#E50914]/10 flex flex-col justify-between h-full">
+                <div className="p-6 rounded-3xl bg-[var(--surface-card)] border border-[var(--border-primary)] hover:border-[#E50914] transition-all hover:shadow-lg hover:shadow-[#E50914]/10 flex flex-col justify-between h-full">
                   <div>
-                    <div className="w-12 h-12 rounded-2xl bg-[#181818] border border-[#2A2A2A] flex items-center justify-center text-[#FF1E2D] shadow-sm mb-4">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)] flex items-center justify-center text-[#FF1E2D] shadow-sm mb-4">
                       <Icon size={24} />
                     </div>
                     <span className="font-mono text-[10px] font-bold text-[#FF1E2D] uppercase tracking-wider block mb-1">
                       {pillar.subtitle}
                     </span>
-                    <h3 className="font-heading text-lg font-bold text-[#F5F5F5] mb-2">
+                    <h3 className="font-heading text-lg font-bold text-[var(--color-text-primary)] mb-2">
                       {pillar.title}
                     </h3>
-                    <p className="text-xs text-[#A3A3A3] leading-relaxed font-body">
+                    <p className="text-xs text-[var(--color-text-muted)] leading-relaxed font-body">
                       {pillar.desc}
                     </p>
                   </div>
@@ -73,15 +73,15 @@ export const About: React.FC = () => {
         </div>
 
         {/* Mission Statement & Architectural Highlights */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#0A0A0A] border border-[#2A2A2A] rounded-3xl p-8 sm:p-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[var(--surface-card)] border border-[var(--border-primary)] rounded-3xl p-8 sm:p-12">
           <div className="lg:col-span-7 space-y-5">
-            <span className="font-mono text-xs font-bold text-[#FF1E2D] uppercase tracking-wider bg-[#181818] border border-[#2A2A2A] px-3.5 py-1 rounded-full inline-block">
+            <span className="font-mono text-xs font-bold text-[#FF1E2D] uppercase tracking-wider bg-[var(--surface-raised)] border border-[var(--border-primary)] px-3.5 py-1 rounded-full inline-block">
               Our Security Mission
             </span>
-            <h3 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#F5F5F5] tracking-tight">
+            <h3 className="font-heading text-2xl sm:text-3xl font-extrabold text-[var(--color-text-primary)] tracking-tight">
               Bridging the Gap Between Real-Time Email Protection and Deep Forensics
             </h3>
-            <p className="text-sm text-[#A3A3A3] leading-relaxed">
+            <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
               Traditional email filters rely on static blocklists and signature databases that fail against novel domain permutations and sophisticated AI-generated lure texts. CyberTrace combines continuous RFC header inspection with asynchronous threat enrichment, providing instant inbox defense for employees alongside deep forensic telemetry for SOC tier 2 investigators.
             </p>
 
@@ -94,7 +94,7 @@ export const About: React.FC = () => {
                 'Automated PDF Forensic Incident Dossiers',
                 'SOC2 & Enterprise Data Privacy Standards',
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs font-semibold text-[#F5F5F5]">
+                <div key={i} className="flex items-center gap-2 text-xs font-semibold text-[var(--color-text-primary)]">
                   <CheckCircle2 size={16} className="text-[#FF1E2D] shrink-0" />
                   <span>{item}</span>
                 </div>
@@ -103,38 +103,38 @@ export const About: React.FC = () => {
           </div>
 
           <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="p-5 rounded-2xl bg-[#111111] border border-[#2A2A2A] shadow-sm">
+            <div className="p-5 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)] shadow-sm">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-xl bg-[#181818] border border-[#2A2A2A] flex items-center justify-center text-[#FF1E2D]">
+                <div className="w-8 h-8 rounded-xl bg-[var(--surface-card)] border border-[var(--border-primary)] flex items-center justify-center text-[#FF1E2D]">
                   <Zap size={16} />
                 </div>
                 <div>
-                  <span className="font-mono font-bold text-xs text-[#F5F5F5] block">99.8% Detection Rate</span>
-                  <span className="text-[10px] text-[#A3A3A3]">AI heuristic evaluation accuracy</span>
+                  <span className="font-mono font-bold text-xs text-[var(--color-text-primary)] block">99.8% Detection Rate</span>
+                  <span className="text-[10px] text-[var(--color-text-muted)]">AI heuristic evaluation accuracy</span>
                 </div>
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-[#111111] border border-[#2A2A2A] shadow-sm">
+            <div className="p-5 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)] shadow-sm">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-xl bg-[#181818] border border-[#2A2A2A] flex items-center justify-center text-[#FF1E2D]">
+                <div className="w-8 h-8 rounded-xl bg-[var(--surface-card)] border border-[var(--border-primary)] flex items-center justify-center text-[#FF1E2D]">
                   <Cpu size={16} />
                 </div>
                 <div>
-                  <span className="font-mono font-bold text-xs text-[#F5F5F5] block">&lt; 350ms Ingestion Latency</span>
-                  <span className="text-[10px] text-[#A3A3A3]">Async FastAPI distributed architecture</span>
+                  <span className="font-mono font-bold text-xs text-[var(--color-text-primary)] block">&lt; 350ms Ingestion Latency</span>
+                  <span className="text-[10px] text-[var(--color-text-muted)]">Async FastAPI distributed architecture</span>
                 </div>
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-[#111111] border border-[#2A2A2A] shadow-sm">
+            <div className="p-5 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-primary)] shadow-sm">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-xl bg-[#181818] border border-[#2A2A2A] flex items-center justify-center text-[#FF1E2D]">
+                <div className="w-8 h-8 rounded-xl bg-[var(--surface-card)] border border-[var(--border-primary)] flex items-center justify-center text-[#FF1E2D]">
                   <Award size={16} />
                 </div>
                 <div>
-                  <span className="font-mono font-bold text-xs text-[#F5F5F5] block">Multi-Layer Threat Forensics</span>
-                  <span className="text-[10px] text-[#A3A3A3]">Header, IP, ASN, Tor & Geolocation matrix</span>
+                  <span className="font-mono font-bold text-xs text-[var(--color-text-primary)] block">Multi-Layer Threat Forensics</span>
+                  <span className="text-[10px] text-[var(--color-text-muted)]">Header, IP, ASN, Tor & Geolocation matrix</span>
                 </div>
               </div>
             </div>

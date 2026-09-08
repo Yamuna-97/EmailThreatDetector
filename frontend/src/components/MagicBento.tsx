@@ -16,37 +16,31 @@ export interface BentoCardItem {
 
 const defaultCardData: BentoCardItem[] = [
   {
-    color: '#111111',
     title: 'AI Semantic Threat Classifier',
     description: 'Deploys Gemini AI and NLP transformers to unmask zero-day phishing, intent coercion, and lookalike domains in milliseconds.',
     label: 'AI Detection',
   },
   {
-    color: '#111111',
     title: 'IP Geolocation & Tor Trace',
     description: 'Maps sender origin country, ASN network, and flags anonymizing VPN/Tor proxy hops before links are opened.',
     label: 'Geolocation',
   },
   {
-    color: '#111111',
     title: 'Deep RFC Header Forensics',
     description: 'Parses Message-ID signatures, SPF/DKIM/DMARC seals, and reconstructs verifiable microsecond audit trails.',
     label: 'Forensics',
   },
   {
-    color: '#111111',
     title: 'Automated SOC Early Warning',
     description: 'Injects in-inbox security warning banners and initiates instant quarantine workflows via FastAPI backend.',
     label: 'Protection',
   },
   {
-    color: '#111111',
     title: 'BEC & Impersonation Shield',
     description: 'Detects display-name hijacking and malicious payroll/wire changes targeting executive inboxes.',
     label: 'Executive Safety',
   },
   {
-    color: '#111111',
     title: 'Threat Intelligence Feeds',
     description: 'Correlates live indicators with IPQualityScore, Spamhaus, and AbuseIPDB global cybercrime registries.',
     label: 'Live Intel',
@@ -365,12 +359,12 @@ export const MagicBento: React.FC<MagicBentoProps> = ({
     <div className="card-grid bento-section" ref={gridRef}>
       {cards.map((card, index) => {
         const baseClassName = `magic-bento-card ${textAutoHide ? 'magic-bento-card--text-autohide' : ''} ${enableBorderGlow ? 'magic-bento-card--border-glow' : ''
-          }`
+          } bg-[var(--surface-card)] border border-[var(--border-primary)] text-[var(--color-text-primary)]`
         const cardProps = {
           className: baseClassName,
           style: {
-            backgroundColor: card.color || '#111111',
             '--glow-color': glowColor,
+            ...(card.color && card.color !== '#111111' ? { backgroundColor: card.color } : {}),
           } as React.CSSProperties,
         }
 
@@ -386,13 +380,13 @@ export const MagicBento: React.FC<MagicBentoProps> = ({
               clickEffect={clickEffect}
               enableMagnetism={enableMagnetism}
             >
-              <div className="magic-bento-card__header">
+              <div className="magic-bento-card__header flex items-center justify-between mb-3">
                 <div className="magic-bento-card__label">{card.label}</div>
-                <div className="w-2 h-2 rounded-full bg-[#E50914] shadow-[0_0_8px_rgba(229,9,20,0.6)]" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#E50914] shadow-[0_0_8px_rgba(229,9,20,0.6)] shrink-0" />
               </div>
-              <div className="magic-bento-card__content">
-                <h3 className="magic-bento-card__title">{card.title}</h3>
-                <p className="magic-bento-card__description">{card.description}</p>
+              <div className="magic-bento-card__content mt-auto">
+                <h3 className="magic-bento-card__title font-heading font-extrabold text-lg sm:text-xl text-[var(--color-text-primary)] mb-1.5">{card.title}</h3>
+                <p className="magic-bento-card__description font-body text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">{card.description}</p>
               </div>
             </ParticleCard>
           )
@@ -400,13 +394,13 @@ export const MagicBento: React.FC<MagicBentoProps> = ({
 
         return (
           <div key={card.title + index} {...cardProps}>
-            <div className="magic-bento-card__header">
+            <div className="magic-bento-card__header flex items-center justify-between mb-3">
               <div className="magic-bento-card__label">{card.label}</div>
-              <div className="w-2 h-2 rounded-full bg-[#E50914] shadow-[0_0_8px_rgba(229,9,20,0.6)]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#E50914] shadow-[0_0_8px_rgba(229,9,20,0.6)] shrink-0" />
             </div>
-            <div className="magic-bento-card__content">
-              <h3 className="magic-bento-card__title">{card.title}</h3>
-              <p className="magic-bento-card__description">{card.description}</p>
+            <div className="magic-bento-card__content mt-auto">
+              <h3 className="magic-bento-card__title font-heading font-extrabold text-lg sm:text-xl text-[var(--color-text-primary)] mb-1.5">{card.title}</h3>
+              <p className="magic-bento-card__description font-body text-xs sm:text-sm text-[var(--color-text-muted)] leading-relaxed">{card.description}</p>
             </div>
           </div>
         )

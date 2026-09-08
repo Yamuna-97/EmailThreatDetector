@@ -30,7 +30,7 @@ export interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
   return (
-    <section className="relative w-full min-h-screen flex flex-col justify-between overflow-hidden bg-[#050505]">
+    <section className="relative w-full min-h-screen flex flex-col justify-between overflow-hidden bg-[var(--bg-primary)]">
       {/* 1. Only Fullscreen Video Background */}
       <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
         <video
@@ -43,8 +43,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
           <source src={VIDEO_URL} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-        {/* Subtle dark gradient scrim ensuring crisp left-side typography while revealing video */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/90 md:via-[#050505]/70 to-transparent pointer-events-none z-1" />
+        {/* Subtle gradient scrim ensuring crisp left-side typography while revealing video */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-primary)] via-[var(--bg-primary)]/90 md:via-[var(--bg-primary)]/70 to-transparent pointer-events-none z-1" />
         {/* Subtle red ambient glow */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#E50914]/10 rounded-full blur-3xl pointer-events-none z-1" />
       </div>
@@ -58,7 +58,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
             initial="hidden"
             animate="visible"
             variants={fadeUpVariant}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#111111]/90 backdrop-blur-md border border-[#E50914]/30 shadow-xs mb-4"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-card)]/90 backdrop-blur-md border border-[#E50914]/30 shadow-xs mb-4"
           >
             <Sparkles size={14} className="text-[#FF1E2D]" />
             <span className="font-mono text-xs font-bold tracking-wider uppercase text-[#FF1E2D]">
@@ -87,7 +87,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
               weight={900}
               textScale={0.095}
               colorful={true}
-              className="font-heading select-none drop-shadow-md text-[#F5F5F5]"
+              className="font-heading select-none drop-shadow-md text-[var(--color-text-primary)]"
             />
           </motion.div>
 
@@ -97,7 +97,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
             initial="hidden"
             animate="visible"
             variants={fadeUpVariant}
-            className="font-body text-base sm:text-lg text-[#A3A3A3] font-normal leading-relaxed max-w-xl mb-8"
+            className="font-body text-base sm:text-lg text-[var(--color-text-secondary)] font-normal leading-relaxed max-w-xl mb-8"
           >
             AI-Powered Email Threat Detection, Geolocation and Forensic Intelligence Platform. Intercept zero-day phishing, executive impersonation, and fraudulent infrastructure before they reach you.
           </motion.p>
@@ -120,7 +120,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
               text="Sign In"
               icon={<LogIn size={15} className="text-[#FF1E2D]" />}
               onClick={() => onOpenAuth ? onOpenAuth('signin') : null}
-              className="w-36 py-3.5 text-sm font-bold bg-[#181818] text-[#F5F5F5] border-[#2A2A2A] hover:border-[#E50914] shadow-sm"
+              className="w-36 py-3.5 text-sm font-bold bg-[var(--surface-raised)] text-[var(--color-text-primary)] border-[var(--border-primary)] hover:border-[#E50914] shadow-sm"
             />
           </motion.div>
 
@@ -130,17 +130,17 @@ export const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
             initial="hidden"
             animate="visible"
             variants={fadeUpVariant}
-            className="flex items-center gap-3.5 py-2.5 px-4 rounded-2xl bg-[#111111]/90 backdrop-blur-md border border-[#2A2A2A] shadow-xs"
+            className="flex items-center gap-3.5 py-2.5 px-4 rounded-2xl bg-[var(--surface-card)]/90 backdrop-blur-md border border-[var(--border-primary)] shadow-xs"
           >
             <div className="relative flex items-center justify-center">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping absolute" />
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 relative" />
             </div>
             <div className="flex flex-col">
-              <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#F5F5F5]">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-primary)]">
                 REAL-TIME PROTECTION ACTIVE
               </span>
-              <span className="text-[11px] text-[#A3A3A3] font-medium">
+              <span className="text-[11px] text-[var(--color-text-muted)] font-medium">
                 FastAPI SOC Engine • Live Threat Telemetry
               </span>
             </div>
@@ -152,7 +152,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenAuth }) => {
       <div className="relative z-10 w-full pb-6 text-center">
         <a
           href="#overview"
-          className="inline-flex flex-col items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-widest text-[#737373] hover:text-[#FF1E2D] transition-colors cursor-pointer"
+          className="inline-flex flex-col items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] hover:text-[#FF1E2D] transition-colors cursor-pointer"
         >
           <span>Scroll to explore platform</span>
           <ChevronDown size={16} className="animate-bounce" />
