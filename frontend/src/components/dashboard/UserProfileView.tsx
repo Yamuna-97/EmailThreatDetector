@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import {
   User, Mail, KeyRound, ShieldCheck, RefreshCw,
   Camera, CheckCircle2, AlertTriangle,
-  Lock, ExternalLink, Unlink, Eye, EyeOff, Trash2
+  Lock, ExternalLink, Unlink, Eye, EyeOff, Trash2, Shield
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { authService } from '../../services/auth'
@@ -83,7 +83,6 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
         name: name.trim(),
         avatar_url: avatarUrl.trim() || undefined,
       })
-      // Update local storage user
       const stored = localStorage.getItem('vaultshield_user')
       if (stored) {
         const parsed = JSON.parse(stored)
@@ -207,7 +206,6 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
     if (togglingMonitor) return
 
     const nextState = !localMonitoringActive
-    // Optimistic instant toggle for immediate visual animation
     setLocalMonitoringActive(nextState)
     setTogglingMonitor(true)
     setGmailMsg(null)
@@ -225,7 +223,6 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
       })
       setTimeout(() => setGmailMsg(null), 4000)
     } catch (err: any) {
-      // Revert optimistic state on failure
       setLocalMonitoringActive(!nextState)
       setGmailMsg({ type: 'error', text: err?.message || 'Failed to toggle Gmail monitoring.' })
     } finally {
@@ -235,24 +232,24 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
 
   return (
     <div className="space-y-8 animate-fade-in font-body">
-      {/* Page Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#192837]/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* Page Header Card */}
+      <div className="bg-[#0A0A0A] rounded-2xl p-6 sm:p-8 border border-[#2A2A2A] shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="relative group">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
                 alt={name || 'Avatar'}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-4 ring-[#7342E2]/20 shadow-md"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-[#FF1E2D]/40 shadow-lg shadow-[#FF1E2D]/20"
               />
             ) : (
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] text-white font-extrabold text-2xl flex items-center justify-center shadow-md shadow-[#7342E2]/25">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#E50914] to-[#8B0000] text-white font-black text-2xl flex items-center justify-center shadow-lg shadow-[#E50914]/30">
                 {name ? name[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : 'U'}
               </div>
             )}
             <label
               htmlFor="avatar-upload-header"
-              className="absolute -bottom-1 -right-1 p-1.5 bg-[#7342E2] hover:bg-[#6332d2] text-white rounded-xl shadow-md cursor-pointer transition-all"
+              className="absolute -bottom-1 -right-1 p-1.5 bg-[#E50914] hover:bg-[#FF1E2D] text-white rounded-xl shadow-md cursor-pointer transition-all"
               title="Change Avatar"
             >
               <Camera size={14} />
@@ -266,15 +263,15 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
             </label>
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-[#192837]">
+            <div className="flex items-center gap-2.5">
+              <h1 className="font-heading text-xl sm:text-2xl font-black text-[#F5F5F5] tracking-tight">
                 {user?.name || 'Account Settings'}
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#7342E2]/10 text-[#7342E2]">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-extrabold uppercase tracking-wider bg-[#FF1E2D]/15 text-[#FF1E2D] border border-[#FF1E2D]/30">
                 {user?.role || 'User'}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-[#192837]/60 mt-0.5">
+            <p className="text-xs sm:text-sm font-mono text-[#737373] mt-1">
               {user?.email} &bull; Security & Profile Management
             </p>
           </div>
@@ -282,37 +279,37 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
 
         {/* Global Status Pill in Profile Header */}
         <div className="flex items-center gap-3">
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-bold ${
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-mono font-bold ${
             isGmailConnected
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-              : 'bg-red-50 border-red-200 text-red-700'
+              ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-400'
+              : 'bg-[#181818] border-[#FF1E2D]/40 text-[#FF1E2D]'
           }`}>
-            <span className={`w-2.5 h-2.5 rounded-full ${isGmailConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-            <span>{isGmailConnected ? `Gmail Connected: ${gmailStatus?.email_address || user?.email}` : 'Gmail Disconnected'}</span>
+            <span className={`w-2 h-2 rounded-full ${isGmailConnected ? 'bg-emerald-400 animate-pulse' : 'bg-[#FF1E2D]'}`} />
+            <span>{isGmailConnected ? `Workspace: ${gmailStatus?.email_address || user?.email}` : 'Gmail Disconnected'}</span>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* SECTION 1: PROFILE DETAILS & AVATAR SELECTION */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#192837]/10 shadow-xs space-y-6">
-          <div className="flex items-center gap-3 pb-4 border-b border-[#192837]/10">
-            <div className="w-10 h-10 rounded-2xl bg-[#7342E2]/10 text-[#7342E2] flex items-center justify-center font-bold">
+        <div className="bg-[#0A0A0A] rounded-2xl p-6 sm:p-8 border border-[#2A2A2A] shadow-xl space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-[#2A2A2A]">
+            <div className="w-10 h-10 rounded-xl bg-[#FF1E2D]/10 text-[#FF1E2D] border border-[#FF1E2D]/25 flex items-center justify-center font-bold">
               <User size={20} />
             </div>
             <div>
-              <h2 className="font-heading text-lg font-bold text-[#192837]">Profile Information</h2>
-              <p className="text-xs text-[#192837]/60">Customize your display name and security avatar</p>
+              <h2 className="font-heading text-lg font-bold text-[#F5F5F5]">Profile Information</h2>
+              <p className="text-xs text-[#737373]">Customize your operator callsign and security avatar</p>
             </div>
           </div>
 
           {profileMsg && (
-            <div className={`p-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 border ${
+            <div className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border ${
               profileMsg.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                : 'bg-red-50 border-red-200 text-red-700'
+                ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
+                : 'bg-[#181818] border-[#FF1E2D]/50 text-[#FF1E2D]'
             }`}>
-              {profileMsg.type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+              {profileMsg.type === 'success' ? <CheckCircle2 size={16} className="text-emerald-400" /> : <AlertTriangle size={16} className="text-[#FF1E2D]" />}
               <span>{profileMsg.text}</span>
             </div>
           )}
@@ -320,32 +317,32 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
           <form onSubmit={handleSaveProfile} className="space-y-5">
             {/* Display Name */}
             <div>
-              <label className="block text-xs font-bold text-[#192837] mb-1.5 uppercase tracking-wider">
+              <label className="block text-[11px] font-bold text-[#A3A3A3] mb-1.5 uppercase tracking-wider">
                 Full Display Name
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. John Doe"
-                className="w-full px-4 py-2.5 rounded-xl border border-[#192837]/15 bg-[#FAF9F6] text-xs sm:text-sm font-semibold text-[#192837] focus:outline-none focus:ring-2 focus:ring-[#7342E2] focus:bg-white transition-all"
+                placeholder="e.g. Alex Mercer"
+                className="w-full px-4 py-2.5 rounded-xl border border-[#2A2A2A] bg-[#111111] text-xs sm:text-sm font-semibold text-[#F5F5F5] focus:outline-none focus:border-[#FF1E2D] focus:ring-1 focus:ring-[#FF1E2D]/30 transition-all"
                 required
               />
             </div>
 
             {/* Email (Readonly) */}
             <div>
-              <label className="block text-xs font-bold text-[#192837] mb-1.5 uppercase tracking-wider">
-                Registered Email (ID)
+              <label className="block text-[11px] font-bold text-[#A3A3A3] mb-1.5 uppercase tracking-wider">
+                Registered Operator Email (ID)
               </label>
               <div className="relative">
                 <input
                   type="email"
                   value={user?.email || ''}
                   disabled
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#192837]/10 bg-black/5 text-xs sm:text-sm font-semibold text-[#192837]/60 cursor-not-allowed"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#2A2A2A] bg-[#141414] text-xs sm:text-sm font-mono text-[#737373] cursor-not-allowed"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#192837]/40 bg-white/80 px-2 py-0.5 rounded-md border border-[#192837]/10">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-[#555555] bg-[#1F1F1F] px-2 py-0.5 rounded border border-[#2A2A2A]">
                   Fixed
                 </span>
               </div>
@@ -353,8 +350,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
 
             {/* Avatar Selector Presets */}
             <div>
-              <label className="block text-xs font-bold text-[#192837] mb-2 uppercase tracking-wider">
-                Choose Profile Avatar
+              <label className="block text-[11px] font-bold text-[#A3A3A3] mb-2 uppercase tracking-wider">
+                Choose Tactical Avatar
               </label>
               <div className="grid grid-cols-6 gap-2 sm:gap-3">
                 {PRESET_AVATARS.map((p) => {
@@ -367,8 +364,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                       title={p.name}
                       className={`relative rounded-xl overflow-hidden aspect-square border-2 transition-all p-0.5 cursor-pointer ${
                         isSelected
-                          ? 'border-[#7342E2] ring-2 ring-[#7342E2]/30 scale-105 shadow-md'
-                          : 'border-transparent hover:border-[#7342E2]/40 opacity-75 hover:opacity-100'
+                          ? 'border-[#FF1E2D] ring-2 ring-[#FF1E2D]/30 scale-105 shadow-md shadow-[#FF1E2D]/20'
+                          : 'border-transparent hover:border-[#FF1E2D]/40 opacity-70 hover:opacity-100'
                       }`}
                     >
                       <img src={p.url} alt={p.name} className="w-full h-full object-cover rounded-lg" />
@@ -380,7 +377,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
 
             {/* Custom Avatar URL or File Upload */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-[#192837] uppercase tracking-wider">
+              <label className="block text-[11px] font-bold text-[#A3A3A3] uppercase tracking-wider">
                 Or Upload Image / Custom URL
               </label>
               <div className="flex gap-2">
@@ -389,7 +386,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                   placeholder="https://example.com/avatar.jpg"
                   value={customAvatarInput}
                   onChange={(e) => setCustomAvatarInput(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-xl border border-[#192837]/15 bg-[#FAF9F6] text-xs font-medium text-[#192837] focus:outline-none focus:ring-2 focus:ring-[#7342E2]"
+                  className="flex-1 px-3 py-2 rounded-xl border border-[#2A2A2A] bg-[#111111] text-xs text-[#F5F5F5] focus:outline-none focus:border-[#FF1E2D]"
                 />
                 <button
                   type="button"
@@ -399,11 +396,11 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                       setCustomAvatarInput('')
                     }
                   }}
-                  className="px-3 py-2 rounded-xl bg-[#7342E2]/10 hover:bg-[#7342E2]/20 text-[#7342E2] text-xs font-bold cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl bg-[#FF1E2D]/10 hover:bg-[#FF1E2D]/20 border border-[#FF1E2D]/30 text-[#FF1E2D] text-xs font-bold cursor-pointer"
                 >
                   Apply
                 </button>
-                <label className="px-3 py-2 rounded-xl bg-[#FAF9F6] hover:bg-black/5 border border-[#192837]/15 text-[#192837] text-xs font-bold cursor-pointer flex items-center gap-1.5 shrink-0">
+                <label className="px-3 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] border border-[#2A2A2A] text-[#A3A3A3] hover:text-[#F5F5F5] text-xs font-bold cursor-pointer flex items-center gap-1.5 shrink-0 transition-colors">
                   <Camera size={14} />
                   <span>Upload File</span>
                   <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
@@ -416,37 +413,37 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
               disabled={savingProfile}
               text={savingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
               icon={savingProfile ? <RefreshCw size={16} className="animate-spin" /> : <ShieldCheck size={16} className="text-white" />}
-              className="w-full py-2.5 rounded-xl bg-[#7342E2] text-white font-bold text-xs sm:text-sm shadow-md shadow-[#7342E2]/20 border-[#7342E2]"
+              className="w-full py-2.5 rounded-xl bg-[#E50914] text-white font-bold text-xs sm:text-sm shadow-lg shadow-[#E50914]/20 border-[#E50914]"
             />
           </form>
         </div>
 
         {/* SECTION 2: PASSWORD CHANGE FORM */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#192837]/10 shadow-xs space-y-6">
-          <div className="flex items-center gap-3 pb-4 border-b border-[#192837]/10">
-            <div className="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold">
+        <div className="bg-[#0A0A0A] rounded-2xl p-6 sm:p-8 border border-[#2A2A2A] shadow-xl space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-[#2A2A2A]">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/25 flex items-center justify-center font-bold">
               <KeyRound size={20} />
             </div>
             <div>
-              <h2 className="font-heading text-lg font-bold text-[#192837]">Change Password</h2>
-              <p className="text-xs text-[#192837]/60">Update your account authentication credentials</p>
+              <h2 className="font-heading text-lg font-bold text-[#F5F5F5]">Change Password</h2>
+              <p className="text-xs text-[#737373]">Update your account authentication credentials</p>
             </div>
           </div>
 
           {passMsg && (
-            <div className={`p-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 border ${
+            <div className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border ${
               passMsg.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                : 'bg-red-50 border-red-200 text-red-700'
+                ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
+                : 'bg-[#181818] border-[#FF1E2D]/50 text-[#FF1E2D]'
             }`}>
-              {passMsg.type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+              {passMsg.type === 'success' ? <CheckCircle2 size={16} className="text-emerald-400" /> : <AlertTriangle size={16} className="text-[#FF1E2D]" />}
               <span>{passMsg.text}</span>
             </div>
           )}
 
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-[#192837] mb-1.5 uppercase tracking-wider">
+              <label className="block text-[11px] font-bold text-[#A3A3A3] mb-1.5 uppercase tracking-wider">
                 Current Password (Optional if OAuth)
               </label>
               <div className="relative">
@@ -455,12 +452,12 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="Enter current password"
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#192837]/15 bg-[#FAF9F6] text-xs sm:text-sm font-semibold text-[#192837] focus:outline-none focus:ring-2 focus:ring-[#7342E2] focus:bg-white transition-all"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#2A2A2A] bg-[#111111] text-xs sm:text-sm font-semibold text-[#F5F5F5] focus:outline-none focus:border-[#FF1E2D] focus:ring-1 focus:ring-[#FF1E2D]/30 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#192837]/40 hover:text-[#192837] cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#737373] hover:text-[#F5F5F5] cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -468,7 +465,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#192837] mb-1.5 uppercase tracking-wider">
+              <label className="block text-[11px] font-bold text-[#A3A3A3] mb-1.5 uppercase tracking-wider">
                 New Password (Min. 6 Characters)
               </label>
               <input
@@ -478,12 +475,12 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 placeholder="Enter strong new password"
                 required
                 minLength={6}
-                className="w-full px-4 py-2.5 rounded-xl border border-[#192837]/15 bg-[#FAF9F6] text-xs sm:text-sm font-semibold text-[#192837] focus:outline-none focus:ring-2 focus:ring-[#7342E2] focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 rounded-xl border border-[#2A2A2A] bg-[#111111] text-xs sm:text-sm font-semibold text-[#F5F5F5] focus:outline-none focus:border-[#FF1E2D] focus:ring-1 focus:ring-[#FF1E2D]/30 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#192837] mb-1.5 uppercase tracking-wider">
+              <label className="block text-[11px] font-bold text-[#A3A3A3] mb-1.5 uppercase tracking-wider">
                 Confirm New Password
               </label>
               <input
@@ -493,7 +490,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 placeholder="Re-enter new password"
                 required
                 minLength={6}
-                className="w-full px-4 py-2.5 rounded-xl border border-[#192837]/15 bg-[#FAF9F6] text-xs sm:text-sm font-semibold text-[#192837] focus:outline-none focus:ring-2 focus:ring-[#7342E2] focus:bg-white transition-all"
+                className="w-full px-4 py-2.5 rounded-xl border border-[#2A2A2A] bg-[#111111] text-xs sm:text-sm font-semibold text-[#F5F5F5] focus:outline-none focus:border-[#FF1E2D] focus:ring-1 focus:ring-[#FF1E2D]/30 transition-all"
               />
             </div>
 
@@ -503,7 +500,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 disabled={changingPass}
                 text={changingPass ? 'Updating Credentials...' : 'Update Password'}
                 icon={changingPass ? <RefreshCw size={16} className="animate-spin" /> : <Lock size={16} className="text-white" />}
-                className="w-full py-2.5 rounded-xl bg-[#192837] text-white font-bold text-xs sm:text-sm shadow-md border-[#192837]"
+                className="w-full py-2.5 rounded-xl bg-[#181818] hover:bg-[#222222] text-white font-bold text-xs sm:text-sm shadow-md border-[#2A2A2A]"
               />
             </div>
           </form>
@@ -511,61 +508,61 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
       </div>
 
       {/* SECTION 3: CENTRALIZED GMAIL CONNECTION & OAUTH MANAGEMENT */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#192837]/10 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#192837]/10">
+      <div className="bg-[#0A0A0A] rounded-2xl p-6 sm:p-8 border border-[#2A2A2A] shadow-xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2A2A2A]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-red-500/10 text-red-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-[#FF1E2D]/10 text-[#FF1E2D] border border-[#FF1E2D]/25 flex items-center justify-center font-bold">
               <Mail size={20} />
             </div>
             <div>
-              <h2 className="font-heading text-lg font-bold text-[#192837]">Gmail Ingestion & OAuth Integration</h2>
-              <p className="text-xs text-[#192837]/60">
+              <h2 className="font-heading text-lg font-bold text-[#F5F5F5]">Gmail Ingestion & OAuth Integration</h2>
+              <p className="text-xs text-[#737373]">
                 Authorize Google Workspace API to enable automated live threat inspection
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold border ${
+            <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold border ${
               isGmailConnected
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                : 'bg-red-50 text-red-700 border-red-200'
+                ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/50'
+                : 'bg-[#181818] text-[#FF1E2D] border-[#FF1E2D]/30'
             }`}>
-              <span className={`w-2 h-2 rounded-full ${isGmailConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+              <span className={`w-2 h-2 rounded-full ${isGmailConnected ? 'bg-emerald-400 animate-pulse' : 'bg-[#FF1E2D]'}`} />
               {isGmailConnected ? 'Connected & Authorized' : 'Not Connected'}
             </span>
           </div>
         </div>
 
         {gmailMsg && (
-          <div className={`p-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 border ${
+          <div className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border ${
             gmailMsg.type === 'success'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-              : 'bg-red-50 border-red-200 text-red-700'
+              ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
+              : 'bg-[#181818] border-[#FF1E2D]/50 text-[#FF1E2D]'
           }`}>
-            {gmailMsg.type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+            {gmailMsg.type === 'success' ? <CheckCircle2 size={16} className="text-emerald-400" /> : <AlertTriangle size={16} className="text-[#FF1E2D]" />}
             <span>{gmailMsg.text}</span>
           </div>
         )}
 
         {/* In-Product Google Limited Use Disclosure */}
-        <div className="p-4 rounded-xl bg-[#7342E2]/5 border border-[#7342E2]/15 text-xs text-[#192837]/80 flex items-start gap-3">
-          <ShieldCheck size={18} className="text-[#7342E2] mt-0.5 shrink-0" />
+        <div className="p-4 rounded-xl bg-[#111111] border border-[#2A2A2A] text-xs text-[#A3A3A3] flex items-start gap-3">
+          <Shield size={18} className="text-[#FF1E2D] mt-0.5 shrink-0" />
           <div className="space-y-1">
-            <p className="font-bold text-[#192837]">Google API Services User Data Policy & Limited Use Disclosure</p>
-            <p className="leading-relaxed text-[11px] sm:text-xs">
-              By connecting Gmail, you authorize CyberTrace to access email metadata and message text in read-only mode (<code className="font-mono bg-white px-1 rounded">gmail.readonly</code>) strictly to perform automated security threat detection. CyberTrace adheres to the Google API Services User Data Policy, including Limited Use requirements. Your email data is never sold, never used for advertising, and never used to train generalized AI models.
+            <p className="font-bold text-[#F5F5F5]">Google API Services User Data Policy & Limited Use Disclosure</p>
+            <p className="leading-relaxed text-[11px] sm:text-xs text-[#737373]">
+              By connecting Gmail, you authorize CyberTrace to access email metadata and message text in read-only mode (<code className="font-mono bg-[#181818] text-[#FF1E2D] px-1 py-0.5 rounded border border-[#2A2A2A]">gmail.readonly</code>) strictly to perform automated security threat detection. CyberTrace adheres to the Google API Services User Data Policy, including Limited Use requirements. Your email data is never sold, never used for advertising, and never used to train generalized AI models.
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Connection Actions */}
-          <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/10 space-y-4">
-            <h3 className="font-heading text-sm font-bold text-[#192837]">Connection Status</h3>
-            <p className="text-xs text-[#192837]/70 leading-relaxed">
+          <div className="p-5 rounded-xl bg-[#111111] border border-[#2A2A2A] space-y-4">
+            <h3 className="font-heading text-sm font-bold text-[#F5F5F5]">Connection Status</h3>
+            <p className="text-xs text-[#A3A3A3] leading-relaxed">
               {isGmailConnected
-                ? `Authorized account: ${gmailStatus?.email_address || user?.email}. Token refresh active.`
+                ? `Authorized account: ${gmailStatus?.email_address || user?.email}. Token refresh daemon active.`
                 : 'Connect your Gmail account via Google OAuth 2.0 to scan inbox emails directly with Gemini AI security model.'}
             </p>
 
@@ -577,23 +574,23 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                       <InteractiveHoverButton
                         disabled={disconnectingGmail}
                         text={disconnectingGmail ? 'Disconnecting...' : 'Disconnect Account'}
-                        icon={disconnectingGmail ? <RefreshCw size={14} className="animate-spin" /> : <Unlink size={14} className="text-amber-800" />}
-                        className="px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 border-amber-200 text-xs font-bold shadow-xs"
+                        icon={disconnectingGmail ? <RefreshCw size={14} className="animate-spin" /> : <Unlink size={14} className="text-amber-400" />}
+                        className="px-4 py-2.5 rounded-xl bg-amber-950/40 text-amber-400 border-amber-800/40 text-xs font-bold shadow-xs hover:bg-amber-900/50"
                       />
                     </div>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className="bg-[#0A0A0A] border-[#2A2A2A] text-[#F5F5F5]">
                     <AlertDialogHeader>
-                      <AlertDialogMedia className="bg-amber-50 text-amber-600 border-amber-200">
+                      <AlertDialogMedia className="bg-amber-950/40 text-amber-400 border-amber-800/40">
                         <Unlink size={24} />
                       </AlertDialogMedia>
-                      <AlertDialogTitle>Disconnect Google Workspace / Gmail?</AlertDialogTitle>
-                      <AlertDialogDescription>
+                      <AlertDialogTitle className="text-[#F5F5F5]">Disconnect Google Workspace / Gmail?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-[#A3A3A3]">
                         This will immediately revoke active Google OAuth 2.0 access, pause the 60-second automated inbox threat monitoring, and stop real-time alerts. You can reconnect your Gmail account at any time.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Keep Connected</AlertDialogCancel>
+                      <AlertDialogCancel className="bg-[#181818] border-[#2A2A2A] text-[#F5F5F5] hover:bg-[#222222]">Keep Connected</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDisconnectGmail}
                         className="bg-amber-600 hover:bg-amber-700 text-white"
@@ -609,37 +606,37 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                   disabled={connectingGmail}
                   text={connectingGmail ? 'Redirecting to Google...' : 'Connect Gmail Account'}
                   icon={connectingGmail ? <RefreshCw size={14} className="animate-spin" /> : <ExternalLink size={14} className="text-white" />}
-                  className="px-5 py-2.5 rounded-xl bg-[#7342E2] text-white text-xs font-bold shadow-md shadow-[#7342E2]/20 border-[#7342E2]"
+                  className="px-5 py-2.5 rounded-xl bg-[#E50914] text-white text-xs font-bold shadow-md shadow-[#E50914]/20 border-[#E50914]"
                 />
               )}
             </div>
           </div>
 
           {/* Automated Monitoring Controls */}
-          <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/10 space-y-4">
+          <div className="p-5 rounded-xl bg-[#111111] border border-[#2A2A2A] space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-heading text-sm font-bold text-[#192837]">Automated Background Monitoring</h3>
+                  <h3 className="font-heading text-sm font-bold text-[#F5F5F5]">Automated Background Monitoring</h3>
                   {localMonitoringActive && isGmailConnected ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 shadow-xs">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-emerald-950/50 text-emerald-400 border border-emerald-800/60 shadow-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                       ACTIVE (60s SYNC)
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#192837]/10 text-[#192837]/60">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#181818] text-[#737373] border border-[#2A2A2A]">
                       PAUSED / MANUAL
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-[#192837]/70 leading-relaxed">
+                <p className="text-xs text-[#A3A3A3] leading-relaxed">
                   Automatically syncs your Gmail inbox every 60s, executes Gemini AI threat analysis, and flags zero-day exploits.
                 </p>
               </div>
 
               {/* Animated Toggle Switch */}
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-xs font-bold text-[#192837]/80 select-none">
+                <span className="text-xs font-mono font-bold text-[#A3A3A3] select-none">
                   {localMonitoringActive && isGmailConnected ? 'ON' : 'OFF'}
                 </span>
                 <button
@@ -655,12 +652,12 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                       ? 'Click to pause automatic 60s monitoring'
                       : 'Click to enable automatic 60s monitoring'
                   }
-                  className={`relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full p-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#7342E2]/30 active:scale-95 ${
+                  className={`relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full p-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#FF1E2D]/40 active:scale-95 ${
                     !isGmailConnected
-                      ? 'bg-gray-200 cursor-not-allowed opacity-60'
+                      ? 'bg-[#1F1F1F] cursor-not-allowed opacity-50'
                       : localMonitoringActive
-                      ? 'bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] shadow-md shadow-[#7342E2]/30'
-                      : 'bg-gray-300 hover:bg-gray-400'
+                      ? 'bg-gradient-to-r from-[#FF1E2D] to-[#E50914] shadow-md shadow-[#E50914]/30'
+                      : 'bg-[#2A2A2A] hover:bg-[#333333]'
                   }`}
                 >
                   <span className="sr-only">Toggle automated monitoring</span>
@@ -672,11 +669,11 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                     className="pointer-events-none flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md"
                   >
                     {togglingMonitor ? (
-                      <RefreshCw size={11} className="animate-spin text-[#7342E2]" />
+                      <RefreshCw size={11} className="animate-spin text-[#E50914]" />
                     ) : (localMonitoringActive && isGmailConnected) ? (
-                      <span className="h-2 w-2 rounded-full bg-[#7342E2]" />
+                      <span className="h-2 w-2 rounded-full bg-[#E50914]" />
                     ) : (
-                      <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-neutral-500" />
                     )}
                   </span>
                 </button>
@@ -684,15 +681,15 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-              <div className="p-3 bg-white rounded-xl border border-[#192837]/10">
-                <span className="text-[10px] text-[#192837]/60 block uppercase font-bold">Auto-Processed</span>
-                <span className="font-extrabold text-sm text-[#192837] mt-0.5 block">
+              <div className="p-3 bg-[#181818] rounded-xl border border-[#2A2A2A]">
+                <span className="text-[10px] text-[#737373] block uppercase font-mono font-bold">Auto-Processed</span>
+                <span className="font-extrabold text-sm font-mono text-[#F5F5F5] mt-0.5 block">
                   {monitoringStatus?.emails_auto_processed ?? gmailStatus?.emails_auto_processed ?? 0} emails
                 </span>
               </div>
-              <div className="p-3 bg-white rounded-xl border border-[#192837]/10">
-                <span className="text-[10px] text-[#192837]/60 block uppercase font-bold">Warnings Dispatched</span>
-                <span className="font-extrabold text-sm text-orange-600 mt-0.5 block">
+              <div className="p-3 bg-[#181818] rounded-xl border border-[#2A2A2A]">
+                <span className="text-[10px] text-[#737373] block uppercase font-mono font-bold">Warnings Dispatched</span>
+                <span className="font-extrabold text-sm font-mono text-[#FF1E2D] mt-0.5 block">
                   {monitoringStatus?.threats_detected ?? gmailStatus?.warnings_sent ?? 0} threats
                 </span>
               </div>
@@ -701,14 +698,14 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
         </div>
 
         {/* Data Deletion & Privacy Control Section */}
-        <div className="p-5 rounded-2xl bg-red-50/50 border border-red-200/70 space-y-3">
+        <div className="p-5 rounded-xl bg-[#140808] border border-[#FF1E2D]/25 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 className="font-heading text-sm font-bold text-red-900 flex items-center gap-1.5">
-                <Trash2 size={16} className="text-red-600" />
+              <h3 className="font-heading text-sm font-bold text-[#FF1E2D] flex items-center gap-2">
+                <Trash2 size={16} />
                 Data Retention & Right to Erasure
               </h3>
-              <p className="text-xs text-red-800/80 mt-1 leading-relaxed max-w-xl">
+              <p className="text-xs text-[#A3A3A3] mt-1 leading-relaxed max-w-xl">
                 Permanently purge all your stored email scan history, threat intelligence logs, alert records, and Gmail OAuth credentials from our encrypted database.
               </p>
             </div>
@@ -718,26 +715,26 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({
                 <button
                   type="button"
                   disabled={deletingData}
-                  className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0 disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-[#E50914] hover:bg-[#FF1E2D] text-white text-xs font-bold transition-all shadow-md cursor-pointer shrink-0 disabled:opacity-50"
                 >
                   {deletingData ? 'Deleting...' : 'Delete Stored Threat Data'}
                 </button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent className="bg-[#0A0A0A] border-[#2A2A2A] text-[#F5F5F5]">
                 <AlertDialogHeader>
-                  <AlertDialogMedia className="bg-red-50 text-red-600 border-red-200">
+                  <AlertDialogMedia className="bg-[#FF1E2D]/15 text-[#FF1E2D] border-[#FF1E2D]/30">
                     <Trash2 size={24} />
                   </AlertDialogMedia>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogTitle className="text-[#F5F5F5]">Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-[#A3A3A3]">
                     This action cannot be undone. This will permanently purge all your scanned email history, threat triage telemetry, and encrypted Gmail tokens from our servers.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className="bg-[#181818] border-[#2A2A2A] text-[#F5F5F5] hover:bg-[#222222]">Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDeleteData}
-                    className="bg-red-600 hover:bg-red-700 text-white"
+                    className="bg-[#E50914] hover:bg-[#FF1E2D] text-white"
                   >
                     Confirm Permanent Deletion
                   </AlertDialogAction>

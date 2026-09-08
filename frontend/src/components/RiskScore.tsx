@@ -12,8 +12,8 @@ const riskLevels = [
     key: 'safe',
     level: 'Safe',
     score: 12,
-    color: 'text-emerald-700',
-    bgBadge: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    color: 'text-emerald-400',
+    bgBadge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     barColor: 'bg-emerald-500',
     category: 'Legitimate Transaction Notice',
     confidence: '99.4%',
@@ -32,8 +32,8 @@ const riskLevels = [
     key: 'suspicious',
     level: 'Suspicious',
     score: 54,
-    color: 'text-amber-700',
-    bgBadge: 'bg-amber-100 text-amber-800 border-amber-300',
+    color: 'text-amber-400',
+    bgBadge: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     barColor: 'bg-amber-500',
     category: 'Marketing Tracking & Aggressive Urgency',
     confidence: '88.2%',
@@ -52,8 +52,8 @@ const riskLevels = [
     key: 'high-risk',
     level: 'High Risk',
     score: 82,
-    color: 'text-orange-700',
-    bgBadge: 'bg-orange-100 text-orange-800 border-orange-300',
+    color: 'text-orange-400',
+    bgBadge: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
     barColor: 'bg-orange-500',
     category: 'Credential Harvesting & Fake Login Portal',
     confidence: '95.1%',
@@ -72,9 +72,9 @@ const riskLevels = [
     key: 'critical',
     level: 'Critical',
     score: 96,
-    color: 'text-rose-700',
-    bgBadge: 'bg-rose-100 text-rose-800 border-rose-300',
-    barColor: 'bg-rose-600',
+    color: 'text-[#FF1E2D]',
+    bgBadge: 'bg-[#FF1E2D]/10 text-[#FF1E2D] border-[#FF1E2D]/20',
+    barColor: 'bg-[#FF1E2D]',
     category: 'Executive Impersonation & Wire Fraud (BEC)',
     confidence: '98.7%',
     subject: 'CONFIDENTIAL: Urgent Acquisition Wire Settlement Needed',
@@ -95,17 +95,17 @@ export const RiskScore: React.FC = () => {
   const current = riskLevels.find((r) => r.key === selectedKey) || riskLevels[3]
 
   return (
-    <section id="risk-score" className="py-24 px-5 sm:px-8 bg-[#FAF9F6] border-b border-[#192837]/6">
+    <section id="risk-score" className="py-24 px-5 sm:px-8 bg-[#050505] border-b border-[#2A2A2A]">
       <div className="max-w-[1280px] mx-auto">
         <ScrollReveal delay={0.05}>
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#FF1E2D] bg-[#FF1E2D]/10 border border-[#FF1E2D]/20 px-3.5 py-1.5 rounded-full inline-block mb-3">
               Multi-Variable Threat Assessment
             </span>
-            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
+            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#F5F5F5] tracking-tight mb-4">
               Dynamic Risk Scoring Engine
             </h2>
-            <p className="font-body text-base text-[#192837]/75 leading-relaxed">
+            <p className="font-body text-base text-[#A3A3A3] leading-relaxed">
               CyberTrace assigns a precise 0–100 risk score based on header authenticity, domain reputation, NLP intent
               analysis, and geolocation telemetry.
             </p>
@@ -122,10 +122,10 @@ export const RiskScore: React.FC = () => {
                   key={lvl.key}
                   type="button"
                   onClick={() => setSelectedKey(lvl.key)}
-                  className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer shadow-xs ${
+                  className={`px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? 'bg-[#192837] text-white shadow-md scale-105'
-                      : 'bg-white text-[#192837] border border-[#192837]/10 hover:bg-[#FAF9F6]'
+                      ? 'bg-[#E50914] text-white shadow-lg shadow-[#E50914]/25 border border-[#FF1E2D] scale-105'
+                      : 'bg-[#111111] text-[#A3A3A3] border border-[#2A2A2A] hover:bg-[#181818] hover:text-[#F5F5F5]'
                   }`}
                 >
                   {lvl.level} ({lvl.score}/100)
@@ -141,56 +141,56 @@ export const RiskScore: React.FC = () => {
             badge={`${current.level.toUpperCase()} SEVERITY`}
             title={`Overall Risk Score: ${current.score}/100`}
             description={`Threat Class: ${current.category} • Model Confidence: ${current.confidence}`}
-            className="max-w-4xl mx-auto p-7 sm:p-10 text-left shadow-2xl"
+            className="max-w-4xl mx-auto p-7 sm:p-10 text-left bg-[#111111] border-[#2A2A2A] shadow-2xl"
           >
             {/* Progress Bar */}
-            <div className="w-full bg-[#FAF9F6] h-3 rounded-full overflow-hidden border border-[#192837]/8 mb-8 mt-4">
+            <div className="w-full bg-[#181818] h-3 rounded-full overflow-hidden border border-[#2A2A2A] mb-8 mt-4">
               <div
-                className={`h-full ${current.barColor} transition-all duration-500 rounded-full`}
+                className={`h-full ${current.barColor} transition-all duration-500 rounded-full shadow-sm`}
                 style={{ width: `${current.score}%` }}
               />
             </div>
 
             {/* Email Subject & Sender Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8">
-                <span className="text-[11px] font-bold text-[#192837]/50 uppercase tracking-wide block mb-1">
+              <div className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A]">
+                <span className="text-[11px] font-bold text-[#737373] uppercase tracking-wide block mb-1">
                   Analyzed Subject Line
                 </span>
-                <p className="text-xs sm:text-sm font-bold text-[#192837]">{current.subject}</p>
+                <p className="text-xs sm:text-sm font-bold text-[#F5F5F5]">{current.subject}</p>
               </div>
-              <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8">
-                <span className="text-[11px] font-bold text-[#192837]/50 uppercase tracking-wide block mb-1">
+              <div className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A]">
+                <span className="text-[11px] font-bold text-[#737373] uppercase tracking-wide block mb-1">
                   Sender & Infrastructure
                 </span>
-                <p className="text-xs font-mono font-semibold text-[#192837] truncate">{current.sender}</p>
-                <p className="text-[11px] text-[#192837]/70 font-mono mt-0.5">{current.ip}</p>
+                <p className="text-xs font-mono font-semibold text-[#F5F5F5] truncate">{current.sender}</p>
+                <p className="text-[11px] text-[#A3A3A3] font-mono mt-0.5">{current.ip}</p>
               </div>
             </div>
 
             {/* Reason for Classification */}
-            <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#192837]/8 mb-6">
-              <div className="flex items-center gap-2 text-xs font-bold text-[#192837] mb-2 uppercase tracking-wide">
-                <Info size={15} className="text-[#7342E2]" />
+            <div className="p-5 rounded-2xl bg-[#181818] border border-[#2A2A2A] mb-6">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#F5F5F5] mb-2 uppercase tracking-wide">
+                <Info size={15} className="text-[#FF1E2D]" />
                 Reason for Classification
               </div>
-              <p className="text-xs sm:text-sm text-[#192837]/80 leading-relaxed font-body">
+              <p className="text-xs sm:text-sm text-[#A3A3A3] leading-relaxed font-body">
                 {current.reason}
               </p>
             </div>
 
             {/* Detected Indicators Grid */}
-            <div className="pt-4 border-t border-[#192837]/10">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#192837]/60 mb-3">
+            <div className="pt-4 border-t border-[#2A2A2A]">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#737373] mb-3">
                 <Layers size={14} /> Detected Forensic Indicators
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {current.indicators.map((ind) => (
                   <div
                     key={ind}
-                    className="flex items-center gap-2 text-xs font-medium text-[#192837] bg-[#FAF9F6] p-2.5 rounded-xl border border-[#192837]/6"
+                    className="flex items-center gap-2 text-xs font-medium text-[#F5F5F5] bg-[#181818] p-2.5 rounded-xl border border-[#2A2A2A]"
                   >
-                    <CheckCircle size={14} className="text-[#7342E2] shrink-0" />
+                    <CheckCircle size={14} className="text-[#FF1E2D] shrink-0" />
                     <span>{ind}</span>
                   </div>
                 ))}

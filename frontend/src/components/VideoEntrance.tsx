@@ -8,7 +8,7 @@ const VIDEO_URL =
 
 export const VideoEntrance: React.FC = () => {
   return (
-    <section className="relative w-full bg-[#FAF9F6] border-b border-[#192837]/10 overflow-hidden">
+    <section className="relative w-full bg-[#050505] border-b border-[#2A2A2A] overflow-hidden">
       <ScrollExpand
         src={VIDEO_URL}
         mediaType="video"
@@ -23,12 +23,12 @@ export const VideoEntrance: React.FC = () => {
         scrollDistance={1.0}
         holdDistance={0.3}
         smoothing={0.1}
-        overlayScrim={0.4}
+        overlayScrim={0.5}
         className="w-full"
       >
         {/* Overlay content that smoothly fades in once the video expands to full bleed */}
         <div className="w-full max-w-4xl mx-auto px-6 flex flex-col items-center text-center z-20">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold uppercase tracking-widest text-[#a78bfa] mb-6 border border-white/20 shadow-md">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-xs font-mono font-bold uppercase tracking-widest text-[#FF1E2D] mb-6 border border-[#FF1E2D]/40 shadow-lg shadow-[#FF1E2D]/20">
             <ShieldCheck size={15} />
             <span>Cyber Defense Platform</span>
           </div>
@@ -54,7 +54,7 @@ export const VideoEntrance: React.FC = () => {
 
           <a
             href="#hero-content"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-bold text-white bg-[#7342E2] hover:brightness-110 active:scale-95 shadow-xl transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-bold uppercase tracking-wider text-white bg-[#E50914] hover:bg-[#FF1E2D] active:scale-95 shadow-xl shadow-[#E50914]/30 transition-all cursor-pointer"
           >
             <span>Explore Platform</span>
             <ArrowDown size={16} />

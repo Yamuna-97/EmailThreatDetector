@@ -27,7 +27,7 @@ export const EmailsDataTable: React.FC<EmailsDataTableProps> = ({
           <button
             type="button"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="flex items-center gap-1 font-bold hover:text-[#7342E2] cursor-pointer"
+            className="flex items-center gap-1 font-bold hover:text-[#FF1E2D] cursor-pointer"
           >
             <span>Sender</span>
             <ArrowUpDown className="h-3 w-3" />
@@ -35,10 +35,10 @@ export const EmailsDataTable: React.FC<EmailsDataTableProps> = ({
         ),
         cell: ({ row }) => (
           <div className="max-w-[200px] truncate space-y-0.5">
-            <span className="font-bold text-[#192837] block truncate">
+            <span className="font-bold text-[#F5F5F5] block truncate">
               {row.original.sender || "Unknown Sender"}
             </span>
-            <span className="text-[11px] font-mono text-[#192837]/50 block truncate">
+            <span className="text-[11px] font-mono text-[#737373] block truncate">
               {row.original.headers?.from_header || ""}
             </span>
           </div>
@@ -49,10 +49,10 @@ export const EmailsDataTable: React.FC<EmailsDataTableProps> = ({
         header: "Subject & Message Snippet",
         cell: ({ row }) => (
           <div className="max-w-md space-y-0.5">
-            <span className="font-bold text-[#192837] block line-clamp-1">
+            <span className="font-bold text-[#F5F5F5] block line-clamp-1">
               {row.original.subject || "(No Subject)"}
             </span>
-            <p className="text-[11px] text-[#192837]/60 line-clamp-1 font-body">
+            <p className="text-[11px] text-[#A3A3A3] line-clamp-1 font-body">
               {row.original.snippet || row.original.plain_text_body || "No preview available"}
             </p>
           </div>
@@ -65,8 +65,8 @@ export const EmailsDataTable: React.FC<EmailsDataTableProps> = ({
           const matchingThreat = threats.find((t) => t.email_id === row.original.id)
           if (!matchingThreat) {
             return (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                <CheckCircle2 size={11} className="text-emerald-600" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                <CheckCircle2 size={11} className="text-emerald-400" />
                 CLEAN / BENIGN
               </span>
             )
@@ -74,12 +74,12 @@ export const EmailsDataTable: React.FC<EmailsDataTableProps> = ({
 
           const sevColor =
             matchingThreat.severity === "critical"
-              ? "bg-red-50 text-red-700 border-red-200"
+              ? "bg-[#FF1E2D]/10 text-[#FF1E2D] border-[#FF1E2D]/30"
               : matchingThreat.severity === "high"
-              ? "bg-orange-50 text-orange-700 border-orange-200"
+              ? "bg-[#FF5A36]/10 text-[#FF5A36] border-[#FF5A36]/30"
               : matchingThreat.severity === "medium"
-              ? "bg-amber-50 text-amber-700 border-amber-200"
-              : "bg-emerald-50 text-emerald-700 border-emerald-200"
+              ? "bg-[#FFB020]/10 text-[#FFB020] border-[#FFB020]/30"
+              : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
 
           return (
             <div className="flex flex-col gap-0.5">
@@ -87,7 +87,7 @@ export const EmailsDataTable: React.FC<EmailsDataTableProps> = ({
                 <ShieldAlert size={10} />
                 {matchingThreat.severity}
               </span>
-              <span className="text-[10px] font-mono font-bold text-red-600">
+              <span className="text-[10px] font-mono font-bold text-[#FF1E2D]">
                 Score: {matchingThreat.risk_score}/100
               </span>
             </div>
@@ -100,7 +100,7 @@ export const EmailsDataTable: React.FC<EmailsDataTableProps> = ({
           <button
             type="button"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="flex items-center gap-1 font-bold hover:text-[#7342E2] cursor-pointer"
+            className="flex items-center gap-1 font-bold hover:text-[#FF1E2D] cursor-pointer"
           >
             <span>Received</span>
             <ArrowUpDown className="h-3 w-3" />
@@ -110,7 +110,7 @@ export const EmailsDataTable: React.FC<EmailsDataTableProps> = ({
           const date = row.original.date
             ? new Date(row.original.date).toLocaleDateString()
             : "Recent"
-          return <span className="text-xs text-[#192837]/60 whitespace-nowrap">{date}</span>
+          return <span className="text-xs text-[#737373] whitespace-nowrap">{date}</span>
         },
       },
       {
@@ -125,8 +125,8 @@ export const EmailsDataTable: React.FC<EmailsDataTableProps> = ({
                 onClick={() => onSelectEmail(row.original)}
                 className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-2xs ${
                   isSelected
-                    ? "bg-[#7342E2] text-white"
-                    : "bg-white border border-[#192837]/15 text-[#192837] hover:border-[#7342E2] hover:text-[#7342E2]"
+                    ? "bg-[#E50914] text-white"
+                    : "bg-[#181818] border border-[#2A2A2A] text-[#F5F5F5] hover:border-[#FF1E2D] hover:text-[#FF1E2D]"
                 }`}
               >
                 <Eye size={12} />
@@ -150,3 +150,5 @@ export const EmailsDataTable: React.FC<EmailsDataTableProps> = ({
     />
   )
 }
+
+export default EmailsDataTable

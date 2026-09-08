@@ -27,29 +27,27 @@ export interface MapProps {
   onClick?: (e: maplibregl.MapMouseEvent) => void
 }
 
-// Ultra-reliable high-resolution basemap styles (Raster tiles from CARTO & OpenStreetMap)
+// Ultra-reliable high-resolution basemap styles for enterprise SOC
 export const MAP_STYLES = {
-  voyager: {
+  darkCyber: {
     version: 8,
     sources: {
-      'carto-voyager': {
+      'esri-dark': {
         type: 'raster',
         tiles: [
-          'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-          'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-          'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'
+          'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
         ],
         tileSize: 256,
-        attribution: '&copy; CARTO &copy; OpenStreetMap'
+        attribution: 'Esri &copy; OpenStreetMap'
       }
     },
     layers: [
       {
-        id: 'carto-voyager-layer',
+        id: 'esri-dark-layer',
         type: 'raster',
-        source: 'carto-voyager',
+        source: 'esri-dark',
         minzoom: 0,
-        maxzoom: 20
+        maxzoom: 16
       }
     ]
   },
@@ -77,15 +75,15 @@ export const MAP_STYLES = {
       }
     ]
   },
-  positron: {
+  voyager: {
     version: 8,
     sources: {
-      'carto-light': {
+      'carto-voyager': {
         type: 'raster',
         tiles: [
-          'https://a.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}@2x.png',
-          'https://b.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}@2x.png',
-          'https://c.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}@2x.png'
+          'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+          'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+          'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'
         ],
         tileSize: 256,
         attribution: '&copy; CARTO &copy; OpenStreetMap'
@@ -93,9 +91,9 @@ export const MAP_STYLES = {
     },
     layers: [
       {
-        id: 'carto-light-layer',
+        id: 'carto-voyager-layer',
         type: 'raster',
-        source: 'carto-light',
+        source: 'carto-voyager',
         minzoom: 0,
         maxzoom: 20
       }
@@ -132,7 +130,7 @@ export const Map: React.FC<MapProps> = ({
   maxZoom = 18,
   pitch = 0,
   bearing = 0,
-  mapStyle = MAP_STYLES.voyager,
+  mapStyle = MAP_STYLES.darkCyber,
   className = 'w-full h-full min-h-[460px] relative rounded-2xl overflow-hidden',
   style,
   children,

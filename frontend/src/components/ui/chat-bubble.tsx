@@ -49,7 +49,7 @@ export function ChatBubbleMessage({
     <div
       className={cn(
         "rounded-2xl p-3 text-sm leading-relaxed",
-        variant === "sent" ? "bg-[#7342E2] text-white" : "bg-white border border-[#192837]/10 text-[#192837] shadow-sm",
+        variant === "sent" ? "bg-[#E50914] text-white font-medium" : "bg-[#181818] border border-[#2A2A2A] text-[#F5F5F5] shadow-sm",
         className
       )}
     >
@@ -76,9 +76,9 @@ export function ChatBubbleAvatar({
   className,
 }: ChatBubbleAvatarProps) {
   return (
-    <Avatar className={cn("h-8 w-8 shrink-0", className)}>
+    <Avatar className={cn("h-8 w-8 shrink-0 border border-[#2A2A2A]", className)}>
       {src && <AvatarImage src={src} />}
-      <AvatarFallback className="bg-[#7342E2]/15 text-[#7342E2] font-bold text-xs">{fallback}</AvatarFallback>
+      <AvatarFallback className="bg-[#181818] text-[#FF1E2D] font-bold text-xs">{fallback}</AvatarFallback>
     </Avatar>
   )
 }
@@ -98,7 +98,7 @@ export function ChatBubbleAction({
     <Button
       variant="ghost"
       size="icon"
-      className={cn("h-6 w-6 text-[#192837]/60 hover:text-[#192837] hover:bg-[#192837]/5", className)}
+      className={cn("h-6 w-6 text-[#737373] hover:text-[#F5F5F5] hover:bg-[#181818]", className)}
       onClick={onClick}
     >
       {icon}

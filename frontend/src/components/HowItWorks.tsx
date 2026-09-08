@@ -29,17 +29,17 @@ const steps = [
 
 export const HowItWorks: React.FC = () => {
   return (
-    <section id="how-it-works" className="py-24 px-5 sm:px-8 bg-[#FAF9F6] border-b border-[#192837]/6">
+    <section id="how-it-works" className="py-24 px-5 sm:px-8 bg-[#050505] border-b border-[#2A2A2A]">
       <div className="max-w-[1280px] mx-auto">
         <ScrollReveal delay={0.05}>
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#7342E2] bg-[#7342E2]/10 px-3.5 py-1.5 rounded-full inline-block mb-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#FF1E2D] bg-[#FF1E2D]/10 border border-[#FF1E2D]/20 px-3.5 py-1.5 rounded-full inline-block mb-3">
               Execution Flow Pipeline
             </span>
-            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#192837] tracking-tight mb-4">
+            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#F5F5F5] tracking-tight mb-4">
               How CyberTrace Operates End-to-End
             </h2>
-            <p className="font-body text-base text-[#192837]/75 leading-relaxed">
+            <p className="font-body text-base text-[#A3A3A3] leading-relaxed">
               From initial OAuth inbox connection to forensic timeline generation, discover the 10-stage automated workflow
               that powers our cyber defense platform.
             </p>
@@ -56,10 +56,10 @@ export const HowItWorks: React.FC = () => {
                   badge={`STEP ${s.step}`}
                   title={s.title}
                   description={s.desc}
-                  className="p-5 text-left flex flex-col justify-between"
+                  className="p-5 text-left flex flex-col justify-between bg-[#111111] border-[#2A2A2A] hover:border-[#FF1E2D]/40"
                 >
-                  <div className="pt-3 border-t border-[#192837]/6 flex justify-end">
-                    <div className="p-2 rounded-xl bg-[#FAF9F6] text-[#7342E2]">
+                  <div className="pt-3 border-t border-[#2A2A2A] flex justify-end">
+                    <div className="p-2 rounded-xl bg-[#181818] border border-[#2A2A2A] text-[#FF1E2D]">
                       <Icon size={18} />
                     </div>
                   </div>

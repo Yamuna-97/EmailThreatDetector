@@ -86,7 +86,7 @@ export const Logo = () => {
         animate={{ opacity: 1 }}
         className="font-extrabold text-base text-[#192837] whitespace-pre font-heading"
       >
-        Cyber<span className="text-[#7342E2]">Trace</span>
+        Cyber<span className="text-[#FF1E2D]">Trace</span>
       </motion.span>
     </div>
   );

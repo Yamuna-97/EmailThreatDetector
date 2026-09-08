@@ -18,7 +18,7 @@ const InteractiveHoverButton = React.forwardRef<
     <button
       ref={ref}
       className={cn(
-        "group relative min-w-[8rem] px-5 py-2.5 cursor-pointer overflow-hidden rounded-full border border-[#7342E2]/30 bg-white text-[#192837] text-center text-xs sm:text-sm font-semibold shadow-sm transition-all duration-300 hover:border-[#7342E2] hover:shadow-md hover:shadow-[#7342E2]/20 active:scale-95 flex items-center justify-center",
+        "group relative min-w-[8rem] px-5 py-2.5 cursor-pointer overflow-hidden rounded-full border border-[#2A2A2A] bg-[#181818] text-[#F5F5F5] text-center text-xs sm:text-sm font-semibold shadow-sm transition-all duration-300 hover:border-[#E50914] hover:shadow-md hover:shadow-[#E50914]/25 active:scale-95 flex items-center justify-center",
         className,
       )}
       {...props}
@@ -36,7 +36,7 @@ const InteractiveHoverButton = React.forwardRef<
       </div>
 
       {/* Background Expand Bubble */}
-      <div className="absolute left-[15%] top-[40%] h-2.5 w-2.5 scale-[1] rounded-full bg-[#7342E2] transition-all duration-300 group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[1.8] group-hover:bg-[#7342E2] group-hover:rounded-none"></div>
+      <div className="absolute left-[15%] top-[40%] h-2.5 w-2.5 scale-[1] rounded-full bg-[#E50914] transition-all duration-300 group-hover:left-[0%] group-hover:top-[0%] group-hover:h-full group-hover:w-full group-hover:scale-[1.8] group-hover:bg-[#E50914] group-hover:rounded-none"></div>
     </button>
   );
 });

@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useCallback } from 'react'
 import { gsap } from 'gsap'
 import './MagicBento.css'
 
-const DEFAULT_GLOW_COLOR = '115, 66, 226'
+const DEFAULT_GLOW_COLOR = '229, 9, 20'
 const DEFAULT_PARTICLE_COUNT = 8
 
 const createParticleElement = (x: number, y: number, color = DEFAULT_GLOW_COLOR) => {
@@ -10,8 +10,8 @@ const createParticleElement = (x: number, y: number, color = DEFAULT_GLOW_COLOR)
   el.className = 'particle'
   el.style.cssText = `
     position: absolute;
-    width: 5px;
-    height: 5px;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
     background: rgba(${color}, 1);
     box-shadow: 0 0 8px rgba(${color}, 0.8);
@@ -219,7 +219,7 @@ export const Card: React.FC<CardProps> = ({
         width: ${maxDistance * 2}px;
         height: ${maxDistance * 2}px;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(${glowColor}, 0.25) 0%, rgba(${glowColor}, 0.08) 35%, transparent 70%);
+        background: radial-gradient(circle, rgba(${glowColor}, 0.3) 0%, rgba(${glowColor}, 0.08) 35%, transparent 70%);
         left: ${x - maxDistance}px;
         top: ${y - maxDistance}px;
         pointer-events: none;
@@ -260,7 +260,8 @@ export const Card: React.FC<CardProps> = ({
       ref={cardRef}
       className={`magic-bento-card magic-bento-card--border-glow particle-container ${className}`.trim()}
       style={{
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#111111',
+        borderColor: '#2A2A2A',
         '--glow-color': glowColor,
         ...style,
       } as React.CSSProperties}
@@ -269,7 +270,7 @@ export const Card: React.FC<CardProps> = ({
       {(badge || title) && (
         <div className="magic-bento-card__header mb-3">
           {badge && <div className="magic-bento-card__label">{badge}</div>}
-          <div className="w-2.5 h-2.5 rounded-full bg-[#7342E2] shadow-xs shrink-0" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#E50914] shadow-[0_0_8px_rgba(229,9,20,0.6)] shrink-0" />
         </div>
       )}
 

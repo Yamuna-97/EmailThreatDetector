@@ -1,17 +1,15 @@
-"use client";
-
-import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface Links {
   label: string;
   href?: string;
-  icon: React.ReactNode;
-  onClick?: () => void;
+  icon: React.JSX.Element | React.ReactNode;
   active?: boolean;
   count?: number;
+  onClick?: () => void;
 }
 
 interface SidebarContextProps {
@@ -49,7 +47,7 @@ export const SidebarProvider = ({
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
 
   return (
-    <SidebarContext.Provider value={{ open, setOpen, animate }}>
+    <SidebarContext.Provider value={{ open, setOpen, animate: animate }}>
       {children}
     </SidebarContext.Provider>
   );
@@ -92,8 +90,8 @@ export const DesktopSidebar = ({
     <motion.div
       className={cn(
         "h-screen sticky top-0 px-3 py-5 hidden md:flex md:flex-col flex-shrink-0 z-30",
-        "bg-white border-r border-[rgba(115,66,226,0.12)]",
-        "shadow-[1px_0_12px_rgba(115,66,226,0.06)]",
+        "bg-[#0A0A0A] border-r border-[#2A2A2A]",
+        "shadow-[1px_0_16px_rgba(0,0,0,0.8)]",
         className
       )}
       animate={{
@@ -120,14 +118,14 @@ export const MobileSidebar = ({
       <div
         className={cn(
           "h-14 px-4 flex flex-row md:hidden items-center justify-between w-full z-40",
-          "bg-white border-b border-[rgba(115,66,226,0.12)]"
+          "bg-[#0A0A0A] border-b border-[#2A2A2A]"
         )}
         {...props}
       >
         <div className="flex justify-end z-20 w-full">
           <button
             type="button"
-            className="p-2 rounded-xl hover:bg-[#F5F3FF] text-[#192837]/70 hover:text-[#7342E2] transition-all cursor-pointer"
+            className="p-2 rounded-xl hover:bg-[#181818] text-[#A3A3A3] hover:text-[#FF1E2D] transition-all cursor-pointer"
             onClick={() => setOpen(!open)}
           >
             <Menu className="h-5 w-5" />
@@ -141,13 +139,13 @@ export const MobileSidebar = ({
               exit={{ x: "-100%", opacity: 0 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               className={cn(
-                "fixed h-full w-full inset-0 bg-white p-6 z-[100] flex flex-col justify-between overflow-y-auto",
-                "border-r border-[rgba(115,66,226,0.12)]",
+                "fixed h-full w-full inset-0 bg-[#0A0A0A] p-6 z-[100] flex flex-col justify-between overflow-y-auto",
+                "border-r border-[#2A2A2A]",
                 className
               )}
             >
               <div
-                className="absolute right-5 top-5 z-50 text-[#192837]/60 cursor-pointer p-2 rounded-xl hover:bg-[#F5F3FF] hover:text-[#7342E2] transition-all"
+                className="absolute right-5 top-5 z-50 text-[#A3A3A3] cursor-pointer p-2 rounded-xl hover:bg-[#181818] hover:text-[#FF1E2D] transition-all"
                 onClick={() => setOpen(!open)}
               >
                 <X className="h-5 w-5" />
@@ -178,8 +176,8 @@ export const SidebarLink = ({
         className={cn(
           "shrink-0 flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-150",
           link.active
-            ? "bg-[#7342E2] text-white shadow-[0_2px_8px_rgba(115,66,226,0.35)]"
-            : "text-[#192837]/55 group-hover/sidebar:text-[#7342E2] group-hover/sidebar:bg-[#F5F3FF]"
+            ? "bg-[#E50914] text-white shadow-[0_2px_10px_rgba(229,9,20,0.4)]"
+            : "text-[#A3A3A3] group-hover/sidebar:text-[#F5F5F5] group-hover/sidebar:bg-[#181818]"
         )}
       >
         {link.icon}
@@ -198,8 +196,8 @@ export const SidebarLink = ({
           className={cn(
             "text-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors duration-150",
             link.active
-              ? "text-[#7342E2] font-bold"
-              : "text-[#192837]/70 font-medium group-hover/sidebar:text-[#192837]"
+              ? "text-[#F5F5F5] font-bold"
+              : "text-[#A3A3A3] font-medium group-hover/sidebar:text-[#F5F5F5]"
           )}
         >
           {link.label}
@@ -207,10 +205,10 @@ export const SidebarLink = ({
         {link.count !== undefined && link.count > 0 && (
           <span
             className={cn(
-              "text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 shrink-0",
+              "text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ml-2 shrink-0",
               link.active
-                ? "bg-[#7342E2] text-white"
-                : "bg-[#F5F3FF] text-[#7342E2] border border-[#E0D9FF]"
+                ? "bg-[#E50914] text-white"
+                : "bg-[#181818] text-[#A3A3A3] border border-[#2A2A2A]"
             )}
           >
             {link.count}
@@ -221,33 +219,34 @@ export const SidebarLink = ({
   );
 
   const baseClasses = cn(
-    "flex items-center gap-2.5 group/sidebar py-1 px-1 rounded-xl transition-all duration-150 cursor-pointer w-full text-left",
+    "flex items-center gap-2.5 group/sidebar py-1.5 px-2 rounded-xl transition-all duration-150 cursor-pointer w-full text-left",
     link.active
-      ? "bg-[#F5F3FF]"
-      : "hover:bg-[#FAFAFA]",
+      ? "bg-[#1F1F1F] border-l-2 border-[#E50914]"
+      : "hover:bg-[#181818]",
     className
   );
 
-  if (link.onClick) {
+  if (link.href) {
     return (
-      <button
-        type="button"
+      <a
+        href={link.href}
         onClick={link.onClick}
         className={baseClasses}
-        {...props}
+        {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
       >
         {content}
-      </button>
+      </a>
     );
   }
 
   return (
-    <a
-      href={link.href || "#"}
+    <button
+      type="button"
+      onClick={link.onClick}
       className={baseClasses}
-      {...(props as any)}
+      {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
     >
       {content}
-    </a>
+    </button>
   );
 };

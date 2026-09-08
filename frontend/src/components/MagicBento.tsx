@@ -3,7 +3,7 @@ import { gsap } from 'gsap'
 import './MagicBento.css'
 
 const DEFAULT_PARTICLE_COUNT = 12
-const DEFAULT_GLOW_COLOR = '115, 66, 226' // Purple theme light
+const DEFAULT_GLOW_COLOR = '229, 9, 20' // Red & Black theme
 const MOBILE_BREAKPOINT = 768
 
 export interface BentoCardItem {
@@ -16,37 +16,37 @@ export interface BentoCardItem {
 
 const defaultCardData: BentoCardItem[] = [
   {
-    color: '#FFFFFF',
+    color: '#111111',
     title: 'AI Semantic Threat Classifier',
     description: 'Deploys Gemini AI and NLP transformers to unmask zero-day phishing, intent coercion, and lookalike domains in milliseconds.',
     label: 'AI Detection',
   },
   {
-    color: '#FFFFFF',
+    color: '#111111',
     title: 'IP Geolocation & Tor Trace',
     description: 'Maps sender origin country, ASN network, and flags anonymizing VPN/Tor proxy hops before links are opened.',
     label: 'Geolocation',
   },
   {
-    color: '#FFFFFF',
+    color: '#111111',
     title: 'Deep RFC Header Forensics',
     description: 'Parses Message-ID signatures, SPF/DKIM/DMARC seals, and reconstructs verifiable microsecond audit trails.',
     label: 'Forensics',
   },
   {
-    color: '#FFFFFF',
+    color: '#111111',
     title: 'Automated SOC Early Warning',
     description: 'Injects in-inbox security warning banners and initiates instant quarantine workflows via FastAPI backend.',
     label: 'Protection',
   },
   {
-    color: '#FFFFFF',
+    color: '#111111',
     title: 'BEC & Impersonation Shield',
     description: 'Detects display-name hijacking and malicious payroll/wire changes targeting executive inboxes.',
     label: 'Executive Safety',
   },
   {
-    color: '#FFFFFF',
+    color: '#111111',
     title: 'Threat Intelligence Feeds',
     description: 'Correlates live indicators with IPQualityScore, Spamhaus, and AbuseIPDB global cybercrime registries.',
     label: 'Live Intel',
@@ -369,7 +369,7 @@ export const MagicBento: React.FC<MagicBentoProps> = ({
         const cardProps = {
           className: baseClassName,
           style: {
-            backgroundColor: card.color || '#FFFFFF',
+            backgroundColor: card.color || '#111111',
             '--glow-color': glowColor,
           } as React.CSSProperties,
         }
@@ -388,7 +388,7 @@ export const MagicBento: React.FC<MagicBentoProps> = ({
             >
               <div className="magic-bento-card__header">
                 <div className="magic-bento-card__label">{card.label}</div>
-                <div className="w-2 h-2 rounded-full bg-[#7342E2] shadow-xs" />
+                <div className="w-2 h-2 rounded-full bg-[#E50914] shadow-[0_0_8px_rgba(229,9,20,0.6)]" />
               </div>
               <div className="magic-bento-card__content">
                 <h3 className="magic-bento-card__title">{card.title}</h3>
@@ -402,7 +402,7 @@ export const MagicBento: React.FC<MagicBentoProps> = ({
           <div key={card.title + index} {...cardProps}>
             <div className="magic-bento-card__header">
               <div className="magic-bento-card__label">{card.label}</div>
-              <div className="w-2 h-2 rounded-full bg-[#7342E2] shadow-xs" />
+              <div className="w-2 h-2 rounded-full bg-[#E50914] shadow-[0_0_8px_rgba(229,9,20,0.6)]" />
             </div>
             <div className="magic-bento-card__content">
               <h3 className="magic-bento-card__title">{card.title}</h3>

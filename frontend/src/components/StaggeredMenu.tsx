@@ -34,15 +34,15 @@ export interface StaggeredMenuProps {
 
 export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   position = 'right',
-  colors = ['#F2F2EE', '#E7E0D8', '#7342E2'],
+  colors = ['#111111', '#1F1F1F', '#E50914'],
   items = [],
   socialItems = [],
   displaySocials = true,
   displayItemNumbering = true,
   className,
-  menuButtonColor = '#192837',
-  openMenuButtonColor = '#192837',
-  accentColor = '#7342E2',
+  menuButtonColor = '#F5F5F5',
+  openMenuButtonColor = '#F5F5F5',
+  accentColor = '#FF1E2D',
   changeMenuColorOnOpen = true,
   isFixed = false,
   closeOnClickAway = true,
@@ -376,7 +376,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     >
       <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
         {(() => {
-          const raw = colors && colors.length ? colors.slice(0, 4) : ['#F2F2EE', '#E2D9F3', '#7342E2']
+          const raw = colors && colors.length ? colors.slice(0, 4) : ['#111111', '#1F1F1F', '#E50914']
           let arr = [...raw]
           if (arr.length >= 3) {
             const mid = Math.floor(arr.length / 2)
@@ -415,7 +415,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       <aside id="staggered-menu-panel" ref={panelRef} className="staggered-menu-panel" aria-hidden={!open}>
         <div className="sm-panel-inner">
           <div className="pt-4">
-            <div className="text-xs uppercase tracking-widest text-[#7342E2] font-semibold mb-6">
+            <div className="text-xs font-mono uppercase tracking-widest text-[#FF1E2D] font-bold mb-6">
               CyberTrace • Threat Platform
             </div>
             <ul className="sm-panel-list" role="list" data-numbering={displayItemNumbering || undefined}>

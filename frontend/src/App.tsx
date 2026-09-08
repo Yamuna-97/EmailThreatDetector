@@ -162,19 +162,19 @@ const AppContent: React.FC = () => {
 
   return (
     <ClickSpark
-      sparkColor="#7342E2"
+      sparkColor="#FF1E2D"
       sparkSize={12}
       sparkRadius={24}
       sparkCount={10}
       duration={450}
       easing="ease-out"
-      className="min-h-screen bg-[#FFFFFF]"
+      className="min-h-screen bg-[#050505]"
     >
       <div
-        className="relative w-full min-h-screen flex flex-col bg-[#FFFFFF] text-[#192837] selection:bg-[#7342E2]/15 selection:text-[#7342E2]"
+        className="relative w-full min-h-screen flex flex-col bg-[#050505] text-[#F5F5F5] selection:bg-[#E50914]/25 selection:text-[#FF1E2D]"
         style={{
           fontFamily: 'var(--font-body)',
-          color: 'var(--color-text)',
+          color: 'var(--color-text-primary)',
         }}
       >
         {/* Return to console floating button if authenticated on landing */}
@@ -183,7 +183,7 @@ const AppContent: React.FC = () => {
             <button
               type="button"
               onClick={() => setForceLanding(false)}
-              className="px-4 py-2 rounded-full bg-[#7342E2] text-white text-xs font-bold shadow-lg shadow-[#7342E2]/30 hover:brightness-110 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-full bg-[#E50914] text-white text-xs font-bold shadow-lg shadow-[#E50914]/40 hover:bg-[#FF1E2D] active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>Return to {role === 'investigator' || role === 'admin' ? 'SOC Console' : 'Dashboard'}</span>
               <span>→</span>

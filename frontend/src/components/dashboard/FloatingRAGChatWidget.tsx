@@ -156,10 +156,10 @@ export const FloatingRAGChatWidget: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="mb-3 w-[360px] sm:w-[420px] h-[540px] max-h-[80vh] rounded-3xl bg-white/95 backdrop-blur-2xl border border-[#192837]/15 shadow-2xl shadow-[#7342E2]/15 flex flex-col overflow-hidden"
+            className="mb-3 w-[360px] sm:w-[420px] h-[540px] max-h-[80vh] rounded-3xl bg-[#0A0A0A]/95 backdrop-blur-2xl border border-[#2A2A2A] shadow-2xl shadow-red-950/25 flex flex-col overflow-hidden text-[#F5F5F5]"
           >
             {/* Widget Header */}
-            <div className="bg-gradient-to-r from-[#7342E2] to-[#8B5CF6] px-4 py-3.5 text-white flex items-center justify-between shrink-0 shadow-sm">
+            <div className="bg-gradient-to-r from-[#8B0000] via-[#B91C1C] to-[#E50914] px-4 py-3.5 text-white flex items-center justify-between shrink-0 shadow-sm">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
                   <Sparkles size={16} />
@@ -167,7 +167,7 @@ export const FloatingRAGChatWidget: React.FC = () => {
                 <div>
                   <h3 className="font-heading text-sm font-extrabold flex items-center gap-1.5 leading-tight">
                     <span>CyberTrace AI</span>
-                    <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full font-mono uppercase tracking-wider">
+                    <span className="text-[10px] bg-black/30 text-white px-1.5 py-0.5 rounded-full font-mono uppercase tracking-wider border border-white/20">
                       {activeMode === "investigator" ? "SOC RAG" : "Advisor"}
                     </span>
                   </h3>
@@ -184,7 +184,7 @@ export const FloatingRAGChatWidget: React.FC = () => {
                     type="button"
                     onClick={() => setActiveMode(activeMode === "user" ? "investigator" : "user")}
                     title={`Switch to ${activeMode === "user" ? "Investigator" : "User"} Mode`}
-                    className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all text-xs font-bold"
+                    className="p-1.5 rounded-lg bg-black/20 hover:bg-black/30 text-white transition-all text-xs font-bold border border-white/15"
                   >
                     {activeMode === "user" ? "User" : "SOC"}
                   </button>
@@ -211,7 +211,7 @@ export const FloatingRAGChatWidget: React.FC = () => {
             </div>
 
             {/* Messages Body */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#FAF9F6]/50">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#050505]">
               {messages.map((msg) => (
                 <ChatBubble key={msg.id} variant={msg.sender === "user" ? "sent" : "received"}>
                   <ChatBubbleAvatar
@@ -219,7 +219,7 @@ export const FloatingRAGChatWidget: React.FC = () => {
                     src={
                       msg.sender === "user"
                         ? undefined
-                        : "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=80"
+                        : undefined
                     }
                   />
                   <div className="flex flex-col max-w-[82%]">
@@ -233,11 +233,11 @@ export const FloatingRAGChatWidget: React.FC = () => {
                     {msg.sender === "bot" && (
                       <ChatBubbleActionWrapper className="justify-start">
                         <ChatBubbleAction
-                          icon={copiedId === msg.id ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                          icon={copiedId === msg.id ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
                           onClick={() => handleCopy(msg.id, msg.text)}
-                          className="hover:bg-white"
+                          className="hover:bg-[#181818]"
                         />
-                        <span className="text-[10px] text-[#192837]/40">{msg.timestamp}</span>
+                        <span className="text-[10px] text-[#737373]">{msg.timestamp}</span>
                       </ChatBubbleActionWrapper>
                     )}
                   </div>
@@ -257,13 +257,13 @@ export const FloatingRAGChatWidget: React.FC = () => {
 
             {/* Quick Prompt Pills */}
             {messages.length <= 2 && (
-              <div className="px-3 py-2 bg-white border-t border-[#192837]/5 overflow-x-auto flex gap-1.5 scrollbar-none">
+              <div className="px-3 py-2 bg-[#0A0A0A] border-t border-[#2A2A2A] overflow-x-auto flex gap-1.5 scrollbar-none">
                 {suggestedPrompts.slice(0, 3).map((prompt, pidx) => (
                   <button
                     key={pidx}
                     type="button"
                     onClick={() => handleSend(prompt)}
-                    className="shrink-0 text-[11px] font-medium text-[#7342E2] bg-[#7342E2]/8 hover:bg-[#7342E2]/15 px-2.5 py-1 rounded-full transition-all text-left truncate max-w-[220px] cursor-pointer"
+                    className="shrink-0 text-[11px] font-medium text-[#FF1E2D] bg-[#181818] hover:bg-[#222222] border border-[#2A2A2A] px-2.5 py-1 rounded-full transition-all text-left truncate max-w-[220px] cursor-pointer"
                   >
                     {prompt}
                   </button>
@@ -277,19 +277,19 @@ export const FloatingRAGChatWidget: React.FC = () => {
                 e.preventDefault()
                 handleSend()
               }}
-              className="p-3 bg-white border-t border-[#192837]/10 flex items-center gap-2"
+              className="p-3 bg-[#0A0A0A] border-t border-[#2A2A2A] flex items-center gap-2"
             >
               <input
                 type="text"
                 value={inputQuery}
                 onChange={(e) => setInputQuery(e.target.value)}
                 placeholder="Ask about email threats, security advice..."
-                className="flex-1 rounded-2xl border border-[#192837]/15 bg-[#FAF9F6] px-3.5 py-2.5 text-xs sm:text-sm text-[#192837] placeholder-[#192837]/40 outline-none focus:bg-white focus:border-[#7342E2] focus:ring-2 focus:ring-[#7342E2]/30 transition-all"
+                className="flex-1 rounded-2xl border border-[#2A2A2A] bg-[#181818] px-3.5 py-2.5 text-xs sm:text-sm text-[#F5F5F5] placeholder-[#737373] outline-none focus:border-[#FF1E2D] focus:ring-1 focus:ring-[#FF1E2D]/30 transition-all"
               />
               <button
                 type="submit"
                 disabled={!inputQuery.trim() || isLoading}
-                className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] text-white flex items-center justify-center shadow-md shadow-[#7342E2]/20 hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all cursor-pointer shrink-0"
+                className="w-10 h-10 rounded-2xl bg-[#E50914] hover:bg-[#FF1E2D] text-white flex items-center justify-center shadow-md shadow-[#FF1E2D]/20 hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all cursor-pointer shrink-0"
               >
                 <Send size={15} />
               </button>
@@ -304,22 +304,22 @@ export const FloatingRAGChatWidget: React.FC = () => {
         whileTap={{ scale: 0.96 }}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="group relative flex items-center gap-2.5 px-5 py-3 rounded-full cursor-pointer"
+        className="group relative flex items-center gap-2.5 px-5 py-3 rounded-full cursor-pointer shadow-xl"
         style={{
-          background: 'linear-gradient(135deg, #7342E2, #9B70F6)',
-          boxShadow: '0 8px 32px rgba(115, 66, 226, 0.35), 0 2px 8px rgba(115, 66, 226, 0.2)',
-          border: '1px solid rgba(255,255,255,0.25)',
+          background: 'linear-gradient(135deg, #E50914, #8B0000)',
+          boxShadow: '0 8px 32px rgba(229, 9, 20, 0.4), 0 2px 8px rgba(229, 9, 20, 0.2)',
+          border: '1px solid rgba(255, 30, 45, 0.4)',
         }}
       >
         {/* Animated ring when closed */}
         {!isOpen && (
-          <span className="absolute -inset-0.5 rounded-full border-2 border-[#7342E2]/40 animate-ping pointer-events-none" style={{ animationDuration: '2s' }} />
+          <span className="absolute -inset-0.5 rounded-full border-2 border-[#FF1E2D]/40 animate-ping pointer-events-none" style={{ animationDuration: '2s' }} />
         )}
 
         <div className="relative z-10">
           {isOpen ? <X size={18} className="text-white" /> : <Bot size={18} className="text-white" />}
           {!isOpen && (
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-white animate-pulse" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#8B0000] animate-pulse" />
           )}
         </div>
 

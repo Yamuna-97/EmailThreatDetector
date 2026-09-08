@@ -20,38 +20,38 @@ export const CyberTraceLogoIcon: React.FC<{ className?: string; size?: number }>
     className={className}
   >
     <defs>
-      <linearGradient id="ctGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#A78BFA" />
-        <stop offset="50%" stopColor="#8B5CF6" />
-        <stop offset="100%" stopColor="#7342E2" />
+      <linearGradient id="ctGradRed" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FF1E2D" />
+        <stop offset="50%" stopColor="#E50914" />
+        <stop offset="100%" stopColor="#8B0000" />
       </linearGradient>
-      <linearGradient id="ctGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.8" />
-        <stop offset="100%" stopColor="#7342E2" stopOpacity="0.2" />
+      <linearGradient id="ctGlowRed" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FF1E2D" stopOpacity="0.8" />
+        <stop offset="100%" stopColor="#8B0000" stopOpacity="0.2" />
       </linearGradient>
-      <filter id="ctShadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#7342E2" floodOpacity="0.35" />
+      <filter id="ctShadowRed" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#E50914" floodOpacity="0.45" />
       </filter>
     </defs>
 
     {/* Outer Shield Hull */}
     <path
       d="M24 4L40 10V22C40 32.5 33.2 42.1 24 45C14.8 42.1 8 32.5 8 22V10L24 4Z"
-      fill="url(#ctGrad1)"
-      filter="url(#ctShadow)"
+      fill="url(#ctGradRed)"
+      filter="url(#ctShadowRed)"
     />
 
     {/* Inner Target Radar Rings */}
     <path
       d="M24 8L36 12.8V22C36 30.2 30.9 37.8 24 40.2C17.1 37.8 12 30.2 12 22V12.8L24 8Z"
-      fill="#1A103C"
-      fillOpacity="0.35"
-      stroke="url(#ctGlow)"
+      fill="#120203"
+      fillOpacity="0.5"
+      stroke="url(#ctGlowRed)"
       strokeWidth="1.2"
     />
 
     {/* Cyber Tracing Crosshair & Neural Node */}
-    <circle cx="24" cy="23" r="7.5" stroke="#FFFFFF" strokeWidth="1.5" strokeDasharray="3 2" strokeOpacity="0.7" />
+    <circle cx="24" cy="23" r="7.5" stroke="#FFFFFF" strokeWidth="1.5" strokeDasharray="3 2" strokeOpacity="0.8" />
     <circle cx="24" cy="23" r="3.2" fill="#FFFFFF" />
     
     {/* Pulse Tracing Crosshair Vectors */}
@@ -63,11 +63,11 @@ export const CyberTraceLogoIcon: React.FC<{ className?: string; size?: number }>
     {/* Dynamic Tracing Sweep Spark */}
     <path
       d="M24 23L31 16"
-      stroke="#38BDF8"
-      strokeWidth="1.8"
+      stroke="#FF1E2D"
+      strokeWidth="2"
       strokeLinecap="round"
     />
-    <circle cx="31" cy="16" r="1.5" fill="#38BDF8" />
+    <circle cx="31" cy="16" r="1.6" fill="#FFFFFF" />
   </svg>
 )
 
@@ -105,15 +105,15 @@ export const CyberTraceLogo: React.FC<CyberTraceLogoProps> = ({
       </div>
       {showText && (
         <div className="flex flex-col leading-tight">
-          <span className={`font-heading font-extrabold tracking-tight text-[#192837] ${textSizes[size]}`}>
-            Cyber<span className="text-[#7342E2]">Trace</span>
+          <span className={`font-heading font-extrabold tracking-tight text-[#F5F5F5] ${textSizes[size]}`}>
+            Cyber<span className="text-[#E50914]">Trace</span>
           </span>
           {subtitle ? (
-            <span className={`font-bold tracking-wider uppercase text-[#7342E2] ${subSizes[size]}`}>
+            <span className={`font-mono font-bold tracking-widest uppercase text-[#FF1E2D] ${subSizes[size]}`}>
               {subtitle}
             </span>
           ) : (
-            <span className={`font-semibold tracking-wider text-[#192837]/50 ${subSizes[size]}`}>
+            <span className={`font-mono font-medium tracking-wider text-[#A3A3A3] ${subSizes[size]}`}>
               AI Threat Intelligence
             </span>
           )}

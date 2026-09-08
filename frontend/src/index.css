@@ -2,42 +2,73 @@
 
 :root {
   --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --color-text: #192837;
-  --color-accent: #7342E2;
-  --color-login-bg: #F2F2EE;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', 'SF Mono', Consolas, Monaco, monospace;
 
-  /* Dashboard surfaces */
-  --dash-bg: #F2F3F8;
-  --dash-surface: #FFFFFF;
-  --dash-surface-2: #F8F9FC;
-  --dash-border: rgba(115, 66, 226, 0.12);
-  --dash-border-subtle: rgba(25, 40, 55, 0.08);
+  /* CyberTrace Red & Black Design Tokens */
+  --bg-primary: #050505;
+  --bg-secondary: #0A0A0A;
+  --surface-card: #111111;
+  --surface-raised: #181818;
+  --surface-interactive: #1F1F1F;
 
-  /* Severity palette */
-  --sev-critical-bg: #FFF1F2;
-  --sev-critical-border: #FECDD3;
-  --sev-critical-text: #BE123C;
-  --sev-critical-dot: #F43F5E;
-  --sev-high-bg: #FFF7ED;
-  --sev-high-border: #FED7AA;
-  --sev-high-text: #C2410C;
-  --sev-high-dot: #F97316;
-  --sev-medium-bg: #FEFCE8;
-  --sev-medium-border: #FDE68A;
-  --sev-medium-text: #B45309;
-  --sev-medium-dot: #F59E0B;
-  --sev-low-bg: #F0FDF4;
-  --sev-low-border: #BBF7D0;
-  --sev-low-text: #15803D;
-  --sev-low-dot: #22C55E;
+  --border-primary: #2A2A2A;
+  --border-subtle: #1C1C1C;
+  --border-accent: rgba(229, 9, 20, 0.4);
 
-  /* Brand */
-  --brand: #7342E2;
-  --brand-soft: #F5F3FF;
-  --brand-border: #E0D9FF;
-  --brand-hover: #6032C4;
-  --brand-glow: rgba(115, 66, 226, 0.18);
+  --color-text-primary: #F5F5F5;
+  --color-text-secondary: #A3A3A3;
+  --color-text-muted: #737373;
+
+  /* CyberTrace Red Palette */
+  --brand-red: #E50914;
+  --brand-red-bright: #FF1E2D;
+  --brand-red-dark: #8B0000;
+  --brand-red-glow: rgba(229, 9, 20, 0.25);
+
+  /* Legacy aliases mapped to Red & Black */
+  --color-text: #F5F5F5;
+  --color-accent: #E50914;
+  --color-login-bg: #0A0A0A;
+
+  --dash-bg: #050505;
+  --dash-surface: #111111;
+  --dash-surface-2: #181818;
+  --dash-border: #2A2A2A;
+  --dash-border-subtle: #1C1C1C;
+
+  /* Security Severity Palette */
+  --sev-critical-bg: rgba(255, 30, 45, 0.12);
+  --sev-critical-border: rgba(255, 30, 45, 0.35);
+  --sev-critical-text: #FF1E2D;
+  --sev-critical-dot: #FF1E2D;
+
+  --sev-high-bg: rgba(255, 90, 54, 0.12);
+  --sev-high-border: rgba(255, 90, 54, 0.35);
+  --sev-high-text: #FF5A36;
+  --sev-high-dot: #FF5A36;
+
+  --sev-medium-bg: rgba(255, 176, 32, 0.12);
+  --sev-medium-border: rgba(255, 176, 32, 0.35);
+  --sev-medium-text: #FFB020;
+  --sev-medium-dot: #FFB020;
+
+  --sev-low-bg: rgba(74, 222, 128, 0.12);
+  --sev-low-border: rgba(74, 222, 128, 0.35);
+  --sev-low-text: #4ADE80;
+  --sev-low-dot: #4ADE80;
+
+  --sev-safe-bg: rgba(34, 197, 94, 0.12);
+  --sev-safe-border: rgba(34, 197, 94, 0.35);
+  --sev-safe-text: #22C55E;
+  --sev-safe-dot: #22C55E;
+
+  /* Brand button & glow */
+  --brand: #E50914;
+  --brand-soft: rgba(229, 9, 20, 0.1);
+  --brand-border: #2A2A2A;
+  --brand-hover: #FF1E2D;
+  --brand-glow: rgba(229, 9, 20, 0.3);
 }
 
 * {
@@ -52,13 +83,15 @@ body,
   width: 100%;
   min-height: 100%;
   font-family: var(--font-body);
-  color: var(--color-text);
+  color: var(--color-text-primary);
+  background-color: var(--bg-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background-color: #f7f6f4;
+  background-color: #050505;
+  color: #F5F5F5;
   overflow-x: hidden;
 }
 
@@ -71,13 +104,17 @@ body {
   font-family: var(--font-body);
 }
 
+.font-mono {
+  font-family: var(--font-mono);
+}
+
 /* =========================================
    SCROLLBARS
    ========================================= */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: rgba(25, 40, 55, 0.03); border-radius: 8px; }
-::-webkit-scrollbar-thumb { background: rgba(115, 66, 226, 0.2); border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(115, 66, 226, 0.45); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0A0A0A; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #E50914; }
 
 /* =========================================
    ANIMATIONS
@@ -98,8 +135,9 @@ body {
   0% { transform: scale(1); opacity: 0.8; }
   100% { transform: scale(2.5); opacity: 0; }
 }
-@keyframes spinRing {
-  to { transform: rotate(360deg); }
+@keyframes pulseRedGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(229, 9, 20, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(255, 30, 45, 0.4); }
 }
 
 .animate-fade-in {
@@ -114,61 +152,70 @@ body {
 .animate-radar {
   animation: radarPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
+.animate-red-glow {
+  animation: pulseRedGlow 3s ease-in-out infinite;
+}
 
 /* =========================================
    DASHBOARD CARD SYSTEM
    ========================================= */
 
-/* Glass card with violet border */
+/* Dark card with subtle border */
 .dash-card {
-  background: var(--dash-surface);
-  border: 1px solid var(--dash-border);
-  border-radius: 20px;
-  box-shadow: 0 1px 3px rgba(115, 66, 226, 0.06), 0 1px 2px rgba(25, 40, 55, 0.04);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  background: var(--surface-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dash-card:hover {
-  box-shadow: 0 4px 16px rgba(115, 66, 226, 0.1), 0 2px 6px rgba(25, 40, 55, 0.06);
-  border-color: rgba(115, 66, 226, 0.22);
+  border-color: rgba(229, 9, 20, 0.3);
+  box-shadow: 0 6px 24px rgba(229, 9, 20, 0.08);
 }
 
-/* Metric card with gradient left bar */
+/* Tactical metric card with left accent */
 .metric-card {
   position: relative;
   overflow: hidden;
-  background: var(--dash-surface);
-  border: 1px solid var(--dash-border);
-  border-radius: 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 14px;
   padding: 20px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .metric-card::before {
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 3px;
-  border-radius: 16px 0 0 16px;
+  border-radius: 14px 0 0 14px;
 }
-.metric-card:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(115,66,226,0.1); }
-.metric-card.metric-total::before    { background: linear-gradient(180deg, #7342E2, #9B70F6); }
-.metric-card.metric-threat::before   { background: linear-gradient(180deg, #F97316, #FBBF24); }
-.metric-card.metric-critical::before { background: linear-gradient(180deg, #F43F5E, #FB7185); }
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: #3A3A3A;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+}
+.metric-card.metric-total::before    { background: linear-gradient(180deg, #E50914, #8B0000); }
+.metric-card.metric-threat::before   { background: linear-gradient(180deg, #FF1E2D, #FF5A36); }
+.metric-card.metric-critical::before { background: linear-gradient(180deg, #FF1E2D, #8B0000); }
 .metric-card.metric-safe::before     { background: linear-gradient(180deg, #22C55E, #4ADE80); }
-.metric-card.metric-users::before    { background: linear-gradient(180deg, #6366F1, #818CF8); }
-.metric-card.metric-suspicious::before { background: linear-gradient(180deg, #F59E0B, #FCD34D); }
+.metric-card.metric-users::before    { background: linear-gradient(180deg, #A3A3A3, #737373); }
+.metric-card.metric-suspicious::before { background: linear-gradient(180deg, #FFB020, #FF5A36); }
 
 /* =========================================
    SEVERITY BADGES
    ========================================= */
 .sev-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
-  padding: 2px 8px; border-radius: 6px; border: 1px solid;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 3px 9px; border-radius: 6px; border: 1px solid;
+  font-family: var(--font-mono);
 }
 .sev-badge.critical { background: var(--sev-critical-bg); border-color: var(--sev-critical-border); color: var(--sev-critical-text); }
 .sev-badge.high     { background: var(--sev-high-bg);     border-color: var(--sev-high-border);     color: var(--sev-high-text); }
 .sev-badge.medium   { background: var(--sev-medium-bg);   border-color: var(--sev-medium-border);   color: var(--sev-medium-text); }
 .sev-badge.low      { background: var(--sev-low-bg);      border-color: var(--sev-low-border);      color: var(--sev-low-text); }
+.sev-badge.safe     { background: var(--sev-safe-bg);     border-color: var(--sev-safe-border);     color: var(--sev-safe-text); }
 
 /* =========================================
    THREAT ROW
@@ -176,9 +223,9 @@ body {
 .threat-row {
   position: relative;
   padding: 14px 16px;
-  border-radius: 14px;
-  background: #FAFAFA;
-  border: 1px solid var(--dash-border-subtle);
+  border-radius: 12px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-primary);
   transition: all 0.18s ease;
   cursor: pointer;
 }
@@ -192,9 +239,9 @@ body {
   transition: opacity 0.18s ease;
 }
 .threat-row:hover {
-  background: #FFFFFF;
-  border-color: rgba(115, 66, 226, 0.25);
-  box-shadow: 0 4px 12px rgba(115, 66, 226, 0.08);
+  background: var(--surface-raised);
+  border-color: rgba(229, 9, 20, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
 }
 .threat-row:hover::before { opacity: 1; }
 .threat-row.critical::before { background: var(--sev-critical-dot); }
@@ -207,24 +254,24 @@ body {
    ========================================= */
 .dash-header {
   position: sticky; top: 0; z-index: 30;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(10, 10, 10, 0.92);
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--dash-border);
-  box-shadow: 0 1px 0 rgba(115, 66, 226, 0.06);
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .status-pill {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 10px; border-radius: 999px;
   font-size: 11px; font-weight: 700; border: 1px solid;
+  font-family: var(--font-mono);
 }
-.status-pill.connected    { background: #F0FDF4; border-color: #BBF7D0; color: #15803D; }
-.status-pill.disconnected { background: #FFF1F2; border-color: #FECDD3; color: #BE123C; }
+.status-pill.connected    { background: rgba(34, 197, 94, 0.12); border-color: rgba(34, 197, 94, 0.35); color: #22C55E; }
+.status-pill.disconnected { background: rgba(255, 30, 45, 0.12); border-color: rgba(255, 30, 45, 0.35); color: #FF1E2D; }
 
 /* =========================================
    PROGRESS BAR
    ========================================= */
-.progress-bar { height: 6px; border-radius: 999px; background: #EDE9FE; overflow: hidden; }
+.progress-bar { height: 6px; border-radius: 999px; background: #1C1C1C; overflow: hidden; }
 .progress-bar-fill { height: 100%; border-radius: 999px; transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
 
 /* =========================================
@@ -244,13 +291,45 @@ body {
 .stagger-item:nth-child(8) { animation-delay: 350ms; }
 
 /* =========================================
-   SIDEBAR PREMIUM STYLES
+   SIDEBAR RED & BLACK STYLES
    ========================================= */
 .sidebar-nav-active {
-  background: linear-gradient(135deg, rgba(115,66,226,0.12), rgba(115,66,226,0.06));
-  border-left: 3px solid #7342E2;
-  color: #7342E2;
+  background: #1F1F1F;
+  border-left: 3px solid #E50914;
+  color: #F5F5F5;
+  box-shadow: inset 4px 0 12px rgba(229, 9, 20, 0.12);
 }
 .sidebar-brand-glow {
-  filter: drop-shadow(0 0 8px rgba(115,66,226,0.4));
+  filter: drop-shadow(0 0 10px rgba(229, 9, 20, 0.4));
+}
+
+/* =========================================
+   TACTICAL BUTTONS
+   ========================================= */
+.btn-primary-red {
+  background: #E50914;
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 10px;
+  transition: all 0.18s ease;
+  box-shadow: 0 2px 10px rgba(229, 9, 20, 0.35);
+}
+.btn-primary-red:hover {
+  background: #FF1E2D;
+  box-shadow: 0 4px 16px rgba(255, 30, 45, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-secondary-dark {
+  background: #181818;
+  color: #F5F5F5;
+  border: 1px solid #2A2A2A;
+  font-weight: 500;
+  border-radius: 10px;
+  transition: all 0.18s ease;
+}
+.btn-secondary-dark:hover {
+  background: #1F1F1F;
+  border-color: #3A3A3A;
+  color: #FFFFFF;
 }

@@ -275,20 +275,20 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-[#FAF9F6] text-[#192837] selection:bg-[#7342E2]/15 selection:text-[#7342E2] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <div className="relative min-h-screen w-full bg-[#050505] text-[#F5F5F5] selection:bg-[#E50914]/25 selection:text-[#FF1E2D] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Dynamic Interactive ShapeGrid Background */}
       <div className="absolute inset-0 w-full h-full z-0 pointer-events-auto">
         <ShapeGrid
           direction="diagonal"
           speed={0.45}
-          borderColor="rgba(115, 66, 226, 0.12)"
+          borderColor="rgba(229, 9, 20, 0.12)"
           squareSize={44}
-          hoverFillColor="rgba(115, 66, 226, 0.22)"
+          hoverFillColor="rgba(229, 9, 20, 0.2)"
           shape="hexagon"
           hoverTrailAmount={6}
-          className="w-full h-full"
+          className="w-full h-full opacity-60"
         />
-        <div className="absolute inset-0 bg-radial from-transparent via-[#FAF9F6]/40 to-[#FAF9F6]/90 pointer-events-none" />
+        <div className="absolute inset-0 bg-radial from-transparent via-[#050505]/60 to-[#050505]/95 pointer-events-none" />
       </div>
 
       <BackButton onBack={onBack} />
@@ -297,7 +297,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         initial={{ opacity: 0, y: 25, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="relative z-10 mx-auto w-full max-w-md rounded-3xl bg-white/95 backdrop-blur-2xl p-8 sm:p-10 border border-[#192837]/10 shadow-2xl shadow-[#7342E2]/10"
+        className="relative z-10 mx-auto w-full max-w-md rounded-3xl bg-[#111111]/95 backdrop-blur-2xl p-8 sm:p-10 border border-[#2A2A2A] shadow-2xl shadow-black/90"
       >
         <Logo />
 
@@ -330,19 +330,19 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 
         {mode === "signup_otp" && (
           <div className="mb-6 text-center">
-            <div className="mx-auto w-12 h-12 rounded-2xl bg-[#7342E2]/10 text-[#7342E2] flex items-center justify-center mb-3">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-[#E50914]/15 text-[#FF1E2D] border border-[#E50914]/30 flex items-center justify-center mb-3">
               <KeyRound size={24} />
             </div>
-            <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-[#192837] tracking-tight">
+            <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-[#F5F5F5] tracking-tight">
               Verify Your Email
             </h1>
-            <p className="mt-1.5 text-xs text-[#192837]/65 flex items-center justify-center gap-1.5 flex-wrap">
+            <p className="mt-1.5 text-xs text-[#A3A3A3] flex items-center justify-center gap-1.5 flex-wrap">
               <span>Code sent to</span>
-              <strong className="text-[#192837] font-semibold">{email}</strong>
+              <strong className="text-[#F5F5F5] font-semibold">{email}</strong>
               <button
                 type="button"
                 onClick={() => setMode("signup")}
-                className="text-[#7342E2] hover:underline font-bold inline-flex items-center gap-0.5 ml-1 cursor-pointer"
+                className="text-[#FF1E2D] hover:underline font-bold inline-flex items-center gap-0.5 ml-1 cursor-pointer"
               >
                 <Edit3 size={11} />
                 <span>Edit</span>
@@ -353,13 +353,13 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 
         {mode === "forgot_password" && (
           <div className="mb-6 text-center">
-            <div className="mx-auto w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-3">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center justify-center mb-3">
               <RotateCw size={24} />
             </div>
-            <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-[#192837] tracking-tight">
+            <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-[#F5F5F5] tracking-tight">
               Reset Password
             </h1>
-            <p className="mt-1.5 text-xs text-[#192837]/65">
+            <p className="mt-1.5 text-xs text-[#A3A3A3]">
               Enter your work email address to receive a 6-digit security reset code.
             </p>
           </div>
@@ -367,14 +367,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 
         {mode === "forgot_password_otp" && (
           <div className="mb-6 text-center">
-            <div className="mx-auto w-12 h-12 rounded-2xl bg-[#7342E2]/10 text-[#7342E2] flex items-center justify-center mb-3">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-[#E50914]/15 text-[#FF1E2D] border border-[#E50914]/30 flex items-center justify-center mb-3">
               <Lock size={24} />
             </div>
-            <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-[#192837] tracking-tight">
+            <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-[#F5F5F5] tracking-tight">
               Choose New Password
             </h1>
-            <p className="mt-1.5 text-xs text-[#192837]/65">
-              Enter the 6-digit code sent to <strong className="text-[#192837]">{email}</strong> and set your new password.
+            <p className="mt-1.5 text-xs text-[#A3A3A3]">
+              Enter the 6-digit code sent to <strong className="text-[#F5F5F5]">{email}</strong> and set your new password.
             </p>
           </div>
         )}
@@ -385,17 +385,17 @@ export const AuthForm: React.FC<AuthFormProps> = ({
             <button
               type="button"
               onClick={() => handleQuickFill("analyst")}
-              className="text-[11px] font-semibold text-[#7342E2] bg-[#7342E2]/8 hover:bg-[#7342E2]/15 px-3 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer"
+              className="text-[11px] font-semibold text-[#A3A3A3] hover:text-[#F5F5F5] bg-[#181818] border border-[#2A2A2A] hover:border-[#E50914] px-3 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer"
             >
-              <UserCheck size={12} />
+              <UserCheck size={12} className="text-[#A3A3A3]" />
               <span>Fill Analyst Demo</span>
             </button>
             <button
               type="button"
               onClick={() => handleQuickFill("investigator")}
-              className="text-[11px] font-semibold text-[#059669] bg-[#059669]/8 hover:bg-[#059669]/15 px-3 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer"
+              className="text-[11px] font-semibold text-[#FF1E2D] bg-[#181818] border border-[#2A2A2A] hover:border-[#FF1E2D] px-3 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer"
             >
-              <Shield size={12} />
+              <Shield size={12} className="text-[#FF1E2D]" />
               <span>Fill Investigator Demo</span>
             </button>
           </div>
@@ -408,9 +408,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2"
+              className="mb-4 p-3 rounded-2xl bg-red-950/40 border border-red-800/80 text-red-200 text-xs font-medium flex items-center gap-2"
             >
-              <AlertCircle size={16} className="shrink-0 text-red-500" />
+              <AlertCircle size={16} className="shrink-0 text-red-400" />
               <span>{error}</span>
             </motion.div>
           )}
@@ -420,9 +420,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium flex items-center gap-2"
+              className="mb-4 p-3 rounded-2xl bg-emerald-950/40 border border-emerald-800/80 text-emerald-200 text-xs font-medium flex items-center gap-2"
             >
-              <CheckCircle2 size={16} className="shrink-0 text-emerald-500" />
+              <CheckCircle2 size={16} className="shrink-0 text-emerald-400" />
               <span>{successMsg}</span>
             </motion.div>
           )}
@@ -470,7 +470,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   setError(err.message || "Failed to initialize Google verification.")
                 }
               }}
-              className="w-full mb-4 py-3 px-4 rounded-2xl bg-white border border-[#192837]/15 hover:border-[#7342E2]/40 hover:bg-[#FAF9F6] text-xs sm:text-sm font-bold text-[#192837] flex items-center justify-center gap-2.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+              className="w-full mb-4 py-3 px-4 rounded-2xl bg-[#181818] border border-[#2A2A2A] hover:border-[#E50914] hover:bg-[#1F1F1F] text-xs sm:text-sm font-bold text-[#F5F5F5] flex items-center justify-center gap-2.5 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -494,11 +494,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({
             </button>
 
             <div className="relative flex items-center justify-center my-4">
-              <div className="border-t border-[#192837]/10 w-full" />
-              <span className="bg-white px-3 text-[10px] font-bold text-[#192837]/40 uppercase tracking-wider">
+              <div className="border-t border-[#2A2A2A] w-full" />
+              <span className="bg-[#111111] px-3 text-[10px] font-bold text-[#737373] uppercase tracking-wider">
                 OR
               </span>
-              <div className="border-t border-[#192837]/10 w-full" />
+              <div className="border-t border-[#2A2A2A] w-full" />
             </div>
           </>
         )}
@@ -509,7 +509,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         {mode === "signin" && (
           <form onSubmit={handleSignIn} className="space-y-4 text-left">
             <div>
-              <label htmlFor="email-input" className="mb-1.5 block text-xs font-bold text-[#192837]/75 uppercase tracking-wide">
+              <label htmlFor="email-input" className="mb-1.5 block text-xs font-bold text-[#A3A3A3] uppercase tracking-wide">
                 Work Email
               </label>
               <div className="relative">
@@ -520,16 +520,16 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="analyst@enterprise.com"
-                  className="w-full rounded-2xl border border-[#192837]/15 bg-[#FAF9F6] px-4 py-3 pl-10 text-sm text-[#192837]
-                  placeholder-[#192837]/35 ring-2 ring-transparent transition-all focus:bg-white focus:outline-0 focus:ring-[#7342E2]/50 focus:border-[#7342E2]"
+                  className="w-full rounded-2xl border border-[#2A2A2A] bg-[#181818] px-4 py-3 pl-10 text-sm text-[#F5F5F5]
+                  placeholder-[#737373] ring-2 ring-transparent transition-all focus:bg-[#1F1F1F] focus:outline-0 focus:ring-[#E50914]/40 focus:border-[#E50914]"
                 />
-                <Mail size={16} className="absolute left-3.5 top-3.5 text-[#192837]/40" />
+                <Mail size={16} className="absolute left-3.5 top-3.5 text-[#737373]" />
               </div>
             </div>
 
             <div>
               <div className="mb-1.5 flex items-center justify-between">
-                <label htmlFor="password-input" className="block text-xs font-bold text-[#192837]/75 uppercase tracking-wide">
+                <label htmlFor="password-input" className="block text-xs font-bold text-[#A3A3A3] uppercase tracking-wide">
                   Password
                 </label>
                 <button
@@ -539,7 +539,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                     setError(null)
                     setSuccessMsg(null)
                   }}
-                  className="text-xs font-bold text-[#7342E2] hover:underline cursor-pointer"
+                  className="text-xs font-bold text-[#FF1E2D] hover:underline cursor-pointer"
                 >
                   Forgot password?
                 </button>
@@ -553,14 +553,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full rounded-2xl border border-[#192837]/15 bg-[#FAF9F6] px-4 py-3 pl-10 pr-10 text-sm text-[#192837]
-                  placeholder-[#192837]/35 ring-2 ring-transparent transition-all focus:bg-white focus:outline-0 focus:ring-[#7342E2]/50 focus:border-[#7342E2]"
+                  className="w-full rounded-2xl border border-[#2A2A2A] bg-[#181818] px-4 py-3 pl-10 pr-10 text-sm text-[#F5F5F5]
+                  placeholder-[#737373] ring-2 ring-transparent transition-all focus:bg-[#1F1F1F] focus:outline-0 focus:ring-[#E50914]/40 focus:border-[#E50914]"
                 />
-                <Lock size={16} className="absolute left-3.5 top-3.5 text-[#192837]/40" />
+                <Lock size={16} className="absolute left-3.5 top-3.5 text-[#737373]" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3.5 text-[#192837]/40 hover:text-[#192837] cursor-pointer"
+                  className="absolute right-3.5 top-3.5 text-[#737373] hover:text-[#F5F5F5] cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -571,9 +571,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] px-5 py-3.5 text-sm font-bold text-white 
-                shadow-lg shadow-[#7342E2]/25 ring-2 ring-[#7342E2]/30 ring-offset-2 ring-offset-white
-                transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
+                className="w-full rounded-2xl bg-[#E50914] hover:bg-[#FF1E2D] px-5 py-3.5 text-sm font-bold text-white 
+                shadow-lg shadow-[#E50914]/35 ring-2 ring-[#E50914]/30 ring-offset-2 ring-offset-[#111111]
+                transition-all active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -594,7 +594,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         {mode === "signup" && (
           <form onSubmit={handleRequestSignUpOtp} className="space-y-4 text-left">
             <div>
-              <label htmlFor="signup-name" className="mb-1.5 block text-xs font-bold text-[#192837]/75 uppercase tracking-wide">
+              <label htmlFor="signup-name" className="mb-1.5 block text-xs font-bold text-[#A3A3A3] uppercase tracking-wide">
                 Full Name
               </label>
               <div className="relative">
@@ -605,14 +605,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Alex Morgan"
-                  className="w-full rounded-2xl border border-[#192837]/15 bg-[#FAF9F6] px-4 py-3 text-sm text-[#192837]
-                  placeholder-[#192837]/35 ring-2 ring-transparent transition-all focus:bg-white focus:outline-0 focus:ring-[#7342E2]/50 focus:border-[#7342E2]"
+                  className="w-full rounded-2xl border border-[#2A2A2A] bg-[#181818] px-4 py-3 text-sm text-[#F5F5F5]
+                  placeholder-[#737373] ring-2 ring-transparent transition-all focus:bg-[#1F1F1F] focus:outline-0 focus:ring-[#E50914]/40 focus:border-[#E50914]"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="signup-email" className="mb-1.5 block text-xs font-bold text-[#192837]/75 uppercase tracking-wide">
+              <label htmlFor="signup-email" className="mb-1.5 block text-xs font-bold text-[#A3A3A3] uppercase tracking-wide">
                 Work Email
               </label>
               <div className="relative">
@@ -623,15 +623,15 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex.morgan@enterprise.com"
-                  className="w-full rounded-2xl border border-[#192837]/15 bg-[#FAF9F6] px-4 py-3 pl-10 text-sm text-[#192837]
-                  placeholder-[#192837]/35 ring-2 ring-transparent transition-all focus:bg-white focus:outline-0 focus:ring-[#7342E2]/50 focus:border-[#7342E2]"
+                  className="w-full rounded-2xl border border-[#2A2A2A] bg-[#181818] px-4 py-3 pl-10 text-sm text-[#F5F5F5]
+                  placeholder-[#737373] ring-2 ring-transparent transition-all focus:bg-[#1F1F1F] focus:outline-0 focus:ring-[#E50914]/40 focus:border-[#E50914]"
                 />
-                <Mail size={16} className="absolute left-3.5 top-3.5 text-[#192837]/40" />
+                <Mail size={16} className="absolute left-3.5 top-3.5 text-[#737373]" />
               </div>
             </div>
 
             <div>
-              <label htmlFor="signup-password" className="mb-1.5 block text-xs font-bold text-[#192837]/75 uppercase tracking-wide">
+              <label htmlFor="signup-password" className="mb-1.5 block text-xs font-bold text-[#A3A3A3] uppercase tracking-wide">
                 Create Password
               </label>
               <div className="relative">
@@ -643,14 +643,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Minimum 6 characters"
-                  className="w-full rounded-2xl border border-[#192837]/15 bg-[#FAF9F6] px-4 py-3 pl-10 pr-10 text-sm text-[#192837]
-                  placeholder-[#192837]/35 ring-2 ring-transparent transition-all focus:bg-white focus:outline-0 focus:ring-[#7342E2]/50 focus:border-[#7342E2]"
+                  className="w-full rounded-2xl border border-[#2A2A2A] bg-[#181818] px-4 py-3 pl-10 pr-10 text-sm text-[#F5F5F5]
+                  placeholder-[#737373] ring-2 ring-transparent transition-all focus:bg-[#1F1F1F] focus:outline-0 focus:ring-[#E50914]/40 focus:border-[#E50914]"
                 />
-                <Lock size={16} className="absolute left-3.5 top-3.5 text-[#192837]/40" />
+                <Lock size={16} className="absolute left-3.5 top-3.5 text-[#737373]" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3.5 text-[#192837]/40 hover:text-[#192837] cursor-pointer"
+                  className="absolute right-3.5 top-3.5 text-[#737373] hover:text-[#F5F5F5] cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -661,9 +661,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] px-5 py-3.5 text-sm font-bold text-white 
-                shadow-lg shadow-[#7342E2]/25 ring-2 ring-[#7342E2]/30 ring-offset-2 ring-offset-white
-                transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
+                className="w-full rounded-2xl bg-[#E50914] hover:bg-[#FF1E2D] px-5 py-3.5 text-sm font-bold text-white 
+                shadow-lg shadow-[#E50914]/35 ring-2 ring-[#E50914]/30 ring-offset-2 ring-offset-[#111111]
+                transition-all active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -684,7 +684,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         {mode === "signup_otp" && (
           <form onSubmit={handleVerifySignUpOtp} className="space-y-5 text-left">
             <div>
-              <label className="mb-2 block text-xs font-bold text-[#192837]/75 uppercase tracking-wide text-center">
+              <label className="mb-2 block text-xs font-bold text-[#A3A3A3] uppercase tracking-wide text-center">
                 Enter 6-Digit Verification Code
               </label>
               <div className="flex items-center justify-between gap-2 max-w-[320px] mx-auto">
@@ -698,19 +698,19 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                     value={digit}
                     onChange={(e) => handleOtpChange(idx, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                    className="w-11 h-13 text-center text-xl font-extrabold text-[#7342E2] rounded-2xl border border-[#192837]/20 bg-[#FAF9F6] focus:bg-white focus:border-[#7342E2] focus:ring-2 focus:ring-[#7342E2]/40 outline-none transition-all shadow-sm"
+                    className="w-11 h-13 text-center text-xl font-extrabold text-[#FF1E2D] rounded-2xl border border-[#2A2A2A] bg-[#181818] focus:bg-[#1F1F1F] focus:border-[#E50914] focus:ring-2 focus:ring-[#E50914]/40 outline-none transition-all shadow-sm"
                   />
                 ))}
               </div>
             </div>
 
             <div className="flex items-center justify-between text-xs px-2">
-              <span className="text-[#192837]/60">Didn't get the code?</span>
+              <span className="text-[#737373]">Didn't get the code?</span>
               <button
                 type="button"
                 disabled={resendCooldown > 0 || loading}
                 onClick={() => handleResendOtp("signup")}
-                className="font-bold text-[#7342E2] hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer"
+                className="font-bold text-[#FF1E2D] hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer"
               >
                 {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : "Resend code"}
               </button>
@@ -720,9 +720,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               <button
                 type="submit"
                 disabled={loading || otp.join("").length < 6}
-                className="w-full rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] px-5 py-3.5 text-sm font-bold text-white 
-                shadow-lg shadow-[#7342E2]/25 ring-2 ring-[#7342E2]/30 ring-offset-2 ring-offset-white
-                transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
+                className="w-full rounded-2xl bg-[#E50914] hover:bg-[#FF1E2D] px-5 py-3.5 text-sm font-bold text-white 
+                shadow-lg shadow-[#E50914]/35 ring-2 ring-[#E50914]/30 ring-offset-2 ring-offset-[#111111]
+                transition-all active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -739,7 +739,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               <button
                 type="button"
                 onClick={() => setMode("signup")}
-                className="text-xs font-semibold text-[#192837]/60 hover:text-[#192837] cursor-pointer"
+                className="text-xs font-semibold text-[#737373] hover:text-[#F5F5F5] cursor-pointer"
               >
                 &larr; Back to account details
               </button>
@@ -753,7 +753,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         {mode === "forgot_password" && (
           <form onSubmit={handleRequestForgotPasswordOtp} className="space-y-4 text-left">
             <div>
-              <label htmlFor="forgot-email" className="mb-1.5 block text-xs font-bold text-[#192837]/75 uppercase tracking-wide">
+              <label htmlFor="forgot-email" className="mb-1.5 block text-xs font-bold text-[#A3A3A3] uppercase tracking-wide">
                 Work Email Address
               </label>
               <div className="relative">
@@ -764,10 +764,10 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="analyst@enterprise.com"
-                  className="w-full rounded-2xl border border-[#192837]/15 bg-[#FAF9F6] px-4 py-3 pl-10 text-sm text-[#192837]
-                  placeholder-[#192837]/35 ring-2 ring-transparent transition-all focus:bg-white focus:outline-0 focus:ring-[#7342E2]/50 focus:border-[#7342E2]"
+                  className="w-full rounded-2xl border border-[#2A2A2A] bg-[#181818] px-4 py-3 pl-10 text-sm text-[#F5F5F5]
+                  placeholder-[#737373] ring-2 ring-transparent transition-all focus:bg-[#1F1F1F] focus:outline-0 focus:ring-[#E50914]/40 focus:border-[#E50914]"
                 />
-                <Mail size={16} className="absolute left-3.5 top-3.5 text-[#192837]/40" />
+                <Mail size={16} className="absolute left-3.5 top-3.5 text-[#737373]" />
               </div>
             </div>
 
@@ -775,9 +775,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               <button
                 type="submit"
                 disabled={loading || !email}
-                className="w-full rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] px-5 py-3.5 text-sm font-bold text-white 
-                shadow-lg shadow-[#7342E2]/25 ring-2 ring-[#7342E2]/30 ring-offset-2 ring-offset-white
-                transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
+                className="w-full rounded-2xl bg-[#E50914] hover:bg-[#FF1E2D] px-5 py-3.5 text-sm font-bold text-white 
+                shadow-lg shadow-[#E50914]/35 ring-2 ring-[#E50914]/30 ring-offset-2 ring-offset-[#111111]
+                transition-all active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -798,7 +798,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   setError(null)
                   setSuccessMsg(null)
                 }}
-                className="text-xs font-semibold text-[#192837]/60 hover:text-[#192837] cursor-pointer"
+                className="text-xs font-semibold text-[#737373] hover:text-[#F5F5F5] cursor-pointer"
               >
                 &larr; Remember your password? Sign in
               </button>
@@ -812,7 +812,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         {mode === "forgot_password_otp" && (
           <form onSubmit={handleResetPassword} className="space-y-4 text-left">
             <div>
-              <label className="mb-2 block text-xs font-bold text-[#192837]/75 uppercase tracking-wide text-center">
+              <label className="mb-2 block text-xs font-bold text-[#A3A3A3] uppercase tracking-wide text-center">
                 6-Digit Reset Code
               </label>
               <div className="flex items-center justify-between gap-2 max-w-[320px] mx-auto">
@@ -826,14 +826,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                     value={digit}
                     onChange={(e) => handleOtpChange(idx, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                    className="w-11 h-13 text-center text-xl font-extrabold text-[#7342E2] rounded-2xl border border-[#192837]/20 bg-[#FAF9F6] focus:bg-white focus:border-[#7342E2] focus:ring-2 focus:ring-[#7342E2]/40 outline-none transition-all shadow-sm"
+                    className="w-11 h-13 text-center text-xl font-extrabold text-[#FF1E2D] rounded-2xl border border-[#2A2A2A] bg-[#181818] focus:bg-[#1F1F1F] focus:border-[#E50914] focus:ring-2 focus:ring-[#E50914]/40 outline-none transition-all shadow-sm"
                   />
                 ))}
               </div>
             </div>
 
             <div>
-              <label htmlFor="new-password" className="mb-1.5 block text-xs font-bold text-[#192837]/75 uppercase tracking-wide">
+              <label htmlFor="new-password" className="mb-1.5 block text-xs font-bold text-[#A3A3A3] uppercase tracking-wide">
                 New Password
               </label>
               <div className="relative">
@@ -845,14 +845,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Minimum 6 characters"
-                  className="w-full rounded-2xl border border-[#192837]/15 bg-[#FAF9F6] px-4 py-3 pl-10 pr-10 text-sm text-[#192837]
-                  placeholder-[#192837]/35 ring-2 ring-transparent transition-all focus:bg-white focus:outline-0 focus:ring-[#7342E2]/50 focus:border-[#7342E2]"
+                  className="w-full rounded-2xl border border-[#2A2A2A] bg-[#181818] px-4 py-3 pl-10 pr-10 text-sm text-[#F5F5F5]
+                  placeholder-[#737373] ring-2 ring-transparent transition-all focus:bg-[#1F1F1F] focus:outline-0 focus:ring-[#E50914]/40 focus:border-[#E50914]"
                 />
-                <Lock size={16} className="absolute left-3.5 top-3.5 text-[#192837]/40" />
+                <Lock size={16} className="absolute left-3.5 top-3.5 text-[#737373]" />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3.5 top-3.5 text-[#192837]/40 hover:text-[#192837] cursor-pointer"
+                  className="absolute right-3.5 top-3.5 text-[#737373] hover:text-[#F5F5F5] cursor-pointer"
                 >
                   {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -860,12 +860,12 @@ export const AuthForm: React.FC<AuthFormProps> = ({
             </div>
 
             <div className="flex items-center justify-between text-xs px-2">
-              <span className="text-[#192837]/60">Didn't receive code?</span>
+              <span className="text-[#737373]">Didn't receive code?</span>
               <button
                 type="button"
                 disabled={resendCooldown > 0 || loading}
                 onClick={() => handleResendOtp("forgot_password")}
-                className="font-bold text-[#7342E2] hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer"
+                className="font-bold text-[#FF1E2D] hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer"
               >
                 {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
               </button>
@@ -875,9 +875,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               <button
                 type="submit"
                 disabled={loading || otp.join("").length < 6 || !newPassword}
-                className="w-full rounded-2xl bg-gradient-to-br from-[#8B5CF6] to-[#7342E2] px-5 py-3.5 text-sm font-bold text-white 
-                shadow-lg shadow-[#7342E2]/25 ring-2 ring-[#7342E2]/30 ring-offset-2 ring-offset-white
-                transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
+                className="w-full rounded-2xl bg-[#E50914] hover:bg-[#FF1E2D] px-5 py-3.5 text-sm font-bold text-white 
+                shadow-lg shadow-[#E50914]/35 ring-2 ring-[#E50914]/30 ring-offset-2 ring-offset-[#111111]
+                transition-all active:scale-[0.98] cursor-pointer disabled:opacity-70 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -894,7 +894,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
               <button
                 type="button"
                 onClick={() => setMode("signin")}
-                className="text-xs font-semibold text-[#192837]/60 hover:text-[#192837] cursor-pointer"
+                className="text-xs font-semibold text-[#737373] hover:text-[#F5F5F5] cursor-pointer"
               >
                 &larr; Back to sign in
               </button>
@@ -913,9 +913,9 @@ const BackButton: React.FC<{ onBack?: () => void }> = ({ onBack }) => (
     <button
       type="button"
       onClick={onBack || (() => window.history.back())}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-[#192837] bg-white/95 backdrop-blur-md border border-[#192837]/10 hover:bg-[#FAF9F6] hover:border-[#7342E2]/30 active:scale-95 transition-all shadow-sm cursor-pointer"
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-[#F5F5F5] bg-[#111111]/90 backdrop-blur-md border border-[#2A2A2A] hover:border-[#E50914] hover:text-[#FF1E2D] active:scale-95 transition-all shadow-md cursor-pointer"
     >
-      <ChevronLeft size={16} className="text-[#7342E2]" />
+      <ChevronLeft size={16} className="text-[#FF1E2D]" />
       <span>Go back</span>
     </button>
   </div>
@@ -934,15 +934,15 @@ const Header: React.FC<{
   onAction: () => void
 }> = ({ title, subtitle, actionText, onAction }) => (
   <div className="mb-4 text-center">
-    <h1 className="font-heading text-2xl font-extrabold text-[#192837] tracking-tight">
+    <h1 className="font-heading text-2xl font-extrabold text-[#F5F5F5] tracking-tight">
       {title}
     </h1>
-    <p className="mt-2 text-xs sm:text-sm text-[#192837]/65 font-body">
+    <p className="mt-2 text-xs sm:text-sm text-[#A3A3A3] font-body">
       {subtitle}{" "}
       <button
         type="button"
         onClick={onAction}
-        className="font-bold text-[#7342E2] hover:underline cursor-pointer"
+        className="font-bold text-[#FF1E2D] hover:underline cursor-pointer"
       >
         {actionText}
       </button>
@@ -951,13 +951,13 @@ const Header: React.FC<{
 )
 
 const TermsAndConditions: React.FC = () => (
-  <p className="mt-6 text-center text-[11px] text-[#192837]/60 leading-relaxed">
+  <p className="mt-6 text-center text-[11px] text-[#737373] leading-relaxed">
     By signing in, you agree to CyberTrace's{" "}
-    <a href="#" className="font-semibold text-[#7342E2] hover:underline">
+    <a href="#" className="font-semibold text-[#FF1E2D] hover:underline">
       Terms of Service
     </a>{" "}
     and{" "}
-    <a href="#" className="font-semibold text-[#7342E2] hover:underline">
+    <a href="#" className="font-semibold text-[#FF1E2D] hover:underline">
       Privacy Policy
     </a>
     . SOC2 & ISO 27001 Compliant.

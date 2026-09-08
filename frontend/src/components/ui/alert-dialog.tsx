@@ -1,7 +1,6 @@
-"use client"
-
 import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
+
 import { cn } from "@/lib/utils"
 
 const AlertDialog = AlertDialogPrimitive.Root
@@ -16,7 +15,7 @@ const AlertDialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Overlay
     className={cn(
-      "fixed inset-0 z-50 bg-black/60 backdrop-blur-xs data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
@@ -39,7 +38,7 @@ const AlertDialogContent = React.forwardRef<
     <AlertDialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border border-[#192837]/10 bg-white p-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-3xl text-[#192837]",
+        "fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border border-[#2A2A2A] bg-[#0A0A0A] p-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-2xl text-[#F5F5F5]",
         size === "sm" ? "max-w-sm p-5" : "max-w-lg",
         className
       )}
@@ -70,7 +69,7 @@ const AlertDialogMedia = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex items-center justify-center w-12 h-12 rounded-2xl bg-red-50 text-red-600 border border-red-200 mb-2 sm:mb-0",
+      "flex items-center justify-center w-12 h-12 rounded-xl bg-[#FF1E2D]/15 text-[#FF1E2D] border border-[#FF1E2D]/30 mb-2 sm:mb-0",
       className
     )}
     {...props}
@@ -100,7 +99,7 @@ const AlertDialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Title
     ref={ref}
-    className={cn("text-lg sm:text-xl font-extrabold font-heading text-[#192837]", className)}
+    className={cn("text-lg sm:text-xl font-bold font-heading text-[#F5F5F5]", className)}
     {...props}
   />
 ))
@@ -112,7 +111,7 @@ const AlertDialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Description
     ref={ref}
-    className={cn("text-xs sm:text-sm text-[#192837]/70 font-medium leading-relaxed", className)}
+    className={cn("text-xs sm:text-sm text-[#A3A3A3] leading-relaxed font-body", className)}
     {...props}
   />
 ))
@@ -126,7 +125,7 @@ const AlertDialogAction = React.forwardRef<
   <AlertDialogPrimitive.Action
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center rounded-full bg-red-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md hover:bg-red-700 active:scale-95 transition-all cursor-pointer",
+      "inline-flex items-center justify-center rounded-xl bg-[#E50914] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md hover:bg-[#FF1E2D] active:scale-95 transition-all cursor-pointer",
       className
     )}
     {...props}
@@ -141,7 +140,7 @@ const AlertDialogCancel = React.forwardRef<
   <AlertDialogPrimitive.Cancel
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center rounded-full border border-[#192837]/15 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-[#192837] shadow-xs hover:bg-[#FAF9F6] active:scale-95 transition-all cursor-pointer mt-2 sm:mt-0",
+      "inline-flex items-center justify-center rounded-xl border border-[#2A2A2A] bg-[#181818] px-5 py-2.5 text-xs sm:text-sm font-bold text-[#F5F5F5] shadow-xs hover:bg-[#222222] active:scale-95 transition-all cursor-pointer mt-2 sm:mt-0",
       className
     )}
     {...props}

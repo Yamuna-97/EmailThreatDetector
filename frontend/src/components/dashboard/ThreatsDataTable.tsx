@@ -25,7 +25,7 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
         accessorKey: "id",
         header: "Threat ID",
         cell: ({ row }) => (
-          <span className="font-mono font-bold text-[#7342E2]">
+          <span className="font-mono font-bold text-[#FF1E2D]">
             #{row.original.id.slice(0, 8).toUpperCase()}
           </span>
         ),
@@ -35,10 +35,10 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
         header: "Threat Classification",
         cell: ({ row }) => (
           <div className="max-w-xs space-y-0.5">
-            <span className="font-bold text-[#192837] block">
+            <span className="font-bold text-[#F5F5F5] block">
               {row.original.threat_type}
             </span>
-            <span className="text-[11px] text-[#192837]/60 line-clamp-1">
+            <span className="text-[11px] text-[#A3A3A3] line-clamp-1">
               {row.original.summary || "AI telemetry detected anomalous pattern."}
             </span>
           </div>
@@ -51,12 +51,12 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
           const sev = row.original.severity
           const colorClass =
             sev === "critical"
-              ? "bg-red-50 text-red-700 border-red-200"
+              ? "bg-[#FF1E2D]/10 text-[#FF1E2D] border-[#FF1E2D]/30"
               : sev === "high"
-              ? "bg-orange-50 text-orange-700 border-orange-200"
+              ? "bg-[#FF5A36]/10 text-[#FF5A36] border-[#FF5A36]/30"
               : sev === "medium"
-              ? "bg-amber-50 text-amber-700 border-amber-200"
-              : "bg-emerald-50 text-emerald-700 border-emerald-200"
+              ? "bg-[#FFB020]/10 text-[#FFB020] border-[#FFB020]/30"
+              : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
 
           return (
             <span className={`px-2 py-0.5 rounded-md font-extrabold uppercase text-[10px] border ${colorClass}`}>
@@ -71,7 +71,7 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
           <button
             type="button"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="flex items-center gap-1 font-bold hover:text-[#7342E2] cursor-pointer"
+            className="flex items-center gap-1 font-bold hover:text-[#FF1E2D] cursor-pointer"
           >
             <span>Risk Score</span>
             <ArrowUpDown className="h-3 w-3" />
@@ -79,8 +79,8 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
         ),
         cell: ({ row }) => (
           <div className="flex items-baseline gap-1 font-mono">
-            <span className="font-bold text-red-600">{row.original.risk_score}</span>
-            <span className="text-[10px] text-[#192837]/40">/100</span>
+            <span className="font-bold text-[#FF1E2D]">{row.original.risk_score}</span>
+            <span className="text-[10px] text-[#737373]">/100</span>
           </div>
         ),
       },
@@ -88,7 +88,7 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
-          <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-[#F3F4F6] text-[#4B5563] border border-gray-200">
+          <span className="font-bold uppercase text-[10px] px-2 py-0.5 rounded bg-[#181818] text-[#A3A3A3] border border-[#2A2A2A]">
             {row.original.status || "active"}
           </span>
         ),
@@ -99,14 +99,14 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
           <button
             type="button"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="flex items-center gap-1 font-bold hover:text-[#7342E2] cursor-pointer"
+            className="flex items-center gap-1 font-bold hover:text-[#FF1E2D] cursor-pointer"
           >
             <span>Detected</span>
             <ArrowUpDown className="h-3 w-3" />
           </button>
         ),
         cell: ({ row }) => (
-          <span className="text-xs text-[#192837]/60 whitespace-nowrap">
+          <span className="text-xs text-[#737373] whitespace-nowrap">
             {new Date(row.original.created_at).toLocaleDateString()}
           </span>
         ),
@@ -121,7 +121,7 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
                 type="button"
                 onClick={() => onOpenCopilot(row.original.email_id || row.original.id)}
                 title="Open AI Copilot"
-                className="p-1.5 rounded-xl bg-[#F5F3FF] hover:bg-[#7342E2] hover:text-white text-[#7342E2] border border-[#D8C8FF] transition-all cursor-pointer"
+                className="p-1.5 rounded-xl bg-[#181818] hover:bg-[#FF1E2D] hover:text-white text-[#FF1E2D] border border-[#2A2A2A] transition-all cursor-pointer"
               >
                 <Cpu size={13} />
               </button>
@@ -130,7 +130,7 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
             <button
               type="button"
               onClick={() => onViewForensics(row.original.id)}
-              className="px-2.5 py-1.5 rounded-xl bg-white border border-[#D8C8FF] font-bold text-xs text-[#192837] hover:border-[#7342E2] hover:text-[#7342E2] transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
+              className="px-2.5 py-1.5 rounded-xl bg-[#181818] border border-[#2A2A2A] font-bold text-xs text-[#F5F5F5] hover:border-[#FF1E2D] hover:text-[#FF1E2D] transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
             >
               <Eye size={12} />
               <span>Forensics</span>
@@ -141,7 +141,7 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
                 type="button"
                 onClick={() => onDownloadPdf(row.original.id)}
                 title="Download Incident Dossier"
-                className="p-1.5 rounded-xl bg-white hover:bg-[#F5F3FF] text-[#7342E2] border border-[#D8C8FF] transition-all cursor-pointer shadow-2xs"
+                className="p-1.5 rounded-xl bg-[#181818] hover:bg-[#FF1E2D]/20 text-[#FF1E2D] border border-[#2A2A2A] transition-all cursor-pointer shadow-2xs"
               >
                 <Download size={13} />
               </button>
@@ -163,3 +163,4 @@ export const ThreatsDataTable: React.FC<ThreatsDataTableProps> = ({
     />
   )
 }
+export default ThreatsDataTable

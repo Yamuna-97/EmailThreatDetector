@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import {
   Mail, RefreshCw, Sparkles, CheckSquare, Square,
-  CheckCircle2, AlertTriangle, ArrowRight, Inbox, Eye
+  CheckCircle2, AlertTriangle, ArrowRight, Inbox, Eye, ShieldAlert
 } from 'lucide-react'
 import { gmailService, type GmailStatus, type MonitoringStatus, type GmailMessagePreview } from '../../services/gmail'
 import { type ThreatItem } from '../../services/threats'
@@ -41,7 +41,6 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
     }
     const num = typeof val === 'number' ? val : parseInt(val, 10)
     if (!isNaN(num)) {
-      // Clamped integer between 1 and 20
       const clamped = Math.min(20, Math.max(1, Math.floor(num)))
       setSelectedLimit(clamped)
     }
@@ -89,7 +88,6 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
       const res = await gmailService.fetchMessagesList(selectedLimit, selectedFolder)
       const msgList = res.messages || []
       setMessages(msgList)
-      // Auto-select unscanned emails by default
       const unscanned = msgList.filter(m => !m.already_scanned).map(m => m.id)
       setSelectedMsgIds(prev => prev.length > 0 ? prev : (unscanned.length > 0 ? unscanned : msgList.map(m => m.id)))
     } catch (err: any) {
@@ -166,23 +164,23 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
 
   if (!isConnected) {
     return (
-      <div className="dash-card p-10 sm:p-14 text-center max-w-2xl mx-auto space-y-6 animate-fade-in">
+      <div className="bg-[#0A0A0A] border border-[#2A2A2A] rounded-2xl p-10 sm:p-14 text-center max-w-2xl mx-auto space-y-6 animate-fade-in shadow-2xl">
         {/* Icon */}
         <div className="relative w-20 h-20 mx-auto">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-rose-500/15 to-rose-500/5 border border-rose-200 flex items-center justify-center mx-auto">
-            <Mail size={36} className="text-rose-600" />
+          <div className="w-20 h-20 rounded-2xl bg-[#FF1E2D]/10 border border-[#FF1E2D]/30 flex items-center justify-center mx-auto shadow-lg shadow-[#FF1E2D]/10">
+            <Mail size={36} className="text-[#FF1E2D]" />
           </div>
-          <div className="absolute -bottom-2 -right-2 w-7 h-7 rounded-xl bg-rose-500 flex items-center justify-center shadow-md">
-            <span className="text-white text-xs font-extrabold">!</span>
+          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-xl bg-[#E50914] flex items-center justify-center shadow-md">
+            <span className="text-white text-xs font-black">!</span>
           </div>
         </div>
 
         <div className="space-y-2">
-          <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-[#192837]">
-            Gmail Account Not Connected
+          <h2 className="font-heading text-xl sm:text-2xl font-black text-[#F5F5F5] tracking-tight">
+            Gmail Workspace Not Connected
           </h2>
-          <p className="text-sm text-[#192837]/60 leading-relaxed max-w-md mx-auto">
-            Authorize your Google account to preview and scan live Gmail messages directly through CyberTrace's threat detection pipeline.
+          <p className="text-sm text-[#A3A3A3] leading-relaxed max-w-md mx-auto">
+            Authorize your Google account to ingest, preview, and scan live Gmail messages directly through CyberTrace's AI threat detection pipeline.
           </p>
         </div>
 
@@ -190,27 +188,27 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
           <button
             type="button"
             onClick={onNavigateToProfile}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#7342E2] hover:bg-[#6032C4] text-white font-bold text-sm shadow-md shadow-[#7342E2]/25 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#E50914] hover:bg-[#FF1E2D] text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-[#E50914]/25 transition-all cursor-pointer"
           >
-            Open Profile & Connect Gmail
+            <span>Open Profile & Connect Gmail</span>
             <ArrowRight size={15} />
           </button>
-          <div className="status-pill disconnected">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-            Gmail Disconnected
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FF1E2D]/10 border border-[#FF1E2D]/30 text-xs font-bold text-[#FF1E2D]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF1E2D]" />
+            Ingestion Disconnected
           </div>
         </div>
 
         {/* Benefits list */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
           {[
-            { label: 'Live Preview', desc: 'See inbox messages before scanning' },
-            { label: 'Batch Analysis', desc: 'Scan multiple emails at once' },
-            { label: 'Auto Monitoring', desc: '60s background sync protection' },
+            { label: 'Live Preview', desc: 'Inspect mailbox messages before scanning' },
+            { label: 'Batch Forensics', desc: 'Scan multi-MIME headers at once' },
+            { label: 'Auto SOC Sync', desc: '60s background monitoring daemon' },
           ].map(({ label, desc }) => (
-            <div key={label} className="p-3.5 rounded-xl bg-[#F8F9FC] border border-[rgba(115,66,226,0.08)] text-left">
-              <span className="text-xs font-bold text-[#192837] block">{label}</span>
-              <span className="text-[11px] text-[#192837]/45 mt-0.5 block">{desc}</span>
+            <div key={label} className="p-4 rounded-xl bg-[#111111] border border-[#2A2A2A] text-left hover:border-[#FF1E2D]/30 transition-colors">
+              <span className="text-xs font-bold text-[#F5F5F5] block">{label}</span>
+              <span className="text-[11px] text-[#737373] mt-1 block leading-normal">{desc}</span>
             </div>
           ))}
         </div>
@@ -219,29 +217,31 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in font-body">
       {/* Page Header */}
       <div>
-        <h1 className="font-heading text-2xl font-extrabold text-[#192837]">Gmail Ingestion & Threat Scanner</h1>
-        <div className="flex items-center gap-2 mt-1">
-          <div className="status-pill connected">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <h1 className="font-heading text-2xl font-black text-[#F5F5F5] tracking-tight">
+          Gmail Ingestion & Threat Scanner
+        </h1>
+        <div className="flex items-center gap-2.5 mt-1.5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-800/50">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             {gmailStatus?.email_address || 'Connected'}
           </div>
-          <span className="text-xs text-[#192837]/45">Live Google Workspace mailbox</span>
+          <span className="text-xs text-[#737373]">Live Google Workspace mailbox stream</span>
         </div>
       </div>
 
       {/* Top Controls Card */}
-      <div className="dash-card p-6 space-y-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[rgba(115,66,226,0.08)]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7342E2] to-[#9B70F6] text-white flex items-center justify-center shadow-sm shadow-[#7342E2]/25">
+      <div className="bg-[#0A0A0A] border border-[#2A2A2A] rounded-2xl p-6 space-y-5 shadow-xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#2A2A2A]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E50914] to-[#8B0000] text-white flex items-center justify-center shadow-md shadow-[#E50914]/25">
               <Mail size={18} />
             </div>
             <div>
-              <h2 className="font-heading text-sm font-bold text-[#192837]">Scan Controls</h2>
-              <p className="text-[11px] text-[#192837]/45">Select messages and run threat analysis</p>
+              <h2 className="font-heading text-sm font-bold text-[#F5F5F5]">Ingestion & Scan Controls</h2>
+              <p className="text-[11px] text-[#737373]">Select emails and dispatch to Gemini AI forensics</p>
             </div>
           </div>
 
@@ -250,52 +250,52 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
               type="button"
               onClick={() => loadGmailMessages(false)}
               disabled={fetchingMessages}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#F8F9FC] hover:bg-[#F5F3FF] border border-[rgba(115,66,226,0.12)] text-xs font-bold text-[#192837] cursor-pointer disabled:opacity-50 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] border border-[#2A2A2A] text-xs font-bold text-[#F5F5F5] cursor-pointer disabled:opacity-50 transition-all"
             >
-              <RefreshCw size={13} className={fetchingMessages ? 'animate-spin' : ''} />
-              Refresh Mailbox
+              <RefreshCw size={13} className={fetchingMessages ? 'animate-spin text-[#FF1E2D]' : ''} />
+              <span>Refresh Mailbox</span>
             </button>
             <button
               type="button"
               onClick={onNavigateToEmails}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#E0D9FF] text-xs font-bold text-[#7342E2] cursor-pointer transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#181818] hover:bg-[#222222] border border-[#FF1E2D]/40 text-xs font-bold text-[#FF1E2D] cursor-pointer transition-all"
             >
-              View Analyzed Threats
+              <span>View Analyzed Threats</span>
               <ArrowRight size={13} />
             </button>
           </div>
         </div>
 
         {/* Automated Background Monitoring Toggle */}
-        <div className="p-4 rounded-2xl bg-[#F8F9FC] border border-[rgba(115,66,226,0.1)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-4 rounded-xl bg-[#111111] border border-[#2A2A2A] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-              localMonitoringActive ? 'bg-emerald-500/15 text-emerald-600' : 'bg-[#192837]/5 text-[#192837]/50'
+              localMonitoringActive ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-800/40' : 'bg-[#181818] text-[#737373] border border-[#2A2A2A]'
             }`}>
               <Sparkles size={18} className={localMonitoringActive ? 'animate-pulse' : ''} />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-[#192837]">Automated Background Monitoring</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-[#F5F5F5]">Automated Background Monitoring</span>
                 {localMonitoringActive ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 shadow-xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-950/50 text-emerald-400 border border-emerald-800/60 shadow-xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                     ACTIVE (60s SYNC)
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#192837]/10 text-[#192837]/60">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#181818] text-[#737373] border border-[#2A2A2A]">
                     PAUSED / MANUAL
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-[#192837]/60 mt-0.5">
-                Automatically scans incoming messages every 60 seconds in the background without refreshing your page
+              <p className="text-[11px] text-[#A3A3A3] mt-0.5">
+                Automatically scans incoming messages every 60 seconds without refreshing your page
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3 self-end sm:self-center">
-            <span className="text-xs font-bold text-[#192837]/70 select-none">
+            <span className="text-xs font-mono font-bold text-[#A3A3A3] select-none">
               {localMonitoringActive ? 'ON' : 'OFF'}
             </span>
             <button
@@ -305,10 +305,10 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
               onClick={handleToggleMonitoring}
               disabled={togglingMonitor}
               title={localMonitoringActive ? 'Click to pause automatic 60s monitoring' : 'Click to enable automatic 60s monitoring'}
-              className={`relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full p-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#7342E2]/30 active:scale-95 ${
+              className={`relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full p-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#FF1E2D]/40 active:scale-95 ${
                 localMonitoringActive
-                  ? 'bg-gradient-to-r from-[#8B5CF6] to-[#7342E2] shadow-md shadow-[#7342E2]/30'
-                  : 'bg-gray-300 hover:bg-gray-400'
+                  ? 'bg-gradient-to-r from-[#FF1E2D] to-[#E50914] shadow-md shadow-[#E50914]/30'
+                  : 'bg-[#2A2A2A] hover:bg-[#333333]'
               }`}
             >
               <span className="sr-only">Toggle automated monitoring</span>
@@ -320,11 +320,11 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
                 className="pointer-events-none flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md"
               >
                 {togglingMonitor ? (
-                  <RefreshCw size={11} className="animate-spin text-[#7342E2]" />
+                  <RefreshCw size={11} className="animate-spin text-[#E50914]" />
                 ) : localMonitoringActive ? (
-                  <span className="h-2 w-2 rounded-full bg-[#7342E2]" />
+                  <span className="h-2 w-2 rounded-full bg-[#E50914]" />
                 ) : (
-                  <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-neutral-400" />
                 )}
               </span>
             </button>
@@ -333,13 +333,13 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
 
         {/* Filter controls */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
-          {/* Email Count Limit (Typeable Integer Range 1-20, Default: 5) */}
+          {/* Email Count Limit */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold text-[#192837] uppercase tracking-wider">
+              <label className="block text-[11px] font-bold text-[#A3A3A3] uppercase tracking-wider">
                 Scan Range (1–20)
               </label>
-              <span className="text-[10px] text-[#7342E2] font-bold">
+              <span className="text-[10px] text-[#FF1E2D] font-mono font-bold">
                 Default: 5 &bull; Max: 20
               </span>
             </div>
@@ -352,7 +352,7 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
                   step={1}
                   value={selectedLimit}
                   onChange={(e) => handleLimitChange(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-[#FAF9F6] border border-[#192837]/15 focus:border-[#7342E2] focus:ring-2 focus:ring-[#7342E2]/20 text-xs font-extrabold text-[#192837] text-center transition-all outline-none"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#111111] border border-[#2A2A2A] focus:border-[#FF1E2D] focus:ring-1 focus:ring-[#FF1E2D]/30 text-xs font-mono font-extrabold text-[#F5F5F5] text-center transition-all outline-none"
                   placeholder="5"
                 />
               </div>
@@ -362,10 +362,10 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
                     key={num}
                     type="button"
                     onClick={() => handleLimitChange(num)}
-                    className={`px-2 py-2 rounded-xl text-[11px] font-extrabold transition-all border cursor-pointer ${
+                    className={`px-2.5 py-2 rounded-xl text-[11px] font-mono font-extrabold transition-all border cursor-pointer ${
                       selectedLimit === num
-                        ? 'bg-[#7342E2] text-white border-[#7342E2] shadow-xs'
-                        : 'bg-[#FAF9F6] text-[#192837]/70 border-[#192837]/10 hover:border-[#7342E2]/40'
+                        ? 'bg-[#E50914] text-white border-[#E50914] shadow-xs'
+                        : 'bg-[#111111] text-[#A3A3A3] border-[#2A2A2A] hover:border-[#FF1E2D]/40'
                     }`}
                   >
                     {num}
@@ -377,7 +377,7 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
 
           {/* Folder Target */}
           <div>
-            <label className="block text-xs font-bold text-[#192837] mb-1.5 uppercase tracking-wider">
+            <label className="block text-[11px] font-bold text-[#A3A3A3] mb-1.5 uppercase tracking-wider">
               Target Folder
             </label>
             <div className="grid grid-cols-3 gap-1.5">
@@ -388,8 +388,8 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
                   onClick={() => setSelectedFolder(f)}
                   className={`py-2 rounded-xl text-xs font-extrabold capitalize transition-all border cursor-pointer ${
                     selectedFolder === f
-                      ? 'bg-[#7342E2] text-white border-[#7342E2] shadow-sm'
-                      : 'bg-[#FAF9F6] text-[#192837]/70 border-[#192837]/10 hover:border-[#7342E2]/40'
+                      ? 'bg-[#E50914] text-white border-[#E50914] shadow-sm'
+                      : 'bg-[#111111] text-[#A3A3A3] border-[#2A2A2A] hover:border-[#FF1E2D]/40'
                   }`}
                 >
                   {f}
@@ -403,23 +403,27 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
             <InteractiveHoverButton
               disabled={scanningSelected || selectedMsgIds.length === 0}
               onClick={handleScanSelected}
-              text={scanningSelected ? `Gemini AI Analyzing (${selectedMsgIds.length})...` : `Scan Selected (${selectedMsgIds.length} Emails)`}
+              text={scanningSelected ? `AI Analyzing (${selectedMsgIds.length})...` : `Scan Selected (${selectedMsgIds.length} Emails)`}
               icon={scanningSelected ? <RefreshCw size={15} className="animate-spin" /> : <Sparkles size={15} className="text-white" />}
-              className="w-full py-2.5 rounded-xl bg-[#7342E2] text-white font-bold text-xs sm:text-sm shadow-md shadow-[#7342E2]/25 border-[#7342E2]"
+              className="w-full py-2.5 rounded-xl bg-[#E50914] text-white font-bold text-xs sm:text-sm shadow-lg shadow-[#E50914]/25 border-[#E50914]"
             />
           </div>
         </div>
       </div>
 
-      {/* Analysis Result Banner with Direct Report Access */}
+      {/* Analysis Result Banner */}
       {statusMessage && (
-        <div className={`p-4 sm:p-5 rounded-2xl text-xs sm:text-sm font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-3 border shadow-sm animate-fade-in ${
+        <div className={`p-4 sm:p-5 rounded-xl text-xs sm:text-sm font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-3 border shadow-lg animate-fade-in ${
           statusMessage.type === 'success'
-            ? 'bg-emerald-50/90 border-emerald-300 text-emerald-900'
-            : 'bg-red-50/90 border-red-300 text-red-900'
+            ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
+            : 'bg-[#181818] border-[#FF1E2D]/50 text-[#FF1E2D]'
         }`}>
           <div className="flex items-center gap-3">
-            {statusMessage.type === 'success' ? <CheckCircle2 size={20} className="text-emerald-600 shrink-0" /> : <AlertTriangle size={20} className="text-red-600 shrink-0" />}
+            {statusMessage.type === 'success' ? (
+              <CheckCircle2 size={20} className="text-emerald-400 shrink-0" />
+            ) : (
+              <AlertTriangle size={20} className="text-[#FF1E2D] shrink-0" />
+            )}
             <span>{statusMessage.text}</span>
           </div>
 
@@ -428,7 +432,7 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
               <button
                 type="button"
                 onClick={() => onViewThreatReport(statusMessage.threatId!)}
-                className="px-3.5 py-1.5 rounded-xl bg-[#7342E2] hover:bg-[#6332d2] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl bg-[#E50914] hover:bg-[#FF1E2D] text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
               >
                 <Eye size={14} />
                 <span>View Analytics Dossier</span>
@@ -437,7 +441,7 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
             <button
               type="button"
               onClick={() => setStatusMessage(null)}
-              className="text-xs opacity-60 hover:opacity-100 p-1 cursor-pointer"
+              className="text-xs text-[#A3A3A3] hover:text-white p-1 cursor-pointer"
             >
               ✕
             </button>
@@ -446,36 +450,36 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
       )}
 
       {/* Messages List Card */}
-      <div className="dash-card overflow-hidden">
+      <div className="bg-[#0A0A0A] border border-[#2A2A2A] rounded-2xl overflow-hidden shadow-xl">
         {/* Table Header / Selection Bar */}
-        <div className="px-6 py-4 border-b border-[rgba(115,66,226,0.08)] bg-[#F8F9FC] flex items-center justify-between gap-4">
+        <div className="px-6 py-4 border-b border-[#2A2A2A] bg-[#111111] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={handleToggleSelectAll}
               disabled={messages.length === 0}
-              className="text-[#7342E2] hover:opacity-80 transition-opacity cursor-pointer flex items-center gap-2 text-xs font-bold"
+              className="text-[#FF1E2D] hover:text-white transition-colors cursor-pointer flex items-center gap-2 text-xs font-bold"
             >
               {selectedMsgIds.length === messages.length && messages.length > 0 ? (
                 <CheckSquare size={18} />
               ) : (
-                <Square size={18} className="text-[#192837]/40" />
+                <Square size={18} className="text-[#555555]" />
               )}
               <span>Select All ({messages.length})</span>
             </button>
-            <span className="text-xs text-[#192837]/50">
+            <span className="text-xs text-[#737373]">
               &bull; {selectedMsgIds.length} selected
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             {fetchingMessages && (
-              <span className="text-xs text-[#7342E2] font-semibold flex items-center gap-1">
+              <span className="text-xs text-[#FF1E2D] font-mono font-semibold flex items-center gap-1.5">
                 <RefreshCw size={12} className="animate-spin" />
                 Updating...
               </span>
             )}
-            <span className="text-xs text-[#192837]/60 font-semibold">
+            <span className="text-xs text-[#A3A3A3] font-mono">
               Showing latest {messages.length} message(s)
             </span>
           </div>
@@ -483,20 +487,20 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
 
         {fetchingMessages && messages.length === 0 ? (
           <div className="py-16 text-center space-y-3">
-            <RefreshCw size={28} className="animate-spin text-[#7342E2] mx-auto" />
-            <p className="text-xs sm:text-sm font-semibold text-[#192837]/70">
+            <RefreshCw size={28} className="animate-spin text-[#FF1E2D] mx-auto" />
+            <p className="text-xs sm:text-sm font-semibold text-[#A3A3A3]">
               Retrieving live emails from your Google Workspace account...
             </p>
           </div>
         ) : messages.length === 0 ? (
           <div className="py-16 text-center space-y-3">
-            <Inbox size={32} className="text-[#192837]/30 mx-auto" />
-            <p className="text-xs sm:text-sm font-semibold text-[#192837]/60">
+            <Inbox size={32} className="text-[#444444] mx-auto" />
+            <p className="text-xs sm:text-sm font-semibold text-[#737373]">
               No emails found in this folder ({selectedFolder}).
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-[rgba(115,66,226,0.06)]">
+          <div className="divide-y divide-[#1F1F1F]">
             {messages.map((m) => {
               const isSelected = selectedMsgIds.includes(m.id)
               const matchingThreat = threats.find(t => t.email_id === m.id || (t as any).message_id === m.id || t.id === m.id)
@@ -508,36 +512,36 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
                 <div
                   key={m.id}
                   className={`p-4 sm:p-5 flex items-start gap-3 sm:gap-4 transition-all ${
-                    isSelected ? 'bg-[#F8F7FF]' : 'hover:bg-[#FAFAFA]'
+                    isSelected ? 'bg-[#181818]/90' : 'hover:bg-[#141414]'
                   }`}
                 >
                   <button
                     type="button"
                     onClick={() => handleToggleMsg(m.id)}
-                    className="mt-0.5 text-[#7342E2] cursor-pointer shrink-0"
+                    className="mt-0.5 text-[#FF1E2D] cursor-pointer shrink-0"
                   >
                     {isSelected ? (
                       <CheckSquare size={18} />
                     ) : (
-                      <Square size={18} className="text-[#192837]/30 hover:text-[#7342E2]" />
+                      <Square size={18} className="text-[#555555] hover:text-[#FF1E2D]" />
                     )}
                   </button>
 
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-heading font-bold text-xs sm:text-sm text-[#192837] truncate max-w-md">
+                      <span className="font-heading font-bold text-xs sm:text-sm text-[#F5F5F5] truncate max-w-md">
                         {m.subject || '(No Subject)'}
                       </span>
-                      <span className="text-[11px] text-[#192837]/50 whitespace-nowrap">
+                      <span className="text-[11px] font-mono text-[#737373] whitespace-nowrap">
                         {m.date || 'Recent'}
                       </span>
                     </div>
 
-                    <p className="text-xs text-[#192837]/70 truncate">
-                      <b className="text-[#192837] font-semibold">From:</b> {m.sender}
+                    <p className="text-xs text-[#A3A3A3] truncate">
+                      <b className="text-[#F5F5F5] font-semibold">From:</b> {m.sender}
                     </p>
 
-                    <p className="text-xs text-[#192837]/60 line-clamp-1 font-body">
+                    <p className="text-xs text-[#737373] line-clamp-1 font-body">
                       {m.snippet || '(empty preview)'}
                     </p>
 
@@ -545,21 +549,21 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
                       {matchingThreat ? (
                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
                           isDanger
-                            ? 'bg-red-50 text-red-700 border-red-200'
+                            ? 'bg-[#FF1E2D]/10 text-[#FF1E2D] border-[#FF1E2D]/30'
                             : isModerate
-                              ? 'bg-amber-50 text-amber-800 border-amber-200'
-                              : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              ? 'bg-amber-950/40 text-amber-400 border-amber-800/40'
+                              : 'bg-emerald-950/40 text-emerald-400 border-emerald-800/40'
                         }`}>
-                          {isDanger ? <AlertTriangle size={11} /> : <CheckCircle2 size={11} />}
+                          {isDanger ? <ShieldAlert size={11} /> : <CheckCircle2 size={11} />}
                           {matchingThreat.threat_type} ({matchingThreat.risk_score}/100)
                         </span>
                       ) : m.already_scanned ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#181818] text-[#A3A3A3] border border-[#2A2A2A]">
                           <CheckCircle2 size={11} />
                           Already Scanned
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-950/30 text-amber-400 border border-amber-800/30">
                           Pending Scan
                         </span>
                       )}
@@ -568,7 +572,7 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
                         <button
                           type="button"
                           onClick={() => onViewThreatReport(matchingThreat.id)}
-                          className="px-2.5 py-1 rounded-lg bg-[#7342E2] text-white text-[11px] font-bold hover:brightness-110 transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+                          className="px-2.5 py-1 rounded-lg bg-[#E50914] text-white text-[11px] font-bold hover:bg-[#FF1E2D] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
                         >
                           <Eye size={12} />
                           <span>View Analytics Report</span>
@@ -579,7 +583,7 @@ export const GmailScannerView: React.FC<GmailScannerViewProps> = ({
                         type="button"
                         onClick={() => handleScanSingle(m.id)}
                         disabled={scanningSelected}
-                        className="px-2.5 py-1 rounded-lg bg-[#7342E2]/10 hover:bg-[#7342E2]/20 text-[#7342E2] text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
+                        className="px-2.5 py-1 rounded-lg bg-[#FF1E2D]/10 hover:bg-[#FF1E2D]/20 border border-[#FF1E2D]/25 text-[#FF1E2D] text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1"
                       >
                         <Sparkles size={11} />
                         <span>{m.already_scanned ? 'Re-Analyze' : 'Scan Now'}</span>

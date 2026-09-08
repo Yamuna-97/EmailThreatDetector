@@ -68,7 +68,6 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
     setScanStep(1)
 
     try {
-      // Step simulation for visual WOW feedback
       setTimeout(() => setScanStep(2), 500)
       setTimeout(() => setScanStep(3), 1000)
       setTimeout(() => setScanStep(4), 1500)
@@ -92,46 +91,46 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.96, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 15 }}
-        className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-[#192837]/10 overflow-hidden text-[#192837]"
+        className="relative w-full max-w-4xl bg-[#0A0A0A] rounded-2xl shadow-2xl border border-[#2A2A2A] overflow-hidden text-[#F5F5F5]"
       >
         {/* Loading Overlay */}
         {scanning && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 backdrop-blur-md p-6 text-center">
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 text-center">
             <CoreSpinLoader customStates={[
-              'Analyzing Email...',
-              'Fetching Headers...',
-              'Checking IP Rep...',
-              'Reading Geolocation...',
-              'Evaluating AI...',
-              'Generating Analytics...'
+              'Parsing MIME Structure...',
+              'Extracting SPF/DKIM Headers...',
+              'Consulting Threat Databases...',
+              'Querying IP Geolocation Node...',
+              'Gemini AI Behavioral Reasoning...',
+              'Computing Risk Assessment Matrix...'
             ]} />
           </div>
         )}
         
         {/* Header */}
-        <div className="p-6 border-b border-[#192837]/10 flex items-center justify-between bg-[#FAF9F6]">
+        <div className="p-6 border-b border-[#2A2A2A] flex items-center justify-between bg-[#111111]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#7342E2] flex items-center justify-center text-white shadow-md shadow-[#7342E2]/20">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E50914] to-[#8B0000] flex items-center justify-center text-white shadow-md shadow-[#E50914]/25">
               <Sparkles size={20} />
             </div>
             <div>
-              <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight">
-                AI Email Threat Scanner
+              <h2 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-[#F5F5F5]">
+                AI Threat Ingestion & Sandbox
               </h2>
-              <p className="text-xs text-[#192837]/60 font-body">
-                Paste raw email content or select synthetic test scenario
+              <p className="text-xs text-[#737373] font-body">
+                Paste raw email payload or select a synthetic adversary test scenario
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-[#192837]/60 hover:text-[#192837] hover:bg-[#192837]/5 transition-all cursor-pointer"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-[#737373] hover:text-[#F5F5F5] hover:bg-[#181818] transition-all cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -141,8 +140,8 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
         <div className="p-6 max-h-[calc(90vh-140px)] overflow-y-auto space-y-6">
           {/* Preset Buttons */}
           <div>
-            <span className="text-[10px] font-bold text-[#192837]/50 uppercase tracking-wider block mb-2">
-              Instant Sample Scenarios (Click to Load)
+            <span className="text-[10px] font-mono font-bold text-[#737373] uppercase tracking-wider block mb-2">
+              Adversary Sandbox Scenarios (Click to Load)
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {PRESET_SCENARIOS.map((p, i) => (
@@ -150,7 +149,7 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
                   key={i}
                   type="button"
                   onClick={() => handleApplyPreset(p)}
-                  className="p-3 rounded-2xl bg-[#FAF9F6] hover:bg-[#7342E2]/5 border border-[#192837]/10 hover:border-[#7342E2]/30 text-left text-xs font-semibold text-[#192837] transition-all cursor-pointer"
+                  className="p-3 rounded-xl bg-[#111111] hover:bg-[#181818] border border-[#2A2A2A] hover:border-[#FF1E2D]/40 text-left text-xs font-semibold text-[#F5F5F5] transition-all cursor-pointer"
                 >
                   {p.name}
                 </button>
@@ -162,43 +161,49 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
           <form onSubmit={handleScan} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-[#192837]/70 mb-1.5">Sender Email Address</label>
+                <label className="block text-[11px] font-bold text-[#A3A3A3] uppercase tracking-wider mb-1.5">
+                  Sender Email Address
+                </label>
                 <input
                   type="text"
                   required
                   value={sender}
                   onChange={(e) => setSender(e.target.value)}
                   placeholder="security-alert@chase-secure-verify.net"
-                  className="w-full text-xs font-mono px-4 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#192837]/15 focus:outline-none focus:bg-white focus:border-[#7342E2]"
+                  className="w-full text-xs font-mono px-4 py-2.5 rounded-xl bg-[#111111] border border-[#2A2A2A] text-[#F5F5F5] focus:outline-none focus:border-[#FF1E2D] focus:ring-1 focus:ring-[#FF1E2D]/30 transition-all"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#192837]/70 mb-1.5">Subject Line</label>
+                <label className="block text-[11px] font-bold text-[#A3A3A3] uppercase tracking-wider mb-1.5">
+                  Subject Line
+                </label>
                 <input
                   type="text"
                   required
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="[URGENT] Security Alert: Unauthorized Transaction"
-                  className="w-full text-xs font-semibold px-4 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#192837]/15 focus:outline-none focus:bg-white focus:border-[#7342E2]"
+                  className="w-full text-xs font-semibold px-4 py-2.5 rounded-xl bg-[#111111] border border-[#2A2A2A] text-[#F5F5F5] focus:outline-none focus:border-[#FF1E2D] focus:ring-1 focus:ring-[#FF1E2D]/30 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#192837]/70 mb-1.5">Email Body (Plain Text or HTML)</label>
+              <label className="block text-[11px] font-bold text-[#A3A3A3] uppercase tracking-wider mb-1.5">
+                Email Body (Plain Text or HTML)
+              </label>
               <textarea
                 required
                 rows={4}
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="Paste the full message content here with embedded links..."
-                className="w-full text-xs font-mono px-4 py-3 rounded-xl bg-[#FAF9F6] border border-[#192837]/15 focus:outline-none focus:bg-white focus:border-[#7342E2]"
+                className="w-full text-xs font-mono px-4 py-3 rounded-xl bg-[#111111] border border-[#2A2A2A] text-[#F5F5F5] focus:outline-none focus:border-[#FF1E2D] focus:ring-1 focus:ring-[#FF1E2D]/30 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#192837]/70 mb-1.5">
+              <label className="block text-[11px] font-bold text-[#A3A3A3] uppercase tracking-wider mb-1.5">
                 Optional Raw MIME Headers (SPF, DKIM, Received IP)
               </label>
               <textarea
@@ -206,12 +211,12 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
                 value={headers}
                 onChange={(e) => setHeaders(e.target.value)}
                 placeholder="From: ...&#10;Authentication-Results: spf=fail&#10;Received: from ..."
-                className="w-full text-xs font-mono px-4 py-2.5 rounded-xl bg-[#FAF9F6] border border-[#192837]/15 focus:outline-none focus:bg-white focus:border-[#7342E2]"
+                className="w-full text-xs font-mono px-4 py-2.5 rounded-xl bg-[#111111] border border-[#2A2A2A] text-[#F5F5F5] focus:outline-none focus:border-[#FF1E2D] focus:ring-1 focus:ring-[#FF1E2D]/30 transition-all"
               />
             </div>
 
             {error && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+              <div className="p-3.5 rounded-xl bg-[#181818] border border-[#FF1E2D]/50 text-[#FF1E2D] text-xs font-semibold">
                 {error}
               </div>
             )}
@@ -219,9 +224,9 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
             <InteractiveHoverButton
               type="submit"
               disabled={scanning}
-              text={scanning ? (scanStep === 1 ? 'Extracting MIME Headers...' : scanStep === 2 ? 'Consulting IPQS & Geo...' : scanStep === 3 ? 'Gemini AI Reasoning...' : 'Computing Risk Score...') : 'Analyze Threat Pipeline'}
+              text={scanning ? (scanStep === 1 ? 'Extracting MIME Headers...' : scanStep === 2 ? 'Consulting IPQS & Geo...' : scanStep === 3 ? 'Gemini AI Reasoning...' : 'Computing Risk Score...') : 'Run AI Threat Pipeline'}
               icon={scanning ? <RefreshCw size={16} className="animate-spin" /> : <Sparkles size={16} className="text-white" />}
-              className="w-full py-3.5 px-6 rounded-2xl bg-[#7342E2] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#7342E2]/25 border-[#7342E2]"
+              className="w-full py-3.5 px-6 rounded-xl bg-[#E50914] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#E50914]/25 border-[#E50914]"
             />
           </form>
 
@@ -230,47 +235,47 @@ export const ManualScanModal: React.FC<ManualScanModalProps> = ({ isOpen, onClos
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#7342E2]/30 space-y-4 shadow-sm"
+              className="p-5 rounded-xl bg-[#111111] border border-[#FF1E2D]/30 space-y-4 shadow-xl"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-[#192837]/10">
+              <div className="flex items-center justify-between pb-3 border-b border-[#2A2A2A]">
                 <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase border ${
-                    result.threat.severity === 'critical' ? 'bg-red-500/10 text-red-600 border-red-500/30' :
-                    result.threat.severity === 'high' ? 'bg-orange-500/10 text-orange-600 border-orange-500/30' :
-                    result.threat.severity === 'medium' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' :
-                    'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+                  <span className={`px-3 py-1 rounded-full text-xs font-mono font-black uppercase border ${
+                    result.threat.severity === 'critical' ? 'bg-[#FF1E2D]/15 text-[#FF1E2D] border-[#FF1E2D]/30' :
+                    result.threat.severity === 'high' ? 'bg-orange-500/15 text-orange-400 border-orange-500/30' :
+                    result.threat.severity === 'medium' ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' :
+                    'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                   }`}>
                     {result.threat.severity} Severity
                   </span>
-                  <span className="font-heading text-base font-bold text-[#192837]">
+                  <span className="font-heading text-base font-bold text-[#F5F5F5]">
                     {result.threat.threat_type}
                   </span>
                 </div>
 
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-black font-heading text-[#7342E2]">
+                  <span className="text-2xl font-black font-heading text-[#FF1E2D]">
                     {result.threat.risk_score}
                   </span>
-                  <span className="text-xs font-bold text-[#192837]/50">/ 100 Risk</span>
+                  <span className="text-xs font-bold text-[#737373]">/ 100 Risk</span>
                 </div>
               </div>
 
-              <p className="text-xs text-[#192837]/80 leading-relaxed font-body">
+              <p className="text-xs text-[#A3A3A3] leading-relaxed font-body">
                 {result.threat.summary}
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                <div className="p-2.5 rounded-xl bg-white border border-[#192837]/10">
-                  <span className="text-[10px] text-[#192837]/50 block">Origin Location</span>
-                  <span className="font-bold">{result.geolocation?.city || 'Frankfurt'}, {result.geolocation?.country || 'Germany'}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-mono">
+                <div className="p-3 rounded-xl bg-[#181818] border border-[#2A2A2A]">
+                  <span className="text-[10px] text-[#737373] block uppercase">Origin Location</span>
+                  <span className="font-bold text-[#F5F5F5]">{result.geolocation?.city || 'Frankfurt'}, {result.geolocation?.country || 'Germany'}</span>
                 </div>
-                <div className="p-2.5 rounded-xl bg-white border border-[#192837]/10">
-                  <span className="text-[10px] text-[#192837]/50 block">IP Fraud Score</span>
-                  <span className="font-bold text-red-600">{result.ip_intelligence?.fraud_score ?? 85}/100</span>
+                <div className="p-3 rounded-xl bg-[#181818] border border-[#2A2A2A]">
+                  <span className="text-[10px] text-[#737373] block uppercase">IP Fraud Score</span>
+                  <span className="font-bold text-[#FF1E2D]">{result.ip_intelligence?.fraud_score ?? 85}/100</span>
                 </div>
-                <div className="p-2.5 rounded-xl bg-white border border-[#192837]/10">
-                  <span className="text-[10px] text-[#192837]/50 block">SPF / DMARC</span>
-                  <span className="font-bold font-mono uppercase">{result.email?.headers?.spf || 'fail'} / {result.email?.headers?.dmarc || 'fail'}</span>
+                <div className="p-3 rounded-xl bg-[#181818] border border-[#2A2A2A]">
+                  <span className="text-[10px] text-[#737373] block uppercase">SPF / DMARC</span>
+                  <span className="font-bold uppercase text-[#F5F5F5]">{result.email?.headers?.spf || 'fail'} / {result.email?.headers?.dmarc || 'fail'}</span>
                 </div>
               </div>
             </motion.div>

@@ -27,10 +27,10 @@ const sevClass = (s: string) => {
 }
 
 const sevColors = {
-  critical: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', dot: 'bg-rose-500', barColor: '#F43F5E' },
-  high: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', dot: 'bg-orange-500', barColor: '#F97316' },
-  medium: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-400', barColor: '#F59E0B' },
-  low: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', barColor: '#22C55E' },
+  critical: { bg: 'bg-[#FF1E2D]/10', text: 'text-[#FF1E2D]', border: 'border-[#FF1E2D]/30', dot: 'bg-[#FF1E2D]', barColor: '#FF1E2D' },
+  high: { bg: 'bg-[#FF5A36]/10', text: 'text-[#FF5A36]', border: 'border-[#FF5A36]/30', dot: 'bg-[#FF5A36]', barColor: '#FF5A36' },
+  medium: { bg: 'bg-[#FFB020]/10', text: 'text-[#FFB020]', border: 'border-[#FFB020]/30', dot: 'bg-[#FFB020]', barColor: '#FFB020' },
+  low: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30', dot: 'bg-emerald-500', barColor: '#22C55E' },
 }
 
 export const InvestigatorDashboard: React.FC = () => {
@@ -130,11 +130,11 @@ export const InvestigatorDashboard: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-[#F2F3F8] text-[#192837] flex flex-col md:flex-row font-body">
+    <div className="min-h-screen bg-[#050505] text-[#F5F5F5] flex flex-col md:flex-row font-body">
 
       {/* ── Sidebar ── */}
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
-        <SidebarBody className="justify-between gap-4">
+        <SidebarBody className="justify-between gap-4 bg-[#0A0A0A] border-r border-[#2A2A2A]">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden gap-1">
 
             {/* Brand */}
@@ -144,10 +144,10 @@ export const InvestigatorDashboard: React.FC = () => {
               </div>
               {sidebarOpen && (
                 <div className="truncate animate-fade-in">
-                  <span className="font-heading text-sm font-extrabold text-[#192837] tracking-tight block leading-tight">
-                    Cyber<span className="text-[#7342E2]">Trace</span>
+                  <span className="font-heading text-sm font-extrabold text-[#F5F5F5] tracking-tight block leading-tight">
+                    Cyber<span className="text-[#FF1E2D]">Trace</span>
                   </span>
-                  <span className="text-[9px] text-[#7342E2] font-bold block uppercase tracking-widest mt-0.5">
+                  <span className="text-[9px] text-[#FF1E2D] font-bold block uppercase tracking-widest mt-0.5">
                     SOC Console
                   </span>
                 </div>
@@ -155,7 +155,7 @@ export const InvestigatorDashboard: React.FC = () => {
             </div>
 
             {sidebarOpen && (
-              <span className="section-label px-3 mb-1">Investigator Menu</span>
+              <span className="section-label px-3 mb-1 text-[#737373] text-[10px] font-bold uppercase tracking-wider">Investigator Menu</span>
             )}
 
             {/* Nav Links */}
@@ -179,7 +179,7 @@ export const InvestigatorDashboard: React.FC = () => {
           </div>
 
           {/* Bottom actions */}
-          <div className="border-t border-[rgba(115,66,226,0.1)] pt-3 flex flex-col gap-0.5">
+          <div className="border-t border-[#2A2A2A] pt-3 flex flex-col gap-0.5">
             <SidebarLink
               link={{
                 label: 'Refresh Data',
@@ -190,10 +190,10 @@ export const InvestigatorDashboard: React.FC = () => {
             <SidebarLink
               link={{
                 label: 'Sign Out',
-                icon: <LogOut size={17} className="text-rose-500" />,
+                icon: <LogOut size={17} className="text-[#FF1E2D]" />,
                 onClick: logout,
               }}
-              className="hover:bg-rose-50 hover:text-rose-700"
+              className="hover:bg-[#FF1E2D]/10 hover:text-[#FF1E2D]"
             />
           </div>
         </SidebarBody>
@@ -203,20 +203,20 @@ export const InvestigatorDashboard: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
 
         {/* Top Header */}
-        <header className="dash-header">
+        <header className="sticky top-0 z-30 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-[#2A2A2A]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="hidden sm:flex w-7 h-7 rounded-lg bg-[#F5F3FF] border border-[#E0D9FF] items-center justify-center shrink-0">
+              <div className="hidden sm:flex w-7 h-7 rounded-lg bg-[#181818] border border-[#2A2A2A] items-center justify-center shrink-0">
                 {(() => {
                   const tab = investigatorTabs.find(t => t.id === activeTab)
                   const Icon = tab?.icon || BarChart3
-                  return <Icon size={14} className="text-[#7342E2]" />
+                  return <Icon size={14} className="text-[#FF1E2D]" />
                 })()}
               </div>
-              <span className="font-heading text-sm font-bold text-[#192837] truncate">
+              <span className="font-heading text-sm font-bold text-[#F5F5F5] truncate">
                 {investigatorTabs.find(t => t.id === activeTab)?.label || 'SOC Console'}
               </span>
-              <span className="hidden sm:inline text-[10px] text-[#7342E2] font-extrabold uppercase px-2 py-0.5 rounded-lg bg-[#F5F3FF] border border-[#E0D9FF]">
+              <span className="hidden sm:inline text-[10px] text-[#FF1E2D] font-extrabold uppercase px-2 py-0.5 rounded-lg bg-[#FF1E2D]/10 border border-[#FF1E2D]/20">
                 Investigation Dossier
               </span>
             </div>
@@ -224,13 +224,13 @@ export const InvestigatorDashboard: React.FC = () => {
             <div className="flex items-center gap-2 shrink-0">
               {/* Gmail Status */}
               {gmailStatus?.is_connected ? (
-                <div title={`Gmail: ${gmailStatus?.email_address}`} className="status-pill connected hidden sm:flex">
+                <div title={`Gmail: ${gmailStatus?.email_address}`} className="px-3 py-1 rounded-full text-xs font-semibold bg-[#181818] border border-[#2A2A2A] text-[#F5F5F5] items-center gap-2 hidden sm:flex">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="truncate max-w-[140px]">{gmailStatus?.email_address || 'Connected'}</span>
                 </div>
               ) : (
-                <div title="Gmail is disconnected." className="status-pill disconnected">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                <div title="Gmail is disconnected." className="px-3 py-1 rounded-full text-xs font-semibold bg-[#FF1E2D]/10 border border-[#FF1E2D]/30 text-[#FF1E2D] flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF1E2D]" />
                   <span className="hidden sm:block">Gmail: Disconnected</span>
                 </div>
               )}
@@ -249,19 +249,19 @@ export const InvestigatorDashboard: React.FC = () => {
                 onClick={loadInvestigatorData}
                 disabled={loading}
                 title="Refresh Telemetry"
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#192837]/50 hover:text-[#7342E2] hover:bg-[#F5F3FF] border border-[rgba(115,66,226,0.12)] transition-all cursor-pointer"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#A3A3A3] hover:text-[#FF1E2D] hover:bg-[#181818] border border-[#2A2A2A] transition-all cursor-pointer"
               >
                 <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
               </button>
 
-              <div className="h-4 w-px bg-[rgba(115,66,226,0.15)]" />
+              <div className="h-4 w-px bg-[#2A2A2A]" />
 
               {/* Sign Out */}
               <button
                 type="button"
                 onClick={logout}
                 title="Sign Out"
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#192837]/50 hover:text-rose-600 hover:bg-rose-50 border border-[rgba(115,66,226,0.12)] hover:border-rose-200 transition-all cursor-pointer"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-[#A3A3A3] hover:text-[#FF1E2D] hover:bg-[#FF1E2D]/10 border border-[#2A2A2A] hover:border-[#FF1E2D]/30 transition-all cursor-pointer"
               >
                 <LogOut size={14} />
               </button>
@@ -278,21 +278,21 @@ export const InvestigatorDashboard: React.FC = () => {
 
               {/* Critical Threat Alert Banner */}
               {mostDangerousThreat && (
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-700 via-rose-800 to-[#192837] text-white p-6 shadow-lg border border-rose-500/40">
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#8B0000] via-[#1E0505] to-[#0A0A0A] text-white p-6 sm:p-8 shadow-xl border border-[#FF1E2D]/40">
                   {/* Radar pulse decoration */}
                   <div className="absolute right-6 top-6 w-24 h-24 pointer-events-none">
-                    <div className="absolute inset-0 rounded-full border-2 border-rose-400/30 animate-radar" />
-                    <div className="absolute inset-2 rounded-full border border-rose-400/20 animate-radar" style={{ animationDelay: '0.5s' }} />
-                    <AlertTriangle size={32} className="absolute inset-0 m-auto text-rose-300/40" />
+                    <div className="absolute inset-0 rounded-full border-2 border-[#FF1E2D]/30 animate-radar" />
+                    <div className="absolute inset-2 rounded-full border border-[#FF1E2D]/20 animate-radar" style={{ animationDelay: '0.5s' }} />
+                    <AlertTriangle size={32} className="absolute inset-0 m-auto text-[#FF1E2D]/50" />
                   </div>
 
                   <div className="space-y-3 max-w-2xl">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-white text-[10px] font-extrabold uppercase tracking-wider border border-white/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-300 animate-ping" />
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm text-white text-[10px] font-extrabold uppercase tracking-wider border border-white/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#FF1E2D] animate-ping" />
                         Highest Critical Threat — All Monitored Accounts
                       </span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-black/30 text-rose-200 font-mono text-xs font-bold border border-rose-400/30">
+                      <span className="px-2.5 py-0.5 rounded-full bg-black/40 text-[#FF5A36] font-mono text-xs font-bold border border-[#FF5A36]/30">
                         #{mostDangerousThreat.id.slice(0, 8).toUpperCase()}
                       </span>
                     </div>
@@ -301,16 +301,16 @@ export const InvestigatorDashboard: React.FC = () => {
                       {mostDangerousThreat.threat_type} — Risk Score {mostDangerousThreat.risk_score}/100
                     </h2>
 
-                    <p className="text-sm text-rose-100/85 leading-relaxed line-clamp-2">
+                    <p className="text-sm text-[#F5F5F5]/85 leading-relaxed line-clamp-2">
                       {mostDangerousThreat.summary || 'High-risk threat detected requiring urgent investigator triage and account lockdown.'}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-mono pt-1 text-rose-200">
-                      <span>Severity: <strong className="text-white uppercase">{mostDangerousThreat.severity}</strong></span>
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-mono pt-1 text-[#A3A3A3]">
+                      <span>Severity: <strong className="text-[#FF1E2D] uppercase">{mostDangerousThreat.severity}</strong></span>
                       <span>·</span>
                       <span>Status: <strong className="text-white uppercase">{mostDangerousThreat.status}</strong></span>
                       <span>·</span>
-                      <span>Confidence: <strong className="text-white">{Math.round((mostDangerousThreat.confidence || 0.96) * 100)}%</strong></span>
+                      <span>Confidence: <strong className="text-emerald-400">{Math.round((mostDangerousThreat.confidence || 0.96) * 100)}%</strong></span>
                     </div>
                   </div>
 
@@ -318,7 +318,7 @@ export const InvestigatorDashboard: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setSelectedThreatId(mostDangerousThreat.id)}
-                      className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white text-rose-700 font-extrabold text-xs hover:bg-rose-50 transition-all shadow-md cursor-pointer"
+                      className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#E50914] text-white font-extrabold text-xs hover:bg-[#FF1E2D] transition-all shadow-md cursor-pointer"
                     >
                       <Eye size={14} />
                       Deep Forensics Investigation
@@ -326,7 +326,7 @@ export const InvestigatorDashboard: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleDownloadPdfReport(mostDangerousThreat.id)}
-                      className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-rose-900/80 text-white font-bold text-xs border border-white/15 hover:bg-rose-900 transition-all shadow-md cursor-pointer"
+                      className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#181818] text-[#F5F5F5] font-bold text-xs border border-[#2A2A2A] hover:bg-[#222222] transition-all shadow-md cursor-pointer"
                     >
                       <Download size={14} />
                       Download Incident PDF Dossier
@@ -337,44 +337,44 @@ export const InvestigatorDashboard: React.FC = () => {
 
               {/* Primary Metric Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                <div className="metric-card metric-total">
-                  <span className="section-label block mb-2">Emails Scanned</span>
-                  <span className="font-heading text-3xl font-extrabold text-[#192837]">
+                <div className="p-4 rounded-2xl bg-[#111111] border border-[#2A2A2A] border-l-4 border-l-[#737373]">
+                  <span className="text-[10px] font-bold text-[#737373] uppercase tracking-wider block mb-2">Emails Scanned</span>
+                  <span className="font-heading text-3xl font-extrabold text-[#F5F5F5]">
                     {stats?.total_emails_scanned ?? (allEmails.length || threats.length)}
                   </span>
-                  <span className="text-xs text-emerald-600 font-semibold mt-1 block">Pipeline Active</span>
+                  <span className="text-xs text-emerald-400 font-semibold mt-1 block">Pipeline Active</span>
                 </div>
 
-                <div className="metric-card metric-threat">
-                  <span className="section-label block mb-2" style={{ color: '#C2410C' }}>Total Threats</span>
-                  <span className="font-heading text-3xl font-extrabold text-orange-600">
+                <div className="p-4 rounded-2xl bg-[#111111] border border-[#2A2A2A] border-l-4 border-l-[#FF5A36]">
+                  <span className="text-[10px] font-bold text-[#FF5A36] uppercase tracking-wider block mb-2">Total Threats</span>
+                  <span className="font-heading text-3xl font-extrabold text-[#FF5A36]">
                     {stats?.total_threats ?? threats.length}
                   </span>
-                  <span className="text-xs text-orange-500/70 font-semibold mt-1 block">via Gemini AI</span>
+                  <span className="text-xs text-[#FF5A36]/70 font-semibold mt-1 block">via Gemini AI</span>
                 </div>
 
-                <div className="metric-card metric-critical">
-                  <span className="section-label block mb-2" style={{ color: '#BE123C' }}>Critical Threats</span>
-                  <span className="font-heading text-3xl font-extrabold text-rose-600">
+                <div className="p-4 rounded-2xl bg-[#111111] border border-[#2A2A2A] border-l-4 border-l-[#FF1E2D]">
+                  <span className="text-[10px] font-bold text-[#FF1E2D] uppercase tracking-wider block mb-2">Critical Threats</span>
+                  <span className="font-heading text-3xl font-extrabold text-[#FF1E2D]">
                     {stats?.critical_threats ?? threats.filter(t => t.severity === 'critical').length}
                   </span>
-                  <span className="text-xs text-rose-400/70 font-semibold mt-1 block">Immediate Alert</span>
+                  <span className="text-xs text-[#FF1E2D]/70 font-semibold mt-1 block">Immediate Alert</span>
                 </div>
 
-                <div className="metric-card metric-users">
-                  <span className="section-label block mb-2" style={{ color: '#4338CA' }}>Monitored Users</span>
-                  <span className="font-heading text-3xl font-extrabold text-indigo-600">
+                <div className="p-4 rounded-2xl bg-[#111111] border border-[#2A2A2A] border-l-4 border-l-blue-500">
+                  <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block mb-2">Monitored Users</span>
+                  <span className="font-heading text-3xl font-extrabold text-blue-400">
                     {usersList.length || 1}
                   </span>
-                  <span className="text-xs text-indigo-400/70 font-semibold mt-1 block">Enterprise RBAC</span>
+                  <span className="text-xs text-blue-300/70 font-semibold mt-1 block">Enterprise RBAC</span>
                 </div>
 
-                <div className="metric-card metric-suspicious col-span-2 sm:col-span-1">
-                  <span className="section-label block mb-2" style={{ color: '#B45309' }}>Suspicious IPs</span>
-                  <span className="font-heading text-3xl font-extrabold text-amber-600">
+                <div className="p-4 rounded-2xl bg-[#111111] border border-[#2A2A2A] border-l-4 border-l-[#FFB020] col-span-2 sm:col-span-1">
+                  <span className="text-[10px] font-bold text-[#FFB020] uppercase tracking-wider block mb-2">Suspicious IPs</span>
+                  <span className="font-heading text-3xl font-extrabold text-[#FFB020]">
                     {stats?.suspicious_ip_count ?? 4}
                   </span>
-                  <span className="text-xs text-amber-500/70 font-semibold mt-1 block">IPQS Validated</span>
+                  <span className="text-xs text-[#FFB020]/70 font-semibold mt-1 block">IPQS Validated</span>
                 </div>
               </div>
 
@@ -390,10 +390,10 @@ export const InvestigatorDashboard: React.FC = () => {
                   return (
                     <div key={label} className={`p-4 rounded-2xl ${sev.bg} border ${sev.border} flex items-center justify-between`}>
                       <div>
-                        <span className={`section-label block mb-1 ${sev.text}`}>{label}</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider block mb-1 ${sev.text}`}>{label}</span>
                         <span className={`font-heading text-2xl font-extrabold ${sev.text}`}>{count}</span>
                       </div>
-                      <Icon size={20} className={`${sev.text} opacity-60`} />
+                      <Icon size={20} className={`${sev.text} opacity-70`} />
                     </div>
                   )
                 })}
@@ -403,32 +403,32 @@ export const InvestigatorDashboard: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* Threat Type Distribution */}
-                <div className="dash-card p-6 space-y-5">
+                <div className="p-6 rounded-3xl bg-[#111111] border border-[#2A2A2A] space-y-5">
                   <div>
-                    <h3 className="font-heading text-sm font-bold text-[#192837]">Threat Vector Analytics</h3>
-                    <p className="text-xs text-[#192837]/45 mt-0.5">Distribution across mail streams</p>
+                    <h3 className="font-heading text-sm font-bold text-[#F5F5F5]">Threat Vector Analytics</h3>
+                    <p className="text-xs text-[#737373] mt-0.5">Distribution across mail streams</p>
                   </div>
 
                   <div className="space-y-4">
                     {[
-                      { label: 'Phishing Attacks', count: stats?.phishing_count || threats.filter(t => t.threat_type.toLowerCase().includes('phish')).length, color: '#F43F5E' },
-                      { label: 'Business Email Compromise', count: stats?.bec_count || threats.filter(t => t.threat_type.toLowerCase().includes('bec') || t.threat_type.toLowerCase().includes('compromise')).length, color: '#F97316' },
-                      { label: 'Credential Theft / Fraud', count: stats?.fraud_count || threats.filter(t => t.threat_type.toLowerCase().includes('fraud') || t.threat_type.toLowerCase().includes('theft')).length, color: '#7342E2' },
-                      { label: 'Malware Vectors', count: stats?.malware_count || threats.filter(t => t.threat_type.toLowerCase().includes('malware')).length, color: '#F59E0B' },
+                      { label: 'Phishing Attacks', count: stats?.phishing_count || threats.filter(t => t.threat_type.toLowerCase().includes('phish')).length, color: '#FF1E2D' },
+                      { label: 'Business Email Compromise', count: stats?.bec_count || threats.filter(t => t.threat_type.toLowerCase().includes('bec') || t.threat_type.toLowerCase().includes('compromise')).length, color: '#FF5A36' },
+                      { label: 'Credential Theft / Fraud', count: stats?.fraud_count || threats.filter(t => t.threat_type.toLowerCase().includes('fraud') || t.threat_type.toLowerCase().includes('theft')).length, color: '#991B1B' },
+                      { label: 'Malware Vectors', count: stats?.malware_count || threats.filter(t => t.threat_type.toLowerCase().includes('malware')).length, color: '#FFB020' },
                     ].map((cat, idx) => {
                       const total = Math.max(1, threats.length)
                       const pct = Math.round((cat.count / total) * 100)
                       return (
                         <div key={idx} className="space-y-1.5">
                           <div className="flex justify-between items-center text-xs font-bold">
-                            <span className="text-[#192837] flex items-center gap-1.5">
+                            <span className="text-[#F5F5F5] flex items-center gap-1.5">
                               <span className="w-2 h-2 rounded-full" style={{ background: cat.color }} />
                               {cat.label}
                             </span>
                             <span className="font-mono" style={{ color: cat.color }}>{cat.count} ({pct}%)</span>
                           </div>
-                          <div className="progress-bar">
-                            <div className="progress-bar-fill" style={{ width: `${Math.max(4, pct)}%`, background: cat.color }} />
+                          <div className="w-full bg-[#0A0A0A] h-2 rounded-full overflow-hidden border border-[#2A2A2A]">
+                            <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(4, pct)}%`, background: cat.color }} />
                           </div>
                         </div>
                       )
@@ -438,7 +438,7 @@ export const InvestigatorDashboard: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('map')}
-                    className="w-full py-2.5 rounded-xl bg-[#F5F3FF] hover:bg-[#EDE9FE] border border-[#E0D9FF] text-xs font-bold text-[#7342E2] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 rounded-xl bg-[#181818] hover:bg-[#222222] border border-[#2A2A2A] text-xs font-bold text-[#FF1E2D] transition-all cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <Globe size={13} />
                     View Geographic Threat Map
@@ -446,46 +446,46 @@ export const InvestigatorDashboard: React.FC = () => {
                 </div>
 
                 {/* User Leaderboard */}
-                <div className="lg:col-span-2 dash-card p-6 space-y-4">
+                <div className="lg:col-span-2 p-6 rounded-3xl bg-[#111111] border border-[#2A2A2A] space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-heading text-sm font-bold text-[#192837]">Monitored Accounts Leaderboard</h3>
-                      <p className="text-xs text-[#192837]/45 mt-0.5">Click to inspect detailed telemetry</p>
+                      <h3 className="font-heading text-sm font-bold text-[#F5F5F5]">Monitored Accounts Leaderboard</h3>
+                      <p className="text-xs text-[#737373] mt-0.5">Click to inspect detailed telemetry</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setActiveTab('users')}
-                      className="flex items-center gap-1 text-xs font-bold text-[#7342E2] hover:underline cursor-pointer"
+                      className="flex items-center gap-1 text-xs font-bold text-[#FF1E2D] hover:underline cursor-pointer"
                     >
                       All accounts ({usersList.length}) <ChevronRight size={13} />
                     </button>
                   </div>
 
-                  <div className="divide-y divide-[rgba(115,66,226,0.06)]">
+                  <div className="divide-y divide-[#2A2A2A]">
                     {usersList.slice(0, 5).map((u, i) => (
-                      <div key={i} className="py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-[#FAFAFA] px-2 rounded-2xl transition-all">
+                      <div key={i} className="py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-[#181818] px-3 rounded-2xl transition-all">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] border border-[#E0D9FF] text-[#7342E2] font-extrabold text-sm flex items-center justify-center">
+                          <div className="w-9 h-9 rounded-xl bg-[#181818] border border-[#2A2A2A] text-[#FF1E2D] font-extrabold text-sm flex items-center justify-center">
                             {u.name ? u.name[0].toUpperCase() : 'U'}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-xs text-[#192837]">{u.name || 'Enterprise User'}</span>
-                              <span className="px-2 py-0.5 rounded-full bg-[#F8F9FC] text-[#192837]/50 text-[9px] font-bold uppercase border border-[rgba(115,66,226,0.08)]">
+                              <span className="font-bold text-xs text-[#F5F5F5]">{u.name || 'Enterprise User'}</span>
+                              <span className="px-2 py-0.5 rounded-full bg-[#181818] text-[#737373] text-[9px] font-bold uppercase border border-[#2A2A2A]">
                                 {u.role}
                               </span>
                             </div>
-                            <span className="text-[11px] text-[#192837]/45 font-mono">{u.email}</span>
+                            <span className="text-[11px] text-[#A3A3A3] font-mono">{u.email}</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 self-end sm:self-center">
-                          <span className="text-xs font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-xl">
+                          <span className="text-xs font-bold text-[#FF5A36] bg-[#FF5A36]/10 border border-[#FF5A36]/30 px-2.5 py-1 rounded-xl">
                             {u.threats_count} threats
                           </span>
                           <button
                             type="button"
                             onClick={() => { setSelectedUser(u); setActiveTab('users') }}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#7342E2] hover:bg-[#6032C4] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#E50914] hover:bg-[#FF1E2D] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
                           >
                             <UserCheck size={12} />
                             Inspect
@@ -498,16 +498,16 @@ export const InvestigatorDashboard: React.FC = () => {
               </div>
 
               {/* Recent Incident Stream */}
-              <div className="dash-card p-6 space-y-4">
+              <div className="p-6 rounded-3xl bg-[#111111] border border-[#2A2A2A] space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-heading text-sm font-bold text-[#192837]">Recent Incident Stream</h3>
-                    <p className="text-xs text-[#192837]/45 mt-0.5">Verified threat telemetry across monitored accounts</p>
+                    <h3 className="font-heading text-sm font-bold text-[#F5F5F5]">Recent Incident Stream</h3>
+                    <p className="text-xs text-[#737373] mt-0.5">Verified threat telemetry across monitored accounts</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setActiveTab('threats')}
-                    className="flex items-center gap-1 text-xs font-bold text-[#7342E2] hover:underline cursor-pointer"
+                    className="flex items-center gap-1 text-xs font-bold text-[#FF1E2D] hover:underline cursor-pointer"
                   >
                     All threats ({threats.length}) <ChevronRight size={13} />
                   </button>
@@ -515,35 +515,36 @@ export const InvestigatorDashboard: React.FC = () => {
 
                 {threats.length === 0 ? (
                   <div className="py-12 text-center space-y-3">
-                    <div className="w-12 h-12 rounded-2xl bg-[#F5F3FF] border border-[#E0D9FF] flex items-center justify-center mx-auto">
-                      <Shield size={22} className="text-[#7342E2]" />
+                    <div className="w-12 h-12 rounded-2xl bg-[#181818] border border-[#2A2A2A] flex items-center justify-center mx-auto">
+                      <Shield size={22} className="text-[#FF1E2D]" />
                     </div>
-                    <p className="text-sm font-bold text-[#192837]">No threats detected</p>
-                    <p className="text-xs text-[#192837]/45">Threat data will appear once users connect Gmail</p>
+                    <p className="text-sm font-bold text-[#F5F5F5]">No threats detected</p>
+                    <p className="text-xs text-[#737373]">Threat data will appear once users connect Gmail</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {threats.slice(0, 5).map(t => {
                       const sc = sevClass(t.severity)
+                      const sev = sevColors[sc]
                       return (
-                        <div key={t.id} className={`threat-row ${sc} stagger-item`}>
+                        <div key={t.id} className="p-4 rounded-2xl bg-[#181818] hover:bg-[#1E1E1E] border border-[#2A2A2A] transition-all">
                           <div className="flex items-start justify-between gap-3">
                             <div className="space-y-1 flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`sev-badge ${sc}`}>{t.severity}</span>
-                                <span className="font-heading text-sm font-bold text-[#192837] truncate">{t.threat_type}</span>
-                                <span className="text-[10px] font-mono text-[#192837]/40">#{t.id.slice(0, 8).toUpperCase()}</span>
-                                <span className="text-[10px] font-mono font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+                                <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${sev.bg} ${sev.text} ${sev.border}`}>{t.severity}</span>
+                                <span className="font-heading text-sm font-bold text-[#F5F5F5] truncate">{t.threat_type}</span>
+                                <span className="text-[10px] font-mono text-[#737373]">#{t.id.slice(0, 8).toUpperCase()}</span>
+                                <span className="text-[10px] font-mono font-bold text-[#FF1E2D] bg-[#FF1E2D]/10 px-2 py-0.5 rounded-md border border-[#FF1E2D]/30">
                                   Risk {t.risk_score}/100
                                 </span>
                               </div>
-                              <p className="text-xs text-[#192837]/65 line-clamp-1">{t.summary}</p>
+                              <p className="text-xs text-[#A3A3A3] line-clamp-1">{t.summary}</p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0 self-center">
                               <button
                                 type="button"
                                 onClick={() => setSelectedThreatId(t.id)}
-                                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-[rgba(115,66,226,0.12)] text-xs font-bold text-[#192837] hover:border-[#7342E2] hover:text-[#7342E2] transition-all cursor-pointer"
+                                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#111111] border border-[#2A2A2A] text-xs font-bold text-[#F5F5F5] hover:border-[#FF1E2D] hover:text-[#FF1E2D] transition-all cursor-pointer"
                               >
                                 <Eye size={12} />
                                 Forensics
@@ -552,7 +553,7 @@ export const InvestigatorDashboard: React.FC = () => {
                                 type="button"
                                 onClick={() => handleDownloadPdfReport(t.id)}
                                 title="Download PDF"
-                                className="w-8 h-8 rounded-xl bg-[#F5F3FF] hover:bg-[#7342E2] hover:text-white text-[#7342E2] border border-[#E0D9FF] transition-all flex items-center justify-center cursor-pointer"
+                                className="w-8 h-8 rounded-xl bg-[#111111] hover:bg-[#FF1E2D] hover:text-white text-[#FF1E2D] border border-[#2A2A2A] transition-all flex items-center justify-center cursor-pointer"
                               >
                                 <Download size={13} />
                               </button>
@@ -571,10 +572,10 @@ export const InvestigatorDashboard: React.FC = () => {
           {activeTab === 'threats' && (
             <div className="space-y-5 animate-fade-in">
               <div>
-                <h1 className="font-heading text-2xl font-extrabold text-[#192837]">Threat Monitoring</h1>
-                <p className="text-sm text-[#192837]/55 mt-0.5">Full organizational security incidents with forensic lookup and risk metrics</p>
+                <h1 className="font-heading text-2xl font-extrabold text-[#F5F5F5]">Threat Monitoring</h1>
+                <p className="text-sm text-[#A3A3A3] mt-0.5">Full organizational security incidents with forensic lookup and risk metrics</p>
               </div>
-              <div className="dash-card p-6">
+              <div className="p-6 rounded-3xl bg-[#111111] border border-[#2A2A2A]">
                 <ThreatsDataTable
                   data={threats}
                   onViewForensics={(threatId) => setSelectedThreatId(threatId)}
@@ -600,40 +601,40 @@ export const InvestigatorDashboard: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setSelectedUser(null)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[rgba(115,66,226,0.12)] text-xs font-bold text-[#7342E2] hover:bg-[#F5F3FF] transition-all cursor-pointer shadow-xs"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#111111] border border-[#2A2A2A] text-xs font-bold text-[#FF1E2D] hover:bg-[#181818] transition-all cursor-pointer shadow-xs"
                   >
                     <ArrowLeft size={13} />
                     Back to Monitored Accounts
                   </button>
 
                   {/* User Header Card */}
-                  <div className="dash-card p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div className="p-6 rounded-3xl bg-[#111111] border border-[#2A2A2A] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] border-2 border-[#E0D9FF] text-[#7342E2] text-2xl font-extrabold flex items-center justify-center shadow-sm">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#181818] to-[#111111] border-2 border-[#FF1E2D]/40 text-[#FF1E2D] text-2xl font-extrabold flex items-center justify-center shadow-sm">
                         {selectedUser.name ? selectedUser.name[0].toUpperCase() : 'U'}
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h2 className="font-heading text-xl font-bold text-[#192837]">{selectedUser.name || 'Enterprise User Account'}</h2>
-                          <span className="px-2.5 py-0.5 rounded-full bg-[#F5F3FF] text-[#7342E2] font-bold text-[10px] uppercase border border-[#E0D9FF]">
+                          <h2 className="font-heading text-xl font-bold text-[#F5F5F5]">{selectedUser.name || 'Enterprise User Account'}</h2>
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#181818] text-[#FF1E2D] font-bold text-[10px] uppercase border border-[#FF1E2D]/20">
                             {selectedUser.role}
                           </span>
                         </div>
-                        <p className="font-mono text-xs text-[#7342E2] font-bold mt-0.5">{selectedUser.email}</p>
-                        <p className="text-[11px] text-[#192837]/40 mt-0.5">
-                          Account ID: <code className="font-mono">{selectedUser.id}</code>
+                        <p className="font-mono text-xs text-[#FF1E2D] font-bold mt-0.5">{selectedUser.email}</p>
+                        <p className="text-[11px] text-[#737373] mt-0.5">
+                          Account ID: <code className="font-mono text-[#A3A3A3]">{selectedUser.id}</code>
                         </p>
                       </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                       {[
-                        { label: 'Threats Logged', value: selectedUserThreats.length || selectedUser.threats_count || 0, color: 'text-orange-600' },
-                        { label: 'Critical Threats', value: selectedUserThreats.filter(t => t.severity === 'critical').length || selectedUser.critical_count || 0, color: 'text-rose-600' },
-                        { label: 'Scanned Emails', value: selectedUserEmails.length || Math.max(selectedUserThreats.length, 1), color: 'text-[#7342E2]' },
+                        { label: 'Threats Logged', value: selectedUserThreats.length || selectedUser.threats_count || 0, color: 'text-[#FF5A36]' },
+                        { label: 'Critical Threats', value: selectedUserThreats.filter(t => t.severity === 'critical').length || selectedUser.critical_count || 0, color: 'text-[#FF1E2D]' },
+                        { label: 'Scanned Emails', value: selectedUserEmails.length || Math.max(selectedUserThreats.length, 1), color: 'text-[#F5F5F5]' },
                       ].map(({ label, value, color }) => (
-                        <div key={label} className="p-3.5 rounded-2xl bg-[#F8F9FC] border border-[rgba(115,66,226,0.1)] text-center min-w-[110px]">
-                          <span className="section-label block mb-1">{label}</span>
+                        <div key={label} className="p-3.5 rounded-2xl bg-[#181818] border border-[#2A2A2A] text-center min-w-[110px]">
+                          <span className="text-[10px] font-bold text-[#737373] uppercase tracking-wider block mb-1">{label}</span>
                           <span className={`text-xl font-extrabold font-mono ${color}`}>{value}</span>
                         </div>
                       ))}
@@ -641,43 +642,44 @@ export const InvestigatorDashboard: React.FC = () => {
                   </div>
 
                   {/* User Threats Table */}
-                  <div className="dash-card p-6 space-y-4">
+                  <div className="p-6 rounded-3xl bg-[#111111] border border-[#2A2A2A] space-y-4">
                     <div>
-                      <h3 className="font-heading text-lg font-bold text-[#192837]">Emails & Threats Analyzed</h3>
-                      <p className="text-xs text-[#192837]/45">for {selectedUser.email}</p>
+                      <h3 className="font-heading text-lg font-bold text-[#F5F5F5]">Emails & Threats Analyzed</h3>
+                      <p className="text-xs text-[#737373]">for {selectedUser.email}</p>
                     </div>
 
                     {selectedUserThreats.length === 0 ? (
                       <div className="py-14 text-center space-y-3">
-                        <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto">
-                          <CheckCircle size={26} className="text-emerald-600" />
+                        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto">
+                          <CheckCircle size={26} className="text-emerald-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-[#192837]">No Threat Incidents Logged</p>
-                          <p className="text-xs text-[#192837]/45 mt-0.5">This enterprise user account is clean and protected.</p>
+                          <p className="text-sm font-bold text-[#F5F5F5]">No Threat Incidents Logged</p>
+                          <p className="text-xs text-[#737373] mt-0.5">This enterprise user account is clean and protected.</p>
                         </div>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         {selectedUserThreats.map(t => {
                           const sc = sevClass(t.severity)
+                          const sev = sevColors[sc]
                           return (
-                            <div key={t.id} className={`threat-row ${sc}`}>
+                            <div key={t.id} className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A]">
                               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                 <div className="space-y-1.5 flex-1">
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <span className={`sev-badge ${sc}`}>{t.severity}</span>
-                                    <span className="font-heading text-sm font-bold text-[#192837]">{t.threat_type}</span>
-                                    <span className="text-[10px] font-mono text-[#192837]/40">#{t.id.slice(0, 8).toUpperCase()}</span>
-                                    <span className="text-[10px] font-mono font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+                                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${sev.bg} ${sev.text} ${sev.border}`}>{t.severity}</span>
+                                    <span className="font-heading text-sm font-bold text-[#F5F5F5]">{t.threat_type}</span>
+                                    <span className="text-[10px] font-mono text-[#737373]">#{t.id.slice(0, 8).toUpperCase()}</span>
+                                    <span className="text-[10px] font-mono font-bold text-[#FF1E2D] bg-[#FF1E2D]/10 px-2 py-0.5 rounded-md border border-[#FF1E2D]/30">
                                       Risk: {t.risk_score}/100
                                     </span>
                                   </div>
-                                  <p className="text-xs text-[#192837]/65 leading-relaxed">
+                                  <p className="text-xs text-[#A3A3A3] leading-relaxed">
                                     {t.summary || 'Scanned email content flagged for potential cybersecurity risks.'}
                                   </p>
-                                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#192837]/40 font-mono">
-                                    <span>Status: <strong className="uppercase text-[#192837]/70">{t.status}</strong></span>
+                                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#737373] font-mono">
+                                    <span>Status: <strong className="uppercase text-[#F5F5F5]">{t.status}</strong></span>
                                     <span>·</span>
                                     <span>{new Date(t.created_at).toLocaleString()}</span>
                                   </div>
@@ -686,7 +688,7 @@ export const InvestigatorDashboard: React.FC = () => {
                                   <button
                                     type="button"
                                     onClick={() => { setCopilotSelectedEmailId(t.email_id || t.id); setActiveTab('copilot') }}
-                                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#F5F3FF] hover:bg-[#7342E2] hover:text-white text-[#7342E2] border border-[#E0D9FF] text-xs font-bold transition-all cursor-pointer"
+                                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#111111] hover:bg-[#FF1E2D] hover:text-white text-[#FF1E2D] border border-[#2A2A2A] text-xs font-bold transition-all cursor-pointer"
                                   >
                                     <Cpu size={12} />
                                     Copilot
@@ -694,7 +696,7 @@ export const InvestigatorDashboard: React.FC = () => {
                                   <button
                                     type="button"
                                     onClick={() => setSelectedThreatId(t.id)}
-                                    className="flex items-center gap-1 px-4 py-1.5 rounded-xl bg-[#7342E2] hover:bg-[#6032C4] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                                    className="flex items-center gap-1 px-4 py-1.5 rounded-xl bg-[#E50914] hover:bg-[#FF1E2D] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
                                   >
                                     <Eye size={12} />
                                     Forensics
@@ -702,7 +704,7 @@ export const InvestigatorDashboard: React.FC = () => {
                                   <button
                                     type="button"
                                     onClick={() => handleDownloadPdfReport(t.id)}
-                                    className="w-8 h-8 rounded-xl bg-white hover:bg-[#F5F3FF] text-[#7342E2] border border-[rgba(115,66,226,0.12)] flex items-center justify-center cursor-pointer transition-all"
+                                    className="w-8 h-8 rounded-xl bg-[#111111] hover:bg-[#181818] text-[#FF1E2D] border border-[#2A2A2A] flex items-center justify-center cursor-pointer transition-all"
                                   >
                                     <Download size={13} />
                                   </button>
@@ -720,8 +722,8 @@ export const InvestigatorDashboard: React.FC = () => {
                 <div className="space-y-5">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
-                      <h1 className="font-heading text-2xl font-extrabold text-[#192837]">Monitored Enterprise Accounts</h1>
-                      <p className="text-sm text-[#192837]/55 mt-0.5">{filteredUsers.length} accounts · RBAC monitored threat telemetry</p>
+                      <h1 className="font-heading text-2xl font-extrabold text-[#F5F5F5]">Monitored Enterprise Accounts</h1>
+                      <p className="text-sm text-[#A3A3A3] mt-0.5">{filteredUsers.length} accounts · RBAC monitored threat telemetry</p>
                     </div>
 
                     <div className="relative w-full sm:w-64">
@@ -730,9 +732,9 @@ export const InvestigatorDashboard: React.FC = () => {
                         value={userSearchQuery}
                         onChange={(e) => setUserSearchQuery(e.target.value)}
                         placeholder="Search by name or email…"
-                        className="w-full text-xs px-4 py-2.5 pl-9 rounded-xl bg-white border border-[rgba(115,66,226,0.12)] text-[#192837] focus:outline-none focus:border-[#7342E2] transition-colors"
+                        className="w-full text-xs px-4 py-2.5 pl-9 rounded-xl bg-[#111111] border border-[#2A2A2A] text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[#FF1E2D] transition-colors"
                       />
-                      <Search size={13} className="absolute left-3 top-3 text-[#192837]/40" />
+                      <Search size={13} className="absolute left-3 top-3 text-[#737373]" />
                     </div>
                   </div>
 
@@ -741,37 +743,37 @@ export const InvestigatorDashboard: React.FC = () => {
                       <div
                         key={i}
                         onClick={() => setSelectedUser(u)}
-                        className="dash-card p-5 cursor-pointer group stagger-item"
+                        className="p-5 rounded-3xl bg-[#111111] border border-[#2A2A2A] hover:border-[#FF1E2D]/40 transition-all cursor-pointer group"
                       >
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#F5F3FF] to-[#EDE9FE] border border-[#E0D9FF] text-[#7342E2] font-extrabold text-base flex items-center justify-center group-hover:bg-[#7342E2] group-hover:text-white transition-all">
+                            <div className="w-11 h-11 rounded-2xl bg-[#181818] border border-[#2A2A2A] text-[#FF1E2D] font-extrabold text-base flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
                               {u.name ? u.name[0].toUpperCase() : 'U'}
                             </div>
                             <div>
-                              <span className="font-bold text-sm text-[#192837] block group-hover:text-[#7342E2] transition-colors">
+                              <span className="font-bold text-sm text-[#F5F5F5] block group-hover:text-[#FF1E2D] transition-colors">
                                 {u.name || 'Enterprise User'}
                               </span>
-                              <span className="text-xs text-[#192837]/45 font-mono">{u.email}</span>
+                              <span className="text-xs text-[#737373] font-mono">{u.email}</span>
                             </div>
                           </div>
-                          <span className="px-2.5 py-1 rounded-full bg-white border border-[rgba(115,66,226,0.1)] font-bold uppercase text-[10px] text-[#192837]/50">
+                          <span className="px-2.5 py-1 rounded-full bg-[#181818] border border-[#2A2A2A] font-bold uppercase text-[10px] text-[#A3A3A3]">
                             {u.role}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between pt-3 border-t border-[rgba(115,66,226,0.06)] text-xs">
+                        <div className="flex items-center justify-between pt-3 border-t border-[#2A2A2A] text-xs">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-lg">
+                            <span className="font-bold text-[#FF5A36] bg-[#FF5A36]/10 border border-[#FF5A36]/30 px-2.5 py-0.5 rounded-lg">
                               {u.threats_count} Threats
                             </span>
                             {u.critical_count > 0 && (
-                              <span className="font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-lg">
+                              <span className="font-bold text-[#FF1E2D] bg-[#FF1E2D]/10 border border-[#FF1E2D]/30 px-2.5 py-0.5 rounded-lg">
                                 {u.critical_count} Critical
                               </span>
                             )}
                           </div>
-                          <span className="font-bold text-[#7342E2] group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                          <span className="font-bold text-[#FF1E2D] group-hover:translate-x-1 transition-transform flex items-center gap-1">
                             Inspect <ChevronRight size={13} />
                           </span>
                         </div>
@@ -798,53 +800,53 @@ export const InvestigatorDashboard: React.FC = () => {
           {activeTab === 'analytics' && (
             <div className="space-y-5 animate-fade-in">
               <div>
-                <h1 className="font-heading text-2xl font-extrabold text-[#192837]">Threat Analytics</h1>
-                <p className="text-sm text-[#192837]/55 mt-0.5">Statistical breakdown of organizational threat vectors</p>
+                <h1 className="font-heading text-2xl font-extrabold text-[#F5F5F5]">Threat Analytics</h1>
+                <p className="text-sm text-[#A3A3A3] mt-0.5">Statistical breakdown of organizational threat vectors</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {/* Threat Vector Distribution */}
-                <div className="dash-card p-6 space-y-4">
+                <div className="p-6 rounded-3xl bg-[#111111] border border-[#2A2A2A] space-y-4">
                   <div>
-                    <h3 className="font-heading text-sm font-bold text-[#192837]">Threat Vector Distribution</h3>
-                    <p className="text-xs text-[#192837]/45 mt-0.5">Classified by Gemini AI inference pipeline</p>
+                    <h3 className="font-heading text-sm font-bold text-[#F5F5F5]">Threat Vector Distribution</h3>
+                    <p className="text-xs text-[#737373] mt-0.5">Classified by Gemini AI inference pipeline</p>
                   </div>
                   <div className="space-y-3">
                     {(analytics?.threat_distribution || []).map((item: any, i: number) => (
                       <div key={i} className="space-y-1.5">
                         <div className="flex justify-between text-xs font-bold">
-                          <span className="text-[#192837]">{item.name}</span>
-                          <span className="text-[#7342E2]">{item.percentage}% ({item.count || 0})</span>
+                          <span className="text-[#F5F5F5]">{item.name}</span>
+                          <span className="text-[#FF1E2D]">{item.percentage}% ({item.count || 0})</span>
                         </div>
-                        <div className="progress-bar">
-                          <div className="progress-bar-fill bg-[#7342E2]" style={{ width: `${item.percentage}%` }} />
+                        <div className="w-full bg-[#0A0A0A] h-2 rounded-full overflow-hidden border border-[#2A2A2A]">
+                          <div className="h-full bg-[#FF1E2D] rounded-full" style={{ width: `${item.percentage}%` }} />
                         </div>
                       </div>
                     ))}
                     {(!analytics?.threat_distribution || analytics.threat_distribution.length === 0) && (
-                      <p className="text-xs text-[#192837]/45 py-6 text-center">No distribution data available yet.</p>
+                      <p className="text-xs text-[#737373] py-6 text-center">No distribution data available yet.</p>
                     )}
                   </div>
                 </div>
 
                 {/* Geographic Distribution */}
-                <div className="dash-card p-6 space-y-4">
+                <div className="p-6 rounded-3xl bg-[#111111] border border-[#2A2A2A] space-y-4">
                   <div>
-                    <h3 className="font-heading text-sm font-bold text-[#192837]">Origin Geographic Sources</h3>
-                    <p className="text-[11px] text-[#192837]/40 mt-0.5">IP-based approximate location — not exact physical address</p>
+                    <h3 className="font-heading text-sm font-bold text-[#F5F5F5]">Origin Geographic Sources</h3>
+                    <p className="text-[11px] text-[#737373] mt-0.5">IP-based approximate location — not exact physical address</p>
                   </div>
                   <div className="space-y-2.5">
                     {(analytics?.geographic_distribution || []).map((geo: any, i: number) => (
-                      <div key={i} className="p-3.5 rounded-2xl bg-[#F8F9FC] border border-[rgba(115,66,226,0.08)] flex justify-between items-center">
+                      <div key={i} className="p-3.5 rounded-2xl bg-[#181818] border border-[#2A2A2A] flex justify-between items-center">
                         <div className="flex items-center gap-2 text-xs">
-                          <MapPin size={13} className="text-[#7342E2] shrink-0" />
-                          <span className="font-bold text-[#192837]">{geo.country} ({geo.code})</span>
+                          <MapPin size={13} className="text-[#FF1E2D] shrink-0" />
+                          <span className="font-bold text-[#F5F5F5]">{geo.country} ({geo.code})</span>
                         </div>
-                        <span className="font-mono font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-lg text-xs">{geo.threats} Detected</span>
+                        <span className="font-mono font-bold text-[#FF1E2D] bg-[#FF1E2D]/10 border border-[#FF1E2D]/30 px-2.5 py-0.5 rounded-lg text-xs">{geo.threats} Detected</span>
                       </div>
                     ))}
                     {(!analytics?.geographic_distribution || analytics.geographic_distribution.length === 0) && (
-                      <p className="text-xs text-[#192837]/45 py-6 text-center">Geographic data will appear after scans with IP resolution.</p>
+                      <p className="text-xs text-[#737373] py-6 text-center">Geographic data will appear after scans with IP resolution.</p>
                     )}
                   </div>
                 </div>
@@ -856,34 +858,35 @@ export const InvestigatorDashboard: React.FC = () => {
           {activeTab === 'reports' && (
             <div className="space-y-5 animate-fade-in">
               <div>
-                <h1 className="font-heading text-2xl font-extrabold text-[#192837]">Forensic Incident Dossiers</h1>
-                <p className="text-sm text-[#192837]/55 mt-0.5">{threats.length} court-admissible PDF forensic dossiers available</p>
+                <h1 className="font-heading text-2xl font-extrabold text-[#F5F5F5]">Forensic Incident Dossiers</h1>
+                <p className="text-sm text-[#A3A3A3] mt-0.5">{threats.length} court-admissible PDF forensic dossiers available</p>
               </div>
 
-              <div className="dash-card p-6 space-y-3">
+              <div className="p-6 rounded-3xl bg-[#111111] border border-[#2A2A2A] space-y-3">
                 {threats.length > 0 ? threats.map(t => {
                   const sc = sevClass(t.severity)
+                  const sev = sevColors[sc]
                   return (
-                    <div key={t.id} className="p-4 rounded-2xl bg-[#F8F9FC] border border-[rgba(115,66,226,0.08)] hover:border-[rgba(115,66,226,0.2)] hover:bg-white flex items-center justify-between gap-4 transition-all stagger-item">
+                    <div key={t.id} className="p-4 rounded-2xl bg-[#181818] border border-[#2A2A2A] hover:border-[#FF1E2D]/40 flex items-center justify-between gap-4 transition-all">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-[#F5F3FF] border border-[#E0D9FF] text-[#7342E2] flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-[#111111] border border-[#2A2A2A] text-[#FF1E2D] flex items-center justify-center shrink-0">
                           <FileText size={18} />
                         </div>
                         <div className="min-w-0">
-                          <span className="font-bold text-sm text-[#192837] block truncate">
+                          <span className="font-bold text-sm text-[#F5F5F5] block truncate">
                             Forensic Dossier: {t.threat_type}
                           </span>
                           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                            <span className="text-[11px] text-[#192837]/45 font-mono">#{t.id.slice(0, 8).toUpperCase()}</span>
-                            <span className={`sev-badge ${sc}`}>{t.severity}</span>
-                            <span className="text-[11px] text-[#192837]/45">Risk: {t.risk_score}/100 · {t.status.toUpperCase()}</span>
+                            <span className="text-[11px] text-[#737373] font-mono">#{t.id.slice(0, 8).toUpperCase()}</span>
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${sev.bg} ${sev.text} ${sev.border}`}>{t.severity}</span>
+                            <span className="text-[11px] text-[#A3A3A3]">Risk: {t.risk_score}/100 · {t.status.toUpperCase()}</span>
                           </div>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleDownloadPdfReport(t.id)}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#7342E2] text-white text-xs font-bold hover:bg-[#6032C4] shadow-xs cursor-pointer transition-all shrink-0"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E50914] text-white text-xs font-bold hover:bg-[#FF1E2D] shadow-xs cursor-pointer transition-all shrink-0"
                       >
                         <Download size={13} />
                         Download PDF
@@ -892,12 +895,12 @@ export const InvestigatorDashboard: React.FC = () => {
                   )
                 }) : (
                   <div className="py-16 text-center space-y-3">
-                    <div className="w-14 h-14 rounded-2xl bg-[#F5F3FF] border border-[#E0D9FF] flex items-center justify-center mx-auto">
-                      <FileText size={26} className="text-[#7342E2]" />
+                    <div className="w-14 h-14 rounded-2xl bg-[#181818] border border-[#2A2A2A] flex items-center justify-center mx-auto">
+                      <FileText size={26} className="text-[#FF1E2D]" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-[#192837]">No forensic dossiers available</p>
-                      <p className="text-xs text-[#192837]/45 mt-0.5">Reports are generated automatically when threats are detected</p>
+                      <p className="text-sm font-bold text-[#F5F5F5]">No forensic dossiers available</p>
+                      <p className="text-xs text-[#737373] mt-0.5">Reports are generated automatically when threats are detected</p>
                     </div>
                   </div>
                 )}

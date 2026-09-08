@@ -29,7 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) =
   const { isAuthenticated, role, logout } = useAuth()
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-[#192837]/8 transition-all">
+    <header className="sticky top-0 z-40 w-full bg-[#050505]/90 backdrop-blur-md border-b border-[#2A2A2A] transition-all">
       <nav
         className="max-w-[1280px] mx-auto px-5 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between"
         aria-label="Main Navigation"
@@ -38,8 +38,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) =
         <a href="#" className="flex items-center gap-3 group focus:outline-none" aria-label="CyberTrace Home">
           <Logo size={36} />
           <div className="flex flex-col">
-            <span className="font-heading text-xl font-extrabold text-[#192837] tracking-tight flex items-center">
-              Cyber<span className="text-[#7342E2]">Trace</span>
+            <span className="font-heading text-xl font-extrabold text-[#F5F5F5] tracking-tight flex items-center">
+              Cyber<span className="text-[#E50914]">Trace</span>
             </span>
           </div>
         </a>
@@ -51,15 +51,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) =
               <InteractiveHoverButton
                 onClick={onGoToDashboard}
                 text={role === 'investigator' || role === 'admin' ? 'SOC Console' : 'Dashboard'}
-                icon={<LayoutDashboard size={14} className="text-[#7342E2]" />}
-                className="py-1.5 px-4 text-xs font-bold"
+                icon={<LayoutDashboard size={14} className="text-[#FF1E2D]" />}
+                className="py-1.5 px-4 text-xs font-bold bg-[#E50914] text-white border-[#E50914]"
               />
 
               <button
                 type="button"
                 onClick={logout}
                 title="Sign Out"
-                className="w-8 h-8 rounded-full flex items-center justify-center text-[#192837]/60 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[#A3A3A3] hover:text-[#FF1E2D] hover:bg-[#181818] transition-all cursor-pointer"
               >
                 <LogOut size={16} />
               </button>
@@ -69,19 +69,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) =
               <InteractiveHoverButton
                 onClick={() => onOpenAuth ? onOpenAuth('signin') : null}
                 text="Sign In"
-                icon={<ShieldCheck size={14} className="text-[#7342E2]" />}
-                className="hidden sm:inline-flex py-2 px-4 text-xs font-bold bg-[#F2F2EE]/80 text-[#192837] border-[#192837]/10"
+                icon={<ShieldCheck size={14} className="text-[#FF1E2D]" />}
+                className="hidden sm:inline-flex py-2 px-4 text-xs font-bold bg-[#181818] text-[#F5F5F5] border-[#2A2A2A] hover:border-[#E50914]"
               />
 
               <InteractiveHoverButton
                 onClick={() => onOpenAuth ? onOpenAuth('signup') : null}
                 text="Get Started"
-                className="hidden sm:inline-flex py-2 px-5 text-xs font-bold bg-[#7342E2] text-white border-[#7342E2]"
+                className="hidden sm:inline-flex py-2 px-5 text-xs font-bold bg-[#E50914] text-white border-[#E50914] hover:bg-[#FF1E2D]"
               />
             </>
           )}
 
-          {/* Staggered Menu from React Bits */}
+          {/* Staggered Menu */}
           <div className="ml-1">
             <StaggeredMenu
               position="right"
@@ -89,10 +89,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onGoToDashboard }) =
               socialItems={socialLinks}
               displaySocials={true}
               displayItemNumbering={true}
-              colors={['#F7F6F3', '#EDE8F5', '#7342E2']}
-              accentColor="#7342E2"
-              menuButtonColor="#192837"
-              openMenuButtonColor="#192837"
+              colors={['#050505', '#111111', '#E50914']}
+              accentColor="#E50914"
+              menuButtonColor="#F5F5F5"
+              openMenuButtonColor="#FF1E2D"
             />
           </div>
         </div>
